@@ -43,8 +43,8 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Install OpenSSL for Prisma
-RUN apk add --no-cache openssl
+# Install OpenSSL for Prisma and curl for healthcheck
+RUN apk add --no-cache openssl curl
 
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs
@@ -80,5 +80,8 @@ EXPOSE 3000
 
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD curl -f http://localhost:3000/api/health || exit 1
 
 ENTRYPOINT ["/bin/sh", "/app/entrypoint.sh"]
