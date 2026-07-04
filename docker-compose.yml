@@ -8,17 +8,17 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/calculo_presupuestal?schema=public
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@dbcp:5432/calculo_presupuestal?schema=public
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
       - NEXTAUTH_URL=${NEXTAUTH_URL}
       - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
       - NEXT_PUBLIC_APP_NAME=Cálculo Presupuestal
     depends_on:
-      db:
+      dbcp:
         condition: service_healthy
     restart: unless-stopped
 
-  db:
+  dbcp:
     image: postgres:16-alpine
     volumes:
       - pgdata:/var/lib/postgresql/data
