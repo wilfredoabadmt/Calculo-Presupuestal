@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,12 +10,12 @@ import { PageHeader } from "@/components/shared/PageHeader"
 import { EmptyState } from "@/components/shared/EmptyState"
 import { SearchInput } from "@/components/shared/SearchInput"
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog"
-import { Boxes, Plus, Trash2, Calculator } from "lucide-react"
-import { formatCurrency, formatNumber } from "@/lib/utils"
+import { Boxes, Plus, Trash2, Calculator, Loader2 } from "lucide-react"
+import { formatCurrency } from "@/lib/utils"
 
 interface Elemento {
   id: string
-  tipo: string
+  tipoElemento: string
   descripcion: string
   cantidad: number
   costoTotal: number
@@ -26,13 +26,45 @@ export default function ElementosPage() {
   const projectId = params.id as string
   const [search, setSearch] = useState("")
   const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [elementos, setElementos] = useState<Elemento[]>([])
+  const [loading, setLoading] = useState(true)
+  const [deleting, setDeleting] = useState(false)
 
-  const elementos: Elemento[] = []
+  useEffect(() => {
+    fetch(`/api/proyectos/${projectId}/elementos`)
+      .then(r => r.json())
+      .then(data => {
+        setElementos(Array.isArray(data) ? data : [])
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [projectId])
 
   const filtered = elementos.filter(e =>
     e.descripcion.toLowerCase().includes(search.toLowerCase()) ||
-    e.tipo.toLowerCase().includes(search.toLowerCase())
+    e.tipoElemento.toLowerCase().includes(search.toLowerCase())
   )
+
+  const handleDelete = async () => {
+    if (!deleteId) return
+    setDeleting(true)
+    try {
+      await fetch(`/api/proyectos/${projectId}/elementos/${deleteId}`, { method: "DELETE" })
+      setElementos(prev => prev.filter(e => e.id !== deleteId))
+      setDeleteId(null)
+    } catch {
+      alert("Error al eliminar")
+    }
+    setDeleting(false)
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -80,12 +112,12 @@ export default function ElementosPage() {
                 <TableBody>
                   {filtered.map(el => (
                     <TableRow key={el.id}>
-                      <TableCell className="font-medium">{el.tipo}</TableCell>
+                      <TableCell className="font-medium">{el.tipoElemento}</TableCell>
                       <TableCell>{el.descripcion}</TableCell>
                       <TableCell className="text-right">{el.cantidad}</TableCell>
                       <TableCell className="text-right font-medium">{formatCurrency(el.costoTotal)}</TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="icon" onClick={() => setDeleteId(el.id)}>
+                        <Button variant="ghost" size="icon" onClick={() => setDeleteId(el.id)} disabled={deleting}>
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                       </TableCell>
@@ -115,7 +147,7 @@ export default function ElementosPage() {
         title="Eliminar elemento"
         description="¿Estás seguro de eliminar este elemento? Esta acción no se puede deshacer."
         confirmText="Eliminar"
-        onConfirm={() => setDeleteId(null)}
+        onConfirm={handleDelete}
         variant="destructive"
       />
     </div>

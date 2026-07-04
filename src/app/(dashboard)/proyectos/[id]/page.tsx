@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -8,44 +8,101 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { 
   Plus, 
-  Building2, 
   Calculator, 
   FileText, 
   Calendar, 
   BarChart,
   TrendingUp,
-  FolderKanban,
   Box,
-  Users,
+  Trash2,
   Eye,
   Edit,
-  Trash2,
-  LayoutDashboard
+  Loader2
 } from "lucide-react"
 import { formatCurrency, formatNumber } from "@/lib/utils"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 
-const mockElements = [
-  { id: "1", tipo: "CONCRETO", descripcion: "Columna principal", cantidad: 4, costo: 125000 },
-  { id: "2", tipo: "PARED", descripcion: "Muros perimetrales", cantidad: 120, costo: 85000 },
-  { id: "3", tipo: "LOSA", descripcion: "Losa entrepiso", cantidad: 1, costo: 320000 },
-]
+interface Elemento {
+  id: string
+  tipoElemento: string
+  descripcion: string
+  cantidad: number
+  costoTotal: number
+}
+
+interface ProjectData {
+  id: string
+  nombre: string
+  cliente: string
+  empresa: string
+  fecha: string
+  validez: number
+  moneda: string
+  descripcion: string | null
+  elementos: Elemento[]
+  _count: { elementos: number }
+}
 
 export default function ProyectoDetailPage() {
   const params = useParams()
   const projectId = params.id as string
+  const [project, setProject] = useState<ProjectData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
-  const project = {
-    id: projectId,
-    nombre: "Edificio Los Andes",
-    cliente: "Constructora ABC",
-    empresa: "Mi Empresa Constructora",
-    fecha: "2024-01-15",
-    validez: 30,
-    moneda: "Bs.",
-    descripcion: "Edificio de 5 pisos en zona central",
+  useEffect(() => {
+    fetch(`/api/proyectos/${projectId}`)
+      .then(r => r.json())
+      .then(data => {
+        setProject(data)
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [projectId])
+
+  const handleDeleteElemento = async (elementoId: string) => {
+    setDeletingId(elementoId)
+    try {
+      await fetch(`/api/proyectos/${projectId}/elementos/${elementoId}`, { method: "DELETE" })
+      setProject(prev => {
+        if (!prev) return prev
+        return {
+          ...prev,
+          elementos: prev.elementos.filter(e => e.id !== elementoId),
+          _count: { ...prev._count, elementos: prev._count.elementos - 1 },
+        }
+      })
+    } catch {
+      alert("Error al eliminar")
+    }
+    setDeletingId(null)
   }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (!project) {
+    return (
+      <div className="text-center py-12">
+        <h2 className="text-xl font-semibold">Proyecto no encontrado</h2>
+        <Button asChild className="mt-4">
+          <Link href="/proyectos">Volver a proyectos</Link>
+        </Button>
+      </div>
+    )
+  }
+
+  const totalCosto = project.elementos.reduce((sum, e) => sum + e.costoTotal, 0)
+  const gastosGenerales = totalCosto * 0.15
+  const utilidad = totalCosto * 0.10
+  const impuestos = totalCosto * 0.0309
+  const totalAIU = totalCosto + gastosGenerales + utilidad + impuestos
 
   return (
     <div className="space-y-6">
@@ -85,10 +142,10 @@ export default function ProyectoDetailPage() {
         <TabsContent value="dashboard">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {[
-              { label: "Elementos Calculados", value: "17", icon: Calculator, color: "bg-orange-500" },
-              { label: "Total Materiales", value: formatCurrency(530000), icon: Box, color: "bg-green-500" },
-              { label: "Subtotal Presupuesto", value: formatCurrency(680000), icon: TrendingUp, color: "bg-blue-500" },
-              { label: "Total con AIU", value: formatCurrency(950000), icon: FileText, color: "bg-purple-500" },
+              { label: "Elementos Calculados", value: project._count.elementos.toString(), icon: Calculator },
+              { label: "Total Materiales", value: formatCurrency(totalCosto), icon: Box },
+              { label: "Subtotal Presupuesto", value: formatCurrency(totalCosto), icon: TrendingUp },
+              { label: "Total con AIU", value: formatCurrency(totalAIU), icon: FileText },
             ].map((stat) => (
               <Card key={stat.label}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -113,6 +170,9 @@ export default function ProyectoDetailPage() {
                 <div className="flex justify-between"><span className="text-muted-foreground">Fecha Inicio</span><span>{format(new Date(project.fecha), "dd MMM yyyy", { locale: es })}</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Validez</span><span>{project.validez} días</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Moneda</span><span>{project.moneda}</span></div>
+                {project.descripcion && (
+                  <div className="flex justify-between"><span className="text-muted-foreground">Descripción</span><span>{project.descripcion}</span></div>
+                )}
               </CardContent>
             </Card>
 
@@ -162,7 +222,7 @@ export default function ProyectoDetailPage() {
           </div>
 
           <div className="space-y-3">
-            {mockElements.map((element) => (
+            {project.elementos.map((element) => (
               <Card key={element.id}>
                 <CardContent className="p-4">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -172,23 +232,29 @@ export default function ProyectoDetailPage() {
                       </div>
                       <div>
                         <h3 className="font-semibold">{element.descripcion}</h3>
-                        <p className="text-sm text-muted-foreground">{element.tipo} • {element.cantidad} uds</p>
+                        <p className="text-sm text-muted-foreground">{element.tipoElemento} • {element.cantidad} uds</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                      <span className="font-semibold">{formatCurrency(element.costo)}</span>
+                      <span className="font-semibold">{formatCurrency(element.costoTotal)}</span>
                       <div className="flex gap-2">
                         <Button variant="ghost" size="icon" asChild>
-                          <Link href={`/proyectos/${projectId}/calculadora?edit=${element.id}`}>
+                          <Link href={`/proyectos/${projectId}/calculadora`}>
                             <Eye className="h-4 w-4" />
                           </Link>
                         </Button>
                         <Button variant="ghost" size="icon" asChild>
-                          <Link href={`/proyectos/${projectId}/calculadora?edit=${element.id}`}>
+                          <Link href={`/proyectos/${projectId}/calculadora`}>
                             <Edit className="h-4 w-4" />
                           </Link>
                         </Button>
-                        <Button variant="ghost" size="icon" className="text-destructive">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive"
+                          onClick={() => handleDeleteElemento(element.id)}
+                          disabled={deletingId === element.id}
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -199,7 +265,7 @@ export default function ProyectoDetailPage() {
             ))}
           </div>
 
-          {mockElements.length === 0 && (
+          {project.elementos.length === 0 && (
             <Card className="text-center py-12">
               <Calculator className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
               <h3 className="text-lg font-medium">No hay elementos calculados</h3>

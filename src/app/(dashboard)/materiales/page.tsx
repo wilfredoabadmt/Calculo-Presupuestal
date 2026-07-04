@@ -1,13 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { PageHeader } from "@/components/shared/PageHeader"
 import { EmptyState } from "@/components/shared/EmptyState"
 import { SearchInput } from "@/components/shared/SearchInput"
-import { Box, Plus, Edit, Trash2, Upload } from "lucide-react"
+import { Box, Plus, Edit, Trash2, Upload, Loader2 } from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
 
 interface Material {
@@ -22,15 +22,34 @@ interface Material {
 export default function MaterialesPage() {
   const [search, setSearch] = useState("")
   const [grupoFilter, setGrupoFilter] = useState("TODOS")
+  const [materiales, setMateriales] = useState<Material[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const materiales: Material[] = []
-  const grupos = ["TODOS", "CEMENTO", "ARENA", "GRAVA", "ACERO", "BLOQUE", "CERAMICA", "TEJA", "MADERA", "YESO"]
+  useEffect(() => {
+    fetch("/api/materiales")
+      .then(r => r.json())
+      .then(data => {
+        setMateriales(Array.isArray(data) ? data : [])
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [])
+
+  const grupos = ["TODOS", ...Array.from(new Set(materiales.map(m => m.grupo)))]
 
   const filtered = materiales.filter(m => {
     const matchSearch = m.nombre.toLowerCase().includes(search.toLowerCase()) || m.codigo.toLowerCase().includes(search.toLowerCase())
     const matchGrupo = grupoFilter === "TODOS" || m.grupo === grupoFilter
     return matchSearch && matchGrupo
   })
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">

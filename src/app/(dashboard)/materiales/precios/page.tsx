@@ -1,29 +1,41 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { PageHeader } from "@/components/shared/PageHeader"
 import { EmptyState } from "@/components/shared/EmptyState"
 import { SearchInput } from "@/components/shared/SearchInput"
-import { DollarSign, Upload, Download, Eye } from "lucide-react"
-import { formatCurrency, formatNumber } from "@/lib/utils"
+import { DollarSign, Upload, Download, Eye, Loader2 } from "lucide-react"
+import { formatCurrency } from "@/lib/utils"
 
 interface BancoPrecio {
   id: string
   actividad: string
   unidad: string
   categoria: string
+  subcategoria: string | null
   precioUnitario: number
 }
 
 export default function BancoPreciosPage() {
   const [search, setSearch] = useState("")
   const [catFilter, setCatFilter] = useState("TODAS")
+  const [items, setItems] = useState<BancoPrecio[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const items: BancoPrecio[] = []
-  const categorias = ["TODAS", "GENERALES", "ESTRUCTURAS", "HIDRAULICA", "VIAS_URBANAS"]
+  useEffect(() => {
+    fetch("/api/banco-precios")
+      .then(r => r.json())
+      .then(data => {
+        setItems(Array.isArray(data.items) ? data.items : [])
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [])
+
+  const categorias = ["TODAS", ...Array.from(new Set(items.map(i => i.categoria)))]
 
   const filtered = items.filter(i => {
     const matchSearch = i.actividad.toLowerCase().includes(search.toLowerCase())
@@ -31,11 +43,19 @@ export default function BancoPreciosPage() {
     return matchSearch && matchCat
   })
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Banco de Precios GMLP"
-        description="Base de precios unitarios GMLP 2007 - 36,220+ ítems"
+        description="Base de precios unitarios GMLP 2007"
         icon={<DollarSign className="h-7 w-7 text-primary" />}
         actions={
           <>
@@ -77,6 +97,7 @@ export default function BancoPreciosPage() {
                     <TableHead>Actividad</TableHead>
                     <TableHead>Unidad</TableHead>
                     <TableHead>Categoría</TableHead>
+                    <TableHead>Subcategoría</TableHead>
                     <TableHead className="text-right">P.U.</TableHead>
                     <TableHead className="text-right">Acciones</TableHead>
                   </TableRow>
@@ -87,6 +108,7 @@ export default function BancoPreciosPage() {
                       <TableCell className="font-medium">{item.actividad}</TableCell>
                       <TableCell>{item.unidad}</TableCell>
                       <TableCell><span className="px-2 py-1 rounded-full text-xs bg-muted">{item.categoria}</span></TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{item.subcategoria || "-"}</TableCell>
                       <TableCell className="text-right font-medium">{formatCurrency(item.precioUnitario)}</TableCell>
                       <TableCell className="text-right">
                         <Button variant="ghost" size="icon"><Eye className="h-4 w-4" /></Button>

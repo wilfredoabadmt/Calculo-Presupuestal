@@ -1,26 +1,49 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { PageHeader } from "@/components/shared/PageHeader"
 import { EmptyState } from "@/components/shared/EmptyState"
-import { DollarSign, Plus, Download } from "lucide-react"
+import { DollarSign, Plus, Download, Loader2 } from "lucide-react"
 import { formatCurrency, formatNumber } from "@/lib/utils"
 
 interface APU {
+  id: string
   codigo: string
   descripcion: string
   unidad: string
+  categoria?: string
   precioUnitario: number
+  materiales: string | null
+  manoObra: string | null
 }
 
 export default function AnalisisPreciosPage() {
   const params = useParams()
   const projectId = params.id as string
+  const [items, setItems] = useState<APU[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const items: APU[] = []
+  useEffect(() => {
+    fetch(`/api/banco-precios`)
+      .then(r => r.json())
+      .then(data => {
+        setItems(Array.isArray(data) ? data.slice(0, 20) : [])
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -39,7 +62,7 @@ export default function AnalisisPreciosPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Análisis de Precios Unitarios</CardTitle>
+          <CardTitle>Banco de Precios Unitarios</CardTitle>
         </CardHeader>
         <CardContent>
           {items.length === 0 ? (
@@ -54,17 +77,19 @@ export default function AnalisisPreciosPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Código</TableHead>
-                    <TableHead>Descripción</TableHead>
-                    <TableHead>Und</TableHead>
+                    <TableHead>Actividad</TableHead>
+                    <TableHead>Unidad</TableHead>
+                    <TableHead>Categoría</TableHead>
                     <TableHead className="text-right">P.U.</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {items.map(item => (
-                    <TableRow key={item.codigo}>
-                      <TableCell className="font-mono">{item.codigo}</TableCell>
+                    <TableRow key={item.id}>
+                      <TableCell className="font-mono text-xs">{item.codigo || item.id.slice(0, 8)}</TableCell>
                       <TableCell>{item.descripcion}</TableCell>
                       <TableCell>{item.unidad}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{item.categoria || "-"}</TableCell>
                       <TableCell className="text-right font-medium">{formatCurrency(item.precioUnitario)}</TableCell>
                     </TableRow>
                   ))}
@@ -74,36 +99,6 @@ export default function AnalisisPreciosPage() {
           )}
         </CardContent>
       </Card>
-
-      {items.length > 0 && (
-        <Card>
-          <CardHeader><CardTitle>Formato APU (Ejemplo)</CardTitle></CardHeader>
-          <CardContent>
-            <div className="grid gap-6 md:grid-cols-2">
-              <div>
-                <h4 className="font-semibold mb-3">A. MATERIALES</h4>
-                <Table>
-                  <TableHeader><TableRow><TableHead>Cod</TableHead><TableHead>Descripción</TableHead><TableHead>Und</TableHead><TableHead className="text-right">Cant</TableHead><TableHead className="text-right">P.U.</TableHead><TableHead className="text-right">Total</TableHead></TableRow></TableHeader>
-                  <TableBody>
-                    <TableRow><TableCell>M01</TableCell><TableCell>Cemento CP-40</TableCell><TableCell>Bls</TableCell><td className="text-right">4.20</td><td className="text-right">8.60</td><td className="text-right font-medium">36.12</td></TableRow>
-                    <TableRow><TableCell>M02</TableCell><TableCell>Arena media</TableCell><TableCell>m³</TableCell><td className="text-right">0.55</td><td className="text-right">28.33</td><td className="text-right font-medium">15.58</td></TableRow>
-                  </TableBody>
-                </Table>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-3">B. MANO DE OBRA</h4>
-                <Table>
-                  <TableHeader><TableRow><TableHead>Profesión</TableHead><TableHead className="text-right">Horas</TableHead><TableHead className="text-right">Tarifa/hr</TableHead><TableHead className="text-right">Total</TableHead></TableRow></TableHeader>
-                  <TableBody>
-                    <TableRow><TableCell>Albañil</TableCell><td className="text-right">8.00</td><td className="text-right">18.75</td><td className="text-right font-medium">150.00</td></TableRow>
-                    <TableRow><TableCell>Armador</TableCell><td className="text-right">4.00</td><td className="text-right">22.50</td><td className="text-right font-medium">90.00</td></TableRow>
-                  </TableBody>
-                </Table>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   )
 }
