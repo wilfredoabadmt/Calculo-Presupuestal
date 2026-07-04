@@ -1,0 +1,471 @@
+PLAN DE IMPLEMENTACIÓN FINAL - SISTEMA WEB "CALCULO PRESUPUESTAL"
+Stack Tecnológico Definitivo
+Capa	Tecnología	Versión
+Framework	Next.js (App Router)	14+
+UI Framework	Tailwind CSS + shadcn/ui	Latest
+Lenguaje	TypeScript	5+
+Base de Datos	PostgreSQL	16
+ORM	Prisma	5+
+Auth	NextAuth.js	v5
+Charts	Recharts	Latest
+Gantt	framer-gantt / gantt-task-react	Latest
+Export PDF	jsPDF + autotable	Latest
+Export Excel	SheetJS (xlsx)	Latest
+Iconos	Lucide React	Latest
+Deploy	Docker + Coolify	-
+CI/CD	GitHub Actions	-
+Moneda Default	Bolivianos (Bs.)	-
+Idioma	Español únicamente	-
+Modelo	Freemium	-
+DESGLOSE POR FASES (42 DÍAS)
+FASE 0: INFRAESTRUCTURA Y CONFIGURACIÓN (Día 1)
+Archivos a crear:
+- package.json con dependencias
+- tsconfig.json
+- next.config.ts
+- tailwind.config.ts
+- postcss.config.js
+- .gitignore (node_modules, .env, .next, etc.)
+- .env.example (variables de entorno plantilla)
+- docker-compose.yml (app + PostgreSQL)
+- Dockerfile (multi-stage build)
+- .github/workflows/ci.yml
+- .github/workflows/deploy.yml
+- prisma/schema.prisma
+- prisma/seed.ts
+Acciones:
+1. git init + git remote add origin
+2. npm create next-app@latest con TypeScript + Tailwind + App Router
+3. Instalar: prisma, next-auth, shadcn/ui, recharts, jspdf, xlsx, lucide-react, framer-motion
+4. Configurar shadcn/ui: npx shadcn@latest init
+5. Configurar Prisma: npx prisma init
+FASE 1: BASE DE DATOS Y MODELADO (Días 2-4)
+Archivo principal: prisma/schema.prisma
+12 modelos principales:
+ 1. User - Usuarios del sistema
+ 2. Proyecto - Proyectos de construcción
+ 3. ElementoPresupuesto - Elementos constructivos (concreto, pared, etc.)
+ 4. Material - Catálogo de 100+ materiales con precios
+ 5. DosificacionConcreto - 12 dosificaciones (1:2:2 hasta 1:4:8)
+ 6. DosificacionMortero - 5 dosificaciones (1:2 hasta 1:6)
+ 7. TipoBloque - 10+ tipos de bloques con unidades/m²
+ 8. DiametroAcero - 20+ diámetros con kg/m
+ 9. TipoCeramica - 6+ tipos cerámica/porcelanato
+10. TipoTeja - 5+ tipos de tejas
+11. PresupuestoGeneral - Presupuesto consolidado con AIU
+12. CronogramaItem - Items del cronograma Gantt
+Seed data (prisma/seed.ts):
+- Insertar las 12 dosificaciones de concreto (mat1)
+- Insertar las 5 dosificaciones de mortero (mat2)
+- Insertar los 10+ tipos de bloques (mat7: B-10x20x40, B-12x20x40, etc.)
+- Insertar los 20+ diámetros de acero (mat8: 1/8" a 2")
+- Insertar los 6+ tipos de cerámica/porcelanato (mat13)
+- Insertar los 5+ tipos de tejas (mat12)
+- Insertar los 50+ materiales con precios de referencia (mat6: cemento Bs.8.60, arena Bs.28.33/m³, etc.)
+- Insertar 16 tipos de mano de obra con tarifas (albañil Bs.18.75/hr, armador Bs.22.50/hr, etc.)
+- Insertar 4 tipos de equipo/maquinaria (equipo topográfico Bs.200/hr, etc.)
+- Insertar datos de afinado (mat3), tablas de desperdicios, perfiles drywall (mat10), paneles yeso (mat11)
+FASE 2: ENGINE DE CÁLCULO (Días 5-10)
+Ubicación: src/lib/calculators/
+10 calculadoras + utilidades:
+Archivo	Elemento	Fórmulas Principales
+concreto.ts	Concreto	vol=a×b×h; cemento=vol×dosif_cemento×(1+desp)×n; arena=vol×dosif_arena×...; grava=...; agua=...
+pared.ts	Pared/Bloque	bloques=area×unid/m2×(1+desp)×n; pega: cemento+arena; repello: cemento+arena×espesor; afinado
+columna.ts	Columna	Concreto vol + Acero Long (varillas=long_total/long_comercial, peso=var×largo×kg/m) + Estribos (total×perímetro×kg/m) por zonas
+viga.ts	Viga	Similar columna: concreto + acero(+) + acero(-) + estribos zonas confinada/central
+losa.ts	Losa	Concreto vol + Acero 4 direcciones (Xa, Xb, Ya, Yb) + Bovedillas + Electromalla
+cimiento.ts	Cimiento	vol=base×altura×largo; Piedra % + Mortero % con dosificación
+muro.ts	Muro Piedra	vol=((C+B)/2)×H×Largo; Piedra % + Mortero % con dosificación
+techo.ts	Techo	area_real=√(L²+H²)×A; tejas=area×unid/m2×(1+desp)×n
+piso.ts	Piso	Ceramicas: piezas, cajas, adhesivo, boquilla, agua
+cielo.ts	Cielo Raso	Paneles, Viguetas, Omegas, Ángulo Perimetral con ROUNDUP
+utils.ts	Utilidades	bolsasCemento(), convertirAgua(), redondeo(), calcularAcero(), desperdicio()
+Fórmulas especiales a implementar:
+- ArrayFormula equivalent → funciones de búsqueda en tablas de referencia
+- calcularAceroLongitudinal() con/sin traslapes
+- calcularEstribos() con zonas: confinada, central, nudo sup, nudo inf
+- Conversión agua: lt→barriles (/158.98), lt→galones (/3.785)
+- Redondeo configurable por tipo de material
+FASE 3: FRONTEND - LAYOUT Y NAVEGACIÓN (Días 11-14)
+Estructura de páginas:
+src/app/
+├── layout.tsx                        # Root layout (font, providers, metadata)
+├── page.tsx                          # Landing page / Marketing
+├── globals.css                       # Tailwind + custom styles
+│
+├── (auth)/
+│   ├── login/page.tsx                # Formulario login
+│   └── register/page.tsx             # Formulario registro
+│
+├── (dashboard)/
+│   ├── layout.tsx                    # Sidebar + Navbar + Breadcrumb
+│   ├── page.tsx                      # Dashboard principal (stats, proyectos recientes)
+│   │
+│   ├── proyectos/
+│   │   ├── page.tsx                  # Lista de proyectos (DataTable)
+│   │   ├── nuevo/page.tsx            # Crear proyecto
+│   │   └── [id]/
+│   │       ├── page.tsx              # Vista del proyecto (tabs)
+│   │       ├── calculadora/
+│   │       │   ├── page.tsx          # Selector visual de tipo de elemento (10 cards)
+│   │       │   ├── concreto/page.tsx
+│   │       │   ├── pared/page.tsx
+│   │       │   ├── columna/page.tsx
+│   │       │   ├── viga/page.tsx
+│   │       │   ├── losa/page.tsx
+│   │       │   ├── cimiento/page.tsx
+│   │       │   ├── muro/page.tsx
+│   │       │   ├── techo/page.tsx
+│   │       │   ├── piso/page.tsx
+│   │       │   └── cielo/page.tsx
+│   │       ├── elementos/page.tsx    # Lista de elementos guardados
+│   │       ├── presupuesto/page.tsx  # Presupuesto general
+│   │       ├── computos/page.tsx     # Computos métricos
+│   │       ├── analisis-precios/page.tsx  # APU
+│   │       ├── cronograma/page.tsx   # Gantt interactivo
+│   │       └── reportes/page.tsx     # Exportar reportes
+│   │
+│   ├── materiales/
+│   │   ├── page.tsx                  # Catálogo CRUD de materiales
+│   │   └── precios/page.tsx          # Banco de precios GMLP
+│   │
+│   ├── configuracion/
+│   │   ├── page.tsx                  # Config general (moneda, %, etc.)
+│   │   ├── dosificaciones/page.tsx   # Gestionar dosificaciones
+│   │   └── cuenta/page.tsx           # Perfil de usuario
+│   │
+│   └── admin/
+│       └── usuarios/page.tsx         # Gestionar usuarios (admin)
+Componentes clave (src/components/):
+src/components/
+├── ui/                               # shadcn/ui (button, card, input, select, table, dialog, tabs, etc.)
+├── layout/
+│   ├── Sidebar.tsx                   # Navegación lateral colapsable
+│   ├── Navbar.tsx                    # Barra superior (búsqueda, notificaciones, usuario)
+│   ├── Breadcrumb.tsx
+│   └── Logo.tsx
+├── calculadora/
+│   ├── SelectorElemento.tsx          # Grid de 10 cards con iconos
+│   ├── FormularioConcreto.tsx
+│   ├── FormularioPared.tsx
+│   ├── FormularioColumna.tsx
+│   ├── FormularioViga.tsx
+│   ├── FormularioLosa.tsx
+│   ├── FormularioCimiento.tsx
+│   ├── FormularioMuro.tsx
+│   ├── FormularioTecho.tsx
+│   ├── FormularioPiso.tsx
+│   ├── FormularioCielo.tsx
+│   ├── ResultadoCalculo.tsx          # Tabla de materiales + costos
+│   ├── EsquemaVisual.tsx             # SVG del elemento constructivo
+│   ├── SelectorDosificacion.tsx      # Dropdown con tabla preview
+│   └── SelectorMaterial.tsx          # Búsqueda de materiales
+├── presupuesto/
+│   ├── TablaPresupuesto.tsx          # Editable con inline editing
+│   ├── FormularioItemPresupuesto.tsx
+│   ├── ResumenCostos.tsx             # Totales, subtotales, AIU
+│   ├── AnalisisPrecioUnitario.tsx    # Desglose completo APU
+│   └── ExportarPresupuesto.tsx       # Botones export PDF/Excel
+├── computos/
+│   ├── TablaComputos.tsx             # Mediciones detalladas
+│   └── FormularioComputo.tsx
+├── cronograma/
+│   ├── GanttChart.tsx                # Gantt interactivo con drag-and-drop
+│   ├── TimelineBar.tsx
+│   └── RutaCritica.tsx               # Highlight de ruta crítica
+├── reportes/
+│   ├── GraficoPareto.tsx             # Diagrama de Pareto
+│   ├── CurvaS.tsx                    # Curva S de inversión
+│   ├── GraficoTorta.tsx              # Composición de costos
+│   ├── GraficoBarras.tsx
+│   └── PlantillaPDF.tsx              # Template para exportación
+├── materiales/
+│   ├── TablaMateriales.tsx           # CRUD con búsqueda/filtros
+│   ├── FormularioMaterial.tsx
+│   └── ImportarPrecios.tsx           # Importar desde Excel
+└── shared/
+    ├── DataTable.tsx                  # Genérica con sorting/pagination
+    ├── CurrencyInput.tsx             # Input con formato Bs.
+    ├── NumberInput.tsx
+    ├── UnitSelector.tsx              # Selector de unidades
+    ├── SearchInput.tsx
+    ├── ConfirmDialog.tsx
+    ├── EmptyState.tsx
+    ├── LoadingSpinner.tsx
+    └── PageHeader.tsx
+FASE 4: FRONTEND - FORMULARIOS DE CÁLCULO (Días 15-20)
+Patrón común para cada formulario:
+1. Esquema Visual SVG del elemento (guía visual como PlugCAD)
+2. Campos de entrada dimensiones (m, cm, mm según elemento)
+3. Dropdowns de selección (dosificación, tipo bloque, diámetro acero)
+4. Sliders/inputs de porcentajes de desperdicio
+5. Botón CALCULAR → ejecuta engine + muestra resultados
+6. Panel de Resultados → tabla de materiales con cantidades y costos
+7. Botón GUARDAR → persiste en BD como elemento del proyecto
+8. Tabla de referencia → muestra opciones disponibles
+Especificación por formulario:
+Formulario	Campos de Entrada	Parámetros	Materiales Calculados
+Concreto	a(m), b(m), h(m)	Dosificación, Resistencia, Desperdicio%, Cant	Cemento(kg→bolsas), Arena(m³), Grava(m³), Agua(lt→barriles→galones)
+Pared	Area(m²)	Tipo Bloque, Dosif Pega, Dosif Repello, Espesor Rep(mm), Espesor Afin(mm), Desp Bloque%, Desp Acabados%, Incluir Acabados(S/N)	Bloques, Cemento Pega, Arena Pega, Cemento Repello, Arena Repello, Cemento Afinado, Arena Afinado
+Columna	Alto(m), a(m), b(m)	Resistencia, Desp Concreto%, Acero Long: Long(m), Traslapes(S/N), Long Traslape(m), Ø varillas, Cant varillas, Desp Acero Long%, Estribos: Long(m), Ø, Separación zona confinada/central/nudos, Cant zonas, Desp Estribos%	Concreto + Acero Longitudinal(Kg) + Acero Estribos(Kg)
+Viga	Largo(m), a(m), b(m)	Similar Columna pero con acero(+) y acero(-)	Concreto + Acero Long(+) + Acero Long(-) + Estribos
+Losa	Largo(m), Ancho(m), Espesor(m)	Acero X(a), X(b), Y(a), Y(b), Separación, Bovedillas, Electromalla	Concreto + Acero 4 dirs + Bovedillas + Electromalla
+Cimiento	Base(m), Altura(m), Largo(m)	Dosificación	Piedra(m³), Cemento(kg), Arena(m³), Agua(lt)
+Muro	Corona(m), Base(m), Altura(m), Largo(m)	Dosificación, %Piedra, %Mortero	Piedra(m³), Cemento(kg), Arena(m³), Agua(lt)
+Techo	Ancho(m), Largo(m), Alto(m pendiente)	Tipo Teja, Desperdicio%	Tejas(unidades)
+Piso	Ancho(m), Largo(m)	Tipo Cerámica, Desp Cerámica%, Desp Adhesivo%, Desp Boquilla%, Unidad Agua	Ceramicas(piezas→cajas), Adhesivo(kg), Boquilla(kg), Agua
+Cielo Raso	Ancho(m), Largo(m)	Tipo Viguetas(m), Separación Viguetas(m), Dim Viguetas, Separación Omegas(m), Dim Omegas, Dim Angulo Perimetral, Desp Paneles%	Paneles, Viguetas, Omegas, Ángulo Perimetral, Masilla, Tornillos
+FASE 5: MÓDULO DE PRESUPUESTOS (Días 21-25)
+Estructura de Presupuesto General (basado en PLANILLA EJEMPLO):
+PRESUPUESTO GENERAL DEL PROYECTO
+├── MODULO I: OBRAS PRELIMINARES (OP01-OP02)
+│   ├── OP01: Señalización y protección
+│   └── OP02: Instalaciones provisionales
+├── MODULO II: OBRA GRUESA (OG01-OG14)
+│   ├── OG01: Movimiento de tierra
+│   ├── OG02: Excavaciones
+│   ├── OG03: Cimentaciones
+│   ├── OG04: Estructura concreto armado
+│   ├── OG05: Mampostería
+│   └── ...
+├── MODULO III: OBRA FINA (OF01-OF15)
+├── MODULO IV: INSTALACIONES HIDROSANITARIAS (IHS01-IHS13)
+└── MODULO V: INSTALACIONES ELÉCTRICAS (IE1-IE5)
+Análisis de Precios Unitarios (APU) por ítem:
+A. MATERIALES
+   │ Cod │ Descripción     │ Und │ Cant  │ Precio │ Total   │
+   │ M01 │ Cemento CP-40   │ Bls │ 4.20  │ 8.60   │ 36.12   │
+   │ M02 │ Arena media     │ m³  │ 0.55  │ 28.33  │ 15.58   │
+   │ M03 │ Grava 3/4"      │ m³  │ 0.83  │ 36.66  │ 30.43   │
+   └─────┴─────────────────┴─────┴───────┴────────┴─────────┘
+   SUBTOTAL MATERIALES: Bs. 82.13
+
+B. MANO DE OBRA
+   │ Profesión    │ Horas │ Tarifa/hr │ Total   │
+   │ Albañil      │ 8.00  │ 18.75     │ 150.00  │
+   │ Armador      │ 4.00  │ 22.50     │ 90.00   │
+   │ Peón         │ 8.00  │ 13.75     │ 110.00  │
+   └──────────────┴───────┴───────────┴─────────┘
+   SUBTOTAL M.O.: Bs. 350.00
+
+C. CARGAS SOCIALES (55%): Bs. 192.50
+D. IVA (14.94%): Bs. 81.29
+E. EQUIPO Y MAQUINARIA (5% sobre MO): Bs. 17.50
+F. GASTOS GENERALES (15%): Bs. 99.42
+G. UTILIDAD (10%): Bs. 66.28
+H. IMPUESTO IT (3.09%): Bs. 20.48
+
+PRECIO UNITARIO TOTAL: Bs. 909.60
+Computos Métricos:
+│ Cod  │ Item              │ Ejes   │ Und │ N.Elem │ Largo  │ Ancho  │ Alto   │ Parcial │ Total  │
+│ OG03 │ Excavación zanja  │ A-1/B-1│ m3  │ 2      │ 5.00   │ 1.20   │ 1.50   │ 9.00    │ 18.00  │
+Pantalla de Presupuesto:
+- Toolbar: Agregar ítem, Importar del banco, Reordenar
+- Tabla editable inline: Código, Descripción, Und, Cantidad, PU, Total
+- Panel lateral: Resumen de costos, Subtotales por módulo
+- Botones: Exportar PDF, Exportar Excel, Guardar
+FASE 6: MÓDULO DE CRONOGRAMA GANTT (Días 26-28)
+Librería sugerida: framer-gantt o gantt-task-react
+Funcionalidades:
+- Vista de Gantt interactiva con drag-and-drop
+- Barras de progreso por ítem
+- Ruta crítica resaltada en rojo
+- Curva S de inversión invertida vs tiempo
+- Dependencias entre tareas (finish-to-start)
+- Calendario de feriados bolivianos pre-cargado
+- Zoom in/out (semana, mes, trimestre)
+- Export del cronograma como imagen/PDF
+Pantalla:
+┌──────────────────────────────────────────────────────────────┐
+│  CRONOGRAMA DE OBRA - [Nombre Proyecto]                     │
+│  ────────────────────────────────────────────────────────── │
+│  [Zoom: Semana | Mes | Trimestre]  [Exportar PDF] [Exportar] │
+│                                                              │
+│  │ ITEM              │ Ene  │ Feb  │ Mar  │ Abr  │ May  │   │
+│  │ ══════════════════│══════│══════│══════│══════│══════│   │
+│  │ OP01 Señalización │ ██   │      │      │      │      │   │
+│  │ OP02 Inst. Prov.  │ ████ │      │      │      │      │   │
+│  │ OG01 Mov. Tierra  │      │ ██   │ █    │      │      │   │
+│  │ OG02 Excavaciones │      │ ███  │ █    │      │      │   │
+│  │ OG03 Cimentación  │      │      │ ████ │ ███  │      │   │
+│  │ OG04 Estructura   │      │      │      │ ████ │ ████ │   │
+│  │ ► RUTA CRÍTICA    │      │      │      │      │      │   │
+│  │                    │      │      │      │      │      │   │
+│  ────────────────────────────────────────────────────────── │
+│  CURVA S: [Gráfico de inversión acumulada]                  │
+│  Inversión semanal: Bs. 0 ────────────── Bs. 50,000        │
+│  Total proyecto: Bs. 450,000                                │
+└──────────────────────────────────────────────────────────────┘
+FASE 7: BANCO DE PRECIOS UNITARIOS (Día 29)
+Importar la base GMLP 2007 (36,220+ ítems) a PostgreSQL:
+BANCO DE PRECIOS UNITARIOS
+├── GENERALES (319 ítems)
+├── ESTRUCTURAS (258 ítems)
+├── HIDRAULICA SANITARIA (214 ítems)
+├── VIAS URBANAS (171 ítems)
+└── DETALLE (36,220+ ítems con análisis completo)
+    ├── Materiales
+    ├── Mano de Obra
+    ├── Beneficios Sociales (71.18%)
+    ├── IVA (14.94%)
+    ├── Equipo/Maquinaria (5%)
+    ├── Gastos Generales (11%)
+    ├── Utilidad (7%)
+    └── Imp. Transacciones (3.09%)
+Pantalla: CRUD con búsqueda, filtros por categoría, vista detallada APU, importar/exportar Excel.
+FASE 8: FUNCIONALIDADES TRANSVERSALES (Días 30-32)
+Autenticación:
+- Login con email/password
+- Registro con confirmación
+- Roles: admin, user
+- Sesiones JWT persistentes
+- Middleware de protección de rutas
+Configuración del Sistema:
+- Moneda default: Bs. (configurable por proyecto)
+- % Impuestos editables (IVA 14.94%, IT 3.09%)
+- % Cargas Sociales (55%)
+- % Gastos Generales (15%)
+- % Utilidad (10%)
+- % Desperdicios por defecto
+- Peso bolsa cemento (42.5 kg)
+API REST:
+POST   /api/auth/register
+POST   /api/auth/login
+GET    /api/proyectos
+POST   /api/proyectos
+GET    /api/proyectos/:id
+PUT    /api/proyectos/:id
+DELETE /api/proyectos/:id
+POST   /api/proyectos/:id/elementos
+PUT    /api/proyectos/:id/elementos/:eid
+DELETE /api/proyectos/:id/elementos/:eid
+POST   /api/calcular/:tipo            // Ejecuta calculadora
+GET    /api/materiales
+POST   /api/materiales
+PUT    /api/materiales/:id
+GET    /api/dosificaciones/:tipo
+GET    /api/banco-precios
+GET    /api/reportes/presupuesto/:id
+GET    /api/reportes/computos/:id
+GET    /api/reportes/cronograma/:id
+POST   /api/export/pdf/:tipo/:id
+POST   /api/export/excel/:tipo/:id
+Auto-guardado: Cada 30 segundos en formularios activos.
+Historial de versiones: Últimas 20 versiones por proyecto.
+FASE 9: REPORTES Y EXPORTACIÓN (Día 33)
+Reporte	Formato	Contenido
+Presupuesto General	PDF/Excel	Tabla completa con totales por módulo
+Computos Métricos	PDF/Excel	Detalle de mediciones
+Análisis Precios Unitarios	PDF	Desglose material + MO + AIU
+Resumen por Capítulos	PDF + Gráfico	Totales + Pareto
+Lista de Materiales	Excel	Materiales agrupados por tipo/proveedor
+Cronograma	PDF/Imagen	Gantt + Curva S
+Reporte Ejecutivo	PDF	Dashboard con gráficos resumen
+FASE 10: DOCKER + DEPLOY + CI/CD (Días 34-36)
+Dockerfile (multi-stage):
+# Build stage
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY . .
+RUN npm ci && npm run build
+
+# Production stage
+FROM node:20-alpine AS runner
+WORKDIR /app
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/static ./.next/static
+EXPOSE 3000
+CMD ["node", "server.js"]
+docker-compose.yml:
+services:
+  app:
+    build: .
+    ports: ["3000:3000"]
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@db:5432/calculo_presupuestal
+      - NEXTAUTH_SECRET=...
+      - NEXTAUTH_URL=https://calculo-presupuestal.clientify.click
+    depends_on: [db]
+  db:
+    image: postgres:16-alpine
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    environment:
+      - POSTGRES_DB=calculo_presupuestal
+      - POSTGRES_PASSWORD=password
+volumes:
+  pgdata:
+GitHub Actions CI:
+name: CI
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test
+      - run: npm run build
+Deploy Coolify:
+- Conectar repositorio GitHub en Coolify
+- Configurar variables de entorno
+- Auto-deploy en cada push a main
+- Dominio: calculo-presupuestal.clientify.click
+- SSL automático
+FASE 11: MARKETING, SEO Y LANDING PAGE (Días 37-39)
+Skills a aplicar:
+Skill	Aplicación
+frontend-design	Diseño UI/UX profesional de toda la app
+page-cro	Optimización de landing page para conversión
+seo-audit	Auditoría SEO inicial
+schema-markup	Datos estructurados (SoftwareApplication, FAQPage)
+analytics-tracking	GA4 + eventos de uso de calculadoras
+launch-strategy	Estrategia de lanzamiento en redes constructoras
+onboarding-cro	Flujo de onboarding del usuario nuevo
+signup-flow-cro	Optimización del formulario de registro
+free-tool-strategy	Calculadora gratuita como lead magnet
+pricing-strategy	Estructura de planes Freemium
+content-strategy	Blog con artículos SEO sobre construcción
+Landing Page:
+- Hero: "Calcula presupuestos de construcción en minutos"
+- Demo interactiva de la calculadora (1 calculadora gratuita)
+- Características principales (10 cards)
+- Testimonios
+- Pricing (Free vs Pro)
+- CTA: "Comienza Gratis"
+FASE 12: TESTING Y POLISH (Días 40-42)
+- Pruebas unitarias de cada calculadora
+- Pruebas de integración de la API
+- Testing responsive (mobile, tablet, desktop)
+- Cross-browser testing
+- Performance optimization (Lighthouse > 90)
+- Accessibility (WCAG 2.1 AA)
+- Bug fixes
+- UX polish
+RESUMEN DE ARCHIVOS A CREAR
+~80+ archivos TypeScript/React
+~12 modelos Prisma
+~10 calculadoras
+~10 formularios de cálculo
+~15 componentes de UI
+~20+ páginas
+~6 reportes
+~1 Dockerfile + docker-compose
+~2 GitHub Actions workflows
+~1 seed script con 36,000+ registros
+ESTRUCTURA DE PLANES FREEMIUM
+Característica	Free	Pro
+Calculadoras	3 (Concreto, Pared, Piso)	Las 10 completas
+Proyectos	1 activo	Ilimitados
+Export PDF	Limitado (5/mes)	Ilimitado
+Banco de Precios	Solo consulta	CRUD completo
+Cronograma Gantt	No	Sí
+Curva S	No	Sí
+API Access	No	Sí
+Soporte	Community	Prioritario
+Precio	$0	$19-49/mes
+¿El plan es completo y profesional? ¿Quieres que ajuste algo o comenzamos con la Fase 0?

@@ -1,0 +1,377 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USUARIOS Y AUTENTICACIÓN
+// ============================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String
+  role          String    @default("USER")
+  plan          String    @default("FREE")
+  planExpiresAt DateTime?
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  proyectos     Proyecto[]
+
+  @@map("users")
+}
+
+// ============================================
+// MATERIALES Y REFERENCIAS (CATÁLOGOS)
+// ============================================
+
+model Material {
+  id          String   @id @default(cuid())
+  codigo      String   @unique
+  nombre      String
+  unidad      String   // kg, m3, m2, ml, lt, bolsa, pza, etc.
+  precio      Float
+  grupo       String   // CEMENTO, ARENA, GRAVA, ACERO, BLOQUE, etc.
+  fechaPrecio DateTime @default(now())
+  proveedor   String?
+  activo      Boolean  @default(true)
+  descripcion String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("materiales")
+}
+
+model DosificacionConcreto {
+  id          String   @id @default(cuid())
+  ratio       String   @unique // "1:2:2", "1:2:3", etc.
+  resistencia Int      // kg/cm2
+  cementoKg   Float
+  arenaM3     Float
+  gravaM3     Float
+  aguaLt      Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  elementos   ElementoPresupuesto[]
+
+  @@map("dosificaciones_concreto")
+}
+
+model DosificacionMortero {
+  id        String   @id @default(cuid())
+  ratio     String   @unique // "1:2", "1:3", etc.
+  cementoKg Float
+  arenaM3   Float
+  aguaLt    Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("dosificaciones_mortero")
+}
+
+model TipoBloque {
+  id            String   @id @default(cuid())
+  nombre        String   @unique // "B-10x20x40", "B-12x20x40", etc.
+  unidadesM2    Float
+  morteroM3M2   Float
+  descripcion   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  elementos     ElementoPresupuesto[]
+
+  @@map("tipos_bloque")
+}
+
+model DiametroAcero {
+  id           String   @id @default(cuid())
+  diametro     String   @unique // "1/8", "1/4", "3/8", "1/2", etc.
+  metrosVarilla Float   // default 6
+  kgM          Float
+  descripcion  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("diametros_acero")
+}
+
+model TipoCeramica {
+  id           String   @id @default(cuid())
+  nombre       String   @unique
+  anchoCm      Float
+  largoCm      Float
+  areaM2       Float
+  unidadesCaja Int
+  tipo         String   // CERAMICA, PORCELANATO
+  precioCaja   Float
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  elementos    ElementoPresupuesto[]
+
+  @@map("tipos_ceramica")
+}
+
+model TipoTeja {
+  id          String   @id @default(cuid())
+  nombre      String   @unique
+  unidadesM2  Float
+  precio      Float
+  descripcion String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  elementos   ElementoPresupuesto[]
+
+  @@map("tipos_teja")
+}
+
+model Desperdicio {
+  id          String   @id @default(cuid())
+  porcentaje  Int      @unique // 1, 2, 3, 5, 10, 15
+  factor      Float    // 1.01, 1.02, etc.
+  createdAt   DateTime @default(now())
+
+  @@map("desperdicios")
+}
+
+model Afinado {
+  id           String   @id @default(cuid())
+  tipo         String   @unique // "GROSOR", "FINO", "EXTRAFINO", "SUPERFINO"
+  espesorMm    Int
+  rendimiento  Float    // m2/bolsa
+  aguaPorBolsa Float    // litros
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("afinados")
+}
+
+model PerfilDrywall {
+  id          String   @id @default(cuid())
+  tipo        String   // "PARANTE", "CANAL", "OMEGA", "VIGUETA", "ANGULO"
+  nombre      String
+  largoM      Float
+  precio      Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("perfiles_drywall")
+}
+
+model PanelYeso {
+  id        String   @id @default(cuid())
+  anchoM    Float
+  largoM    Float
+  areaM2    Float
+  precio    Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("paneles_yeso")
+}
+
+model LaminasTecho {
+  id        String   @id @default(cuid())
+  tipo      String
+  anchoM    Float
+  largoM    Float
+  traslape  Float
+  precio    Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("laminas_techo")
+}
+
+model ManoObra {
+  id        String   @id @default(cuid())
+  oficio    String   @unique
+  precioHora Float
+  jornalLP  Float?
+  jornalOR  Float?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("mano_obra")
+}
+
+model EquipoMaquinaria {
+  id        String   @id @default(cuid())
+  nombre    String   @unique
+  precioHora Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("equipo_maquinaria")
+}
+
+// ============================================
+// PROYECTOS Y PRESUPUESTOS
+// ============================================
+
+model Proyecto {
+  id          String   @id @default(cuid())
+  nombre      String
+  cliente     String
+  empresa     String
+  fecha       DateTime @default(now())
+  validez     Int      @default(30) // días
+  moneda      String   @default("Bs.")
+  descripcion String?
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  elementos       ElementoPresupuesto[]
+  presupuesto     PresupuestoGeneral?
+  cronograma      CronogramaItem[]
+  analisisPrecios AnalisisPrecioUnitario[]
+
+  @@map("proyectos")
+}
+
+model ElementoPresupuesto {
+  id              String   @id @default(cuid())
+  proyectoId      String
+  proyecto        Proyecto @relation(fields: [proyectoId], references: [id], onDelete: Cascade)
+  tipoElemento    String
+  descripcion     String
+  cantidad        Int      @default(1)
+
+  // Dimensiones (usar según tipo)
+  dimA            Float?
+  dimB            Float?
+  dimH            Float?
+  dimLargo        Float?
+  dimAncho        Float?
+  dimEspesor      Float?
+
+  // Parámetros de cálculo
+  dosificacionConcretoId String?
+  dosificacionConcreto   DosificacionConcreto? @relation(fields: [dosificacionConcretoId], references: [id])
+  resistencia            Int?
+  desperdicio            Float  @default(0)
+  tipoBloqueId           String?
+  tipoBloque             TipoBloque? @relation(fields: [tipoBloqueId], references: [id])
+  tipoCeramicaId         String?
+  tipoCeramica           TipoCeramica? @relation(fields: [tipoCeramicaId], references: [id])
+  tipoTejaId             String?
+  tipoTeja               TipoTeja? @relation(fields: [tipoTejaId], references: [id])
+
+  // Acero (columnas/vigas) - almacenado como JSON string
+  aceroLongitudinal      String?
+  estribos               String?
+
+  // Resultados calculados - almacenado como JSON string
+  materiales      String?
+  costoTotal      Float  @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("elementos_presupuesto")
+}
+
+model PresupuestoGeneral {
+  id                String   @id @default(cuid())
+  proyectoId        String   @unique
+  proyecto          Proyecto @relation(fields: [proyectoId], references: [id], onDelete: Cascade)
+  subtotalMaterial  Float    @default(0)
+  gastosGenerales   Float    @default(0)
+  utilidad          Float    @default(0)
+  impuestos         Float    @default(0)
+  totalGeneral      Float    @default(0)
+  items             String?  // JSON string
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("presupuestos_generales")
+}
+
+model CronogramaItem {
+  id          String   @id @default(cuid())
+  proyectoId  String
+  proyecto    Proyecto @relation(fields: [proyectoId], references: [id], onDelete: Cascade)
+  codigo      String
+  item        String
+  fechaInicio DateTime
+  duracion    Int      // días
+  fechaFinal  DateTime
+  dependeDe   String?  // JSON string array
+  creadoManualmente Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("cronograma_items")
+}
+
+// ============================================
+// ANÁLISIS DE PRECIOS UNITARIOS (APU)
+// ============================================
+
+model AnalisisPrecioUnitario {
+  id              String   @id @default(cuid())
+  codigo          String   @unique
+  descripcion     String
+  unidad          String
+  proyectoId      String?
+  proyecto        Proyecto? @relation(fields: [proyectoId], references: [id])
+
+  // Componentes del APU - almacenados como JSON strings
+  materiales      String?
+  manoObra        String?
+  cargasSociales  Float    @default(55)
+  iva             Float    @default(14.94)
+  equipoMaquinaria Float    @default(5)
+  gastosGenerales Float    @default(15)
+  utilidad        Float    @default(10)
+  it              Float    @default(3.09)
+
+  precioUnitario  Float
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("analisis_precios_unitarios")
+}
+
+// ============================================
+// BANCO DE PRECIOS GMLP
+// ============================================
+
+model BancoPrecioGMLP {
+  id          String   @id @default(cuid())
+  actividad   String
+  unidad      String
+  cantidad    Float
+  categoria   String   // GENERALES, ESTRUCTURAS, HIDRAULICA, VIAS_URBANAS
+  subcategoria String?
+
+  // Desglose de costos - stored as JSON strings
+  materiales      String?
+  manoObra        String?
+  beneficiosSociales Float @default(71.18) // %
+  iva             Float   @default(14.94) // %
+  equipoMaquinaria Float  @default(5) // %
+  gastosGenerales Float   @default(11) // %
+  utilidad        Float   @default(7) // %
+  it              Float   @default(3.09) // %
+
+  precioUnitario  Float
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("banco_precios_gmlp")
+}

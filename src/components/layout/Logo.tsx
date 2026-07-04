@@ -1,0 +1,13 @@
+"use client"
+
+import Link from "next/link"
+import { Zap } from "lucide-react"
+
+export function Logo() {
+  return (
+    <Link href="/" className="flex items-center gap-2 font-bold text-xl text-primary">
+      <Zap className="h-6 w-6" />
+      <span>Cálculo Presupuestal</span>
+    </Link>
+  )
+}
