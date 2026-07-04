@@ -65,11 +65,8 @@ COPY --from=builder /app/prisma/seed.ts ./prisma/seed.ts
 
 # Create entrypoint script
 RUN echo '#!/bin/sh' > /app/entrypoint.sh && \
-    echo 'set -e' >> /app/entrypoint.sh && \
-    echo 'echo "Running Prisma migrations..."' >> /app/entrypoint.sh && \
-    echo 'npx prisma db push --skip-generate' >> /app/entrypoint.sh && \
-    echo 'echo "Running seed..."' >> /app/entrypoint.sh && \
-    echo 'npx tsx prisma/seed.ts || true' >> /app/entrypoint.sh && \
+    echo 'echo "Running Prisma migrations in background..."' >> /app/entrypoint.sh && \
+    echo 'npx prisma db push --skip-generate &' >> /app/entrypoint.sh && \
     echo 'echo "Starting application..."' >> /app/entrypoint.sh && \
     echo 'exec node server.js' >> /app/entrypoint.sh && \
     chmod +x /app/entrypoint.sh
