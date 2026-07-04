@@ -34,7 +34,10 @@ export default function ReportesPage() {
   }, [projectId])
 
   const subtotal = elementos.reduce((sum, e) => sum + e.costoTotal, 0)
-  const totalAIU = subtotal * 1.30
+  const gastosGenerales = subtotal * 0.15
+  const utilidad = subtotal * 0.10
+  const impuestos = subtotal * 0.0309
+  const totalAIU = subtotal + gastosGenerales + utilidad + impuestos
 
   const handleExport = useCallback((tipo: string) => {
     setExporting(tipo)
@@ -48,9 +51,9 @@ export default function ReportesPage() {
 
     const resumen = {
       "Subtotal Materiales": subtotal,
-      "Gastos Generales (15%)": subtotal * 0.15,
-      "Utilidad (10%)": subtotal * 0.10,
-      "Impuesto IT (3.09%)": subtotal * 0.0309,
+      "Gastos Generales (15%)": gastosGenerales,
+      "Utilidad (10%)": utilidad,
+      "Impuesto IT (3.09%)": impuestos,
       "Total General": totalAIU,
     }
 

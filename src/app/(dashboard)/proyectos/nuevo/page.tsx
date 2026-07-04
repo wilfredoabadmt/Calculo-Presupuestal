@@ -58,12 +58,27 @@ export default function NuevoProyectoPage() {
     setIsLoading(true)
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      const projectId = "new-" + Date.now()
-      router.push(`/proyectos/${projectId}`)
-    } catch {
-      setServerError("Error al crear el proyecto. Intenta de nuevo.")
+      const res = await fetch("/api/proyectos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nombre: formData.nombre,
+          cliente: formData.cliente,
+          empresa: formData.empresa,
+          fecha: formData.fecha,
+          validez: parseInt(String(formData.validez)) || 30,
+          moneda: formData.moneda,
+          descripcion: formData.descripcion,
+        }),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => null)
+        throw new Error(err?.error || "Error al crear el proyecto")
+      }
+      const proyecto = await res.json()
+      router.push(`/proyectos/${proyecto.id}`)
+    } catch (err: any) {
+      setServerError(err.message || "Error al crear el proyecto. Intenta de nuevo.")
     } finally {
       setIsLoading(false)
     }

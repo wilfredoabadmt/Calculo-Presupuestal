@@ -130,6 +130,10 @@ export default function ConcretoCalculatorPage() {
     if (!results) return
     setIsSaving(true)
     try {
+      const dosRes = await fetch(`/api/dosificaciones?tipo=concreto&ratio=${encodeURIComponent(form.dosificacion)}`)
+      const dosData = await dosRes.json()
+      const dosificacionId = dosData?.id || null
+
       const res = await fetch(`/api/proyectos/${projectId}/elementos`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -140,7 +144,7 @@ export default function ConcretoCalculatorPage() {
           dimA: parseFloat(form.dimA),
           dimB: parseFloat(form.dimB),
           dimH: parseFloat(form.dimH),
-          dosificacionConcretoId: form.dosificacion,
+          dosificacionConcretoId: dosificacionId,
           resistencia: selectedDosificacion.resistencia,
           desperdicio: parseFloat(form.desperdicio),
           materiales: JSON.stringify({

@@ -13,9 +13,11 @@ import { formatCurrency, formatNumber } from "@/lib/utils"
 interface APU {
   id: string
   codigo: string
+  actividad: string
   descripcion: string
   unidad: string
   categoria?: string
+  subcategoria?: string
   precioUnitario: number
   materiales: string | null
   manoObra: string | null
@@ -31,7 +33,7 @@ export default function AnalisisPreciosPage() {
     fetch(`/api/banco-precios`)
       .then(r => r.json())
       .then(data => {
-        setItems(Array.isArray(data) ? data.slice(0, 20) : [])
+        setItems(Array.isArray(data.items) ? data.items.slice(0, 20) : Array.isArray(data) ? data.slice(0, 20) : [])
         setLoading(false)
       })
       .catch(() => setLoading(false))
