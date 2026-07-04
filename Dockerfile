@@ -3,6 +3,20 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Build arguments from Coolify
+ARG NEXTAUTH_SECRET
+ARG NEXTAUTH_URL
+ARG NEXT_PUBLIC_APP_URL
+ARG DATABASE_URL
+
+# Environment variables for build
+ENV NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+ENV NEXTAUTH_URL=${NEXTAUTH_URL}
+ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+ENV DATABASE_URL=${DATABASE_URL}
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+
 # Install OpenSSL for Prisma postinstall
 RUN apk add --no-cache openssl
 
@@ -13,11 +27,11 @@ COPY prisma ./prisma/
 # Install dependencies
 RUN npm ci --network-timeout 300000
 
-# Generate Prisma Client
-RUN npx prisma generate
-
 # Copy source code
 COPY . .
+
+# Generate Prisma Client
+RUN npx prisma generate
 
 # Build application
 RUN npm run build
