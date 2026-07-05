@@ -2,7 +2,8 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 
-export async function PUT(request: Request, { params }: { params: { id: string; cid: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string; cid: string }> }) {
+  const { id, cid } = await params
   const session = await auth()
   if (!session?.user?.id) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 })
@@ -10,7 +11,7 @@ export async function PUT(request: Request, { params }: { params: { id: string; 
 
   const body = await request.json()
   const item = await prisma.cronogramaItem.update({
-    where: { id: params.cid },
+    where: { id: cid },
     data: {
       codigo: body.codigo,
       item: body.item,
@@ -25,13 +26,14 @@ export async function PUT(request: Request, { params }: { params: { id: string; 
   return NextResponse.json(item)
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string; cid: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string; cid: string }> }) {
+  const { id, cid } = await params
   const session = await auth()
   if (!session?.user?.id) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 })
   }
 
-  await prisma.cronogramaItem.delete({ where: { id: params.cid } })
+  await prisma.cronogramaItem.delete({ where: { id: cid } })
 
   return NextResponse.json({ ok: true })
 }

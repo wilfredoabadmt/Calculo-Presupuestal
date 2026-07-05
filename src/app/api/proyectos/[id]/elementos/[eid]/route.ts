@@ -17,38 +17,40 @@ async function verifyElementOwnership(userId: string, projectId: string, element
   return null
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string; eid: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string; eid: string }> }) {
+  const { id, eid } = await params
   const session = await auth()
   if (!session?.user?.id) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 })
   }
 
-  const ownershipError = await verifyElementOwnership(session.user.id, params.id, params.eid)
+  const ownershipError = await verifyElementOwnership(session.user.id, id, eid)
   if (ownershipError) {
     return NextResponse.json({ error: ownershipError.error }, { status: ownershipError.status })
   }
 
   const body = await request.json()
   const elemento = await prisma.elementoPresupuesto.update({
-    where: { id: params.eid },
+    where: { id: eid },
     data: body,
   })
 
   return NextResponse.json(elemento)
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string; eid: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string; eid: string }> }) {
+  const { id, eid } = await params
   const session = await auth()
   if (!session?.user?.id) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 })
   }
 
-  const ownershipError = await verifyElementOwnership(session.user.id, params.id, params.eid)
+  const ownershipError = await verifyElementOwnership(session.user.id, id, eid)
   if (ownershipError) {
     return NextResponse.json({ error: ownershipError.error }, { status: ownershipError.status })
   }
 
-  await prisma.elementoPresupuesto.delete({ where: { id: params.eid } })
+  await prisma.elementoPresupuesto.delete({ where: { id: eid } })
 
   return NextResponse.json({ ok: true })
 }

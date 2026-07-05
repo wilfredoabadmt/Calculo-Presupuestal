@@ -2,21 +2,23 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const session = await auth()
   if (!session?.user?.id) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 })
   }
 
   const items = await prisma.cronogramaItem.findMany({
-    where: { proyectoId: params.id },
+    where: { proyectoId: id },
     orderBy: { fechaInicio: "asc" },
   })
 
   return NextResponse.json(items)
 }
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const session = await auth()
   if (!session?.user?.id) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 })
@@ -31,7 +33,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
   const cronogramaItem = await prisma.cronogramaItem.create({
     data: {
-      proyectoId: params.id,
+      proyectoId: id,
       codigo,
       item,
       fechaInicio: new Date(fechaInicio),

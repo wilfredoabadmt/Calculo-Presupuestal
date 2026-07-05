@@ -12,19 +12,20 @@ async function verifyOwnership(userId: string, projectId: string) {
   return null
 }
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const session = await auth()
   if (!session?.user?.id) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 })
   }
 
-  const ownershipError = await verifyOwnership(session.user.id, params.id)
+  const ownershipError = await verifyOwnership(session.user.id, id)
   if (ownershipError) {
     return NextResponse.json({ error: ownershipError.error }, { status: ownershipError.status })
   }
 
   const proyecto = await prisma.proyecto.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       elementos: true,
       presupuesto: true,
@@ -36,38 +37,40 @@ export async function GET(request: Request, { params }: { params: { id: string }
   return NextResponse.json(proyecto)
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const session = await auth()
   if (!session?.user?.id) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 })
   }
 
-  const ownershipError = await verifyOwnership(session.user.id, params.id)
+  const ownershipError = await verifyOwnership(session.user.id, id)
   if (ownershipError) {
     return NextResponse.json({ error: ownershipError.error }, { status: ownershipError.status })
   }
 
   const body = await request.json()
   const proyecto = await prisma.proyecto.update({
-    where: { id: params.id },
+    where: { id },
     data: body,
   })
 
   return NextResponse.json(proyecto)
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const session = await auth()
   if (!session?.user?.id) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 })
   }
 
-  const ownershipError = await verifyOwnership(session.user.id, params.id)
+  const ownershipError = await verifyOwnership(session.user.id, id)
   if (ownershipError) {
     return NextResponse.json({ error: ownershipError.error }, { status: ownershipError.status })
   }
 
-  await prisma.proyecto.delete({ where: { id: params.id } })
+  await prisma.proyecto.delete({ where: { id } })
 
   return NextResponse.json({ ok: true })
 }

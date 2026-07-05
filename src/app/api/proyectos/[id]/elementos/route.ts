@@ -12,32 +12,34 @@ async function verifyProjectOwnership(userId: string, projectId: string) {
   return null
 }
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const session = await auth()
   if (!session?.user?.id) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 })
   }
 
-  const ownershipError = await verifyProjectOwnership(session.user.id, params.id)
+  const ownershipError = await verifyProjectOwnership(session.user.id, id)
   if (ownershipError) {
     return NextResponse.json({ error: ownershipError.error }, { status: ownershipError.status })
   }
 
   const elementos = await prisma.elementoPresupuesto.findMany({
-    where: { proyectoId: params.id },
+    where: { proyectoId: id },
     orderBy: { createdAt: "asc" },
   })
 
   return NextResponse.json(elementos)
 }
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const session = await auth()
   if (!session?.user?.id) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 })
   }
 
-  const ownershipError = await verifyProjectOwnership(session.user.id, params.id)
+  const ownershipError = await verifyProjectOwnership(session.user.id, id)
   if (ownershipError) {
     return NextResponse.json({ error: ownershipError.error }, { status: ownershipError.status })
   }
@@ -72,7 +74,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
   const elemento = await prisma.elementoPresupuesto.create({
     data: {
-      proyectoId: params.id,
+      proyectoId: id,
       tipoElemento,
       descripcion,
       cantidad: cantidad || 1,
