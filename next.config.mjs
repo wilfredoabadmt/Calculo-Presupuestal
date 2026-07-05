@@ -19,6 +19,7 @@ const nextConfig = {
   experimental: {
     cpus: 1,
   },
+  allowedDevOrigins: ['192.168.0.7', 'localhost:3000']
 };
 
 export default nextConfig;
