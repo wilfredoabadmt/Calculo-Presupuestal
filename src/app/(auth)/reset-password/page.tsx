@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, Lock, Zap, CheckCircle, Mail } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 function ResetPasswordForm() {
   const router = useRouter()
@@ -20,6 +21,8 @@ function ResetPasswordForm() {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [formError, setFormError] = useState("")
+  const [passwordError, setPasswordError] = useState("")
+  const [confirmPasswordError, setConfirmPasswordError] = useState("")
   const [success, setSuccess] = useState(false)
   const [tokenValid, setTokenValid] = useState<null | boolean>(null)
 
@@ -32,17 +35,37 @@ function ResetPasswordForm() {
     }
   }, [token, email])
 
+  const validate = () => {
+    let isValid = true
+
+    if (!password) {
+      setPasswordError("La contraseña es requerida")
+      isValid = false
+    } else if (password.length < 6) {
+      setPasswordError("La contraseña debe tener al menos 6 caracteres")
+      isValid = false
+    } else {
+      setPasswordError("")
+    }
+
+    if (!confirmPassword) {
+      setConfirmPasswordError("Confirma tu contraseña")
+      isValid = false
+    } else if (password !== confirmPassword) {
+      setConfirmPasswordError("Las contraseñas no coinciden")
+      isValid = false
+    } else {
+      setConfirmPasswordError("")
+    }
+
+    return isValid
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setFormError("")
 
-    if (password !== confirmPassword) {
-      setFormError("Las contraseñas no coinciden")
-      return
-    }
-
-    if (password.length < 8) {
-      setFormError("La contraseña debe tener al menos 8 caracteres")
+    if (!validate()) {
       return
     }
 
@@ -143,7 +166,7 @@ function ResetPasswordForm() {
           </div>
           <CardTitle className="text-2xl">Nueva Contraseña</CardTitle>
           <CardDescription>
-            Ingresa tu nueva contraseña (mínimo 8 caracteres)
+            Ingresa tu nueva contraseña (mínimo 6 caracteres)
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -164,12 +187,13 @@ function ResetPasswordForm() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10"
+                  className={cn("pl-10", passwordError && "border-destructive")}
                   required
                   disabled={isLoading}
-                  minLength={8}
+                  minLength={6}
                 />
               </div>
+              {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
             </div>
 
             <div className="space-y-2">
@@ -182,12 +206,13 @@ function ResetPasswordForm() {
                   placeholder="••••••••"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="pl-10"
+                  className={cn("pl-10", confirmPasswordError && "border-destructive")}
                   required
                   disabled={isLoading}
-                  minLength={8}
+                  minLength={6}
                 />
               </div>
+              {confirmPasswordError && <p className="text-sm text-destructive">{confirmPasswordError}</p>}
             </div>
 
             <Button type="submit" className="w-full font-bold" disabled={isLoading} size="lg">

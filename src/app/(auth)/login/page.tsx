@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, Mail, Lock, Zap, CheckCircle } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 function LoginForm() {
   const router = useRouter()
@@ -22,11 +23,41 @@ function LoginForm() {
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [formError, setFormError] = useState("")
+  const [emailError, setEmailError] = useState("")
+  const [passwordError, setPasswordError] = useState("")
+
+  const validate = () => {
+    let isValid = true
+
+    if (!email) {
+      setEmailError("El email es requerido")
+      isValid = false
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setEmailError("Email inválido")
+      isValid = false
+    } else {
+      setEmailError("")
+    }
+
+    if (!password) {
+      setPasswordError("La contraseña es requerida")
+      isValid = false
+    } else {
+      setPasswordError("")
+    }
+
+    return isValid
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
     setFormError("")
+
+    if (!validate()) {
+      return
+    }
+
+    setIsLoading(true)
 
     try {
       const result = await signIn("credentials", {
@@ -35,9 +66,9 @@ function LoginForm() {
         redirect: false,
       })
 
-        if (result?.error) {
-          console.error("NextAuth Error:", result.error)
-          setFormError("Credenciales inválidas. Verifica tu email y contraseña.")
+      if (result?.error) {
+        console.error("NextAuth Error:", result.error)
+        setFormError("Credenciales inválidas. Verifica tu email y contraseña.")
       } else {
         router.push(callbackUrl)
         router.refresh()
@@ -94,11 +125,12 @@ function LoginForm() {
                   placeholder="tu@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
+                  className={cn("pl-10", emailError && "border-destructive")}
                   required
                   disabled={isLoading}
                 />
               </div>
+              {emailError && <p className="text-sm text-destructive">{emailError}</p>}
             </div>
 
             <div className="space-y-2">
@@ -116,11 +148,12 @@ function LoginForm() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10"
+                  className={cn("pl-10", passwordError && "border-destructive")}
                   required
                   disabled={isLoading}
                 />
               </div>
+              {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
             </div>
 
             <Button type="submit" className="w-full font-bold" disabled={isLoading} size="lg">
@@ -142,14 +175,14 @@ function LoginForm() {
               Regístrate gratis
             </Link>
           </p>
-            <div className="text-xs text-muted-foreground text-center bg-muted/50 px-4 py-2 rounded-lg">
-              <strong>Demo:</strong> demo@calculo.com / demo123
-            </div>
-            <div className="mt-2 text-center">
-              <Link href="/reset-password" prefetch={false} className="text-xs text-muted-foreground hover:text-primary transition-colors">
-                ¿Olvidaste tu contraseña? Solicitar restablecimiento
-              </Link>
-            </div>
+          <div className="text-xs text-muted-foreground text-center bg-muted/50 px-4 py-2 rounded-lg">
+            <strong>Demo:</strong> demo@calculo.com / demo123
+          </div>
+          <div className="mt-2 text-center">
+            <Link href="/forgot-password" prefetch={false} className="text-xs text-muted-foreground hover:text-primary transition-colors">
+              ¿Olvidaste tu contraseña? Solicitar restablecimiento
+            </Link>
+          </div>
         </CardFooter>
       </Card>
     </div>

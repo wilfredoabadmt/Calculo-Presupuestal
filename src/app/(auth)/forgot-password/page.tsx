@@ -9,18 +9,37 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, Mail, Zap, CheckCircle } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 function ForgotPasswordForm() {
   const router = useRouter()
   const [email, setEmail] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [formError, setFormError] = useState("")
+  const [clientError, setClientError] = useState("")
   const [success, setSuccess] = useState(false)
+
+  const validate = () => {
+    if (!email) {
+      setClientError("El email es requerido")
+      return false
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setClientError("Email inválido")
+      return false
+    }
+    setClientError("")
+    return true
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
     setFormError("")
+
+    if (!validate()) {
+      return
+    }
+
+    setIsLoading(true)
 
     try {
       const res = await fetch("/api/auth/forgot-password", {
@@ -102,11 +121,12 @@ function ForgotPasswordForm() {
                   placeholder="tu@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
+                  className={cn("pl-10", clientError && "border-destructive")}
                   required
                   disabled={isLoading}
                 />
               </div>
+              {clientError && <p className="text-sm text-destructive">{clientError}</p>}
             </div>
 
             <Button type="submit" className="w-full font-bold" disabled={isLoading} size="lg">
