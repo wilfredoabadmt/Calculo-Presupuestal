@@ -1,26 +1,4 @@
-# ============================================
-# Stage 1: Dependencies
-# ============================================
-FROM node:20-alpine AS deps
-
-WORKDIR /app
-
-# Install OpenSSL for Prisma
-RUN apk add --no-cache openssl
-
-# Copy package files FIRST for layer caching
-COPY package*.json ./
-COPY prisma ./prisma/
-
-# Install dependencies (cached unless package.json changes)
-RUN npm ci --ignore-scripts --network-timeout 120000
-
-# Generate Prisma client
-RUN npx prisma generate
-
-# ============================================
-# Stage 2: Build
-# ============================================
+# Build stage
 FROM node:20-alpine AS builder
 
 WORKDIR /app
@@ -39,21 +17,42 @@ ENV DATABASE_URL=${DATABASE_URL}
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_OPTIONS="--max-old-space-size=2048"
 
-# Copy deps from previous stage (fully cached)
-COPY --from=deps /app/node_modules ./node_modules
+# Install OpenSSL for Prisma
+RUN apk add --no-cache openssl
+
+# Copy package files FIRST for layer caching
+COPY package*.json ./
+COPY prisma ./prisma/
+
+# Install dependencies (cached unless package.json changes)
+RUN npm ci --ignore-scripts --network-timeout 120000
 
 # Copy source code
 COPY . .
 
-# Copy generated prisma client
-COPY --from=deps /app/node_modules/.prisma ./node_modules/.prisma
+# Generate Prisma client
+RUN npx prisma generate
 
 # Build application
 RUN npm run build
 
-# ============================================
-# Stage 3: Production runner
-# ============================================
+# Prepare runtime dependencies (avoid '@' in COPY paths for Coolify parser)
+RUN mkdir -p /app/rt-deps && \
+  cp -r /app/node_modules/.prisma /app/rt-deps/dot-prisma && \
+  cp -r /app/node_modules/@prisma /app/rt-deps/at-prisma && \
+  cp -r /app/node_modules/prisma /app/rt-deps/prisma && \
+  cp -r /app/node_modules/.bin /app/rt-deps/bin && \
+  cp -r /app/node_modules/tsx /app/rt-deps/tsx && \
+  cp -r /app/node_modules/esbuild /app/rt-deps/esbuild && \
+  cp -r /app/node_modules/@esbuild /app/rt-deps/at-esbuild && \
+  cp -r /app/node_modules/typescript /app/rt-deps/typescript && \
+  cp -r /app/node_modules/bcryptjs /app/rt-deps/bcryptjs && \
+  cp -r /app/node_modules/@types /app/rt-deps/at-types && \
+  cp -r /app/node_modules/zod /app/rt-deps/zod && \
+  cp -r /app/node_modules/get-tsconfig /app/rt-deps/get-tsconfig && \
+  cp -r /app/node_modules/resolve-pkg-maps /app/rt-deps/resolve-pkg-maps
+
+# Production stage
 FROM node:20-alpine AS runner
 
 WORKDIR /app
@@ -73,21 +72,25 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # Copy prisma files
 COPY --from=builder /app/prisma ./prisma
 
-# Copy only the runtime dependencies needed
-RUN mkdir -p /app/node_modules
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.bin ./node_modules/.bin
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/tsx ./node_modules/tsx
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/esbuild ./node_modules/esbuild
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@esbuild ./node_modules/@esbuild
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/typescript ./node_modules/typescript
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/bcryptjs ./node_modules/bcryptjs
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@types ./node_modules/@types
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/zod ./node_modules/zod
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/get-tsconfig ./node_modules/get-tsconfig
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/resolve-pkg-maps ./node_modules/resolve-pkg-maps
+# Copy prepared runtime dependencies
+COPY --from=builder --chown=nextjs:nodejs /app/rt-deps /app/rt-deps
+
+# Restore runtime dependencies to node_modules
+RUN mkdir -p /app/node_modules && \
+  mv /app/rt-deps/dot-prisma /app/node_modules/.prisma && \
+  mv /app/rt-deps/at-prisma /app/node_modules/@prisma && \
+  mv /app/rt-deps/prisma /app/node_modules/prisma && \
+  mv /app/rt-deps/bin /app/node_modules/.bin && \
+  mv /app/rt-deps/tsx /app/node_modules/tsx && \
+  mv /app/rt-deps/esbuild /app/node_modules/esbuild && \
+  mv /app/rt-deps/at-esbuild /app/node_modules/@esbuild && \
+  mv /app/rt-deps/typescript /app/node_modules/typescript && \
+  mv /app/rt-deps/bcryptjs /app/node_modules/bcryptjs && \
+  mv /app/rt-deps/at-types /app/node_modules/@types && \
+  mv /app/rt-deps/zod /app/node_modules/zod && \
+  mv /app/rt-deps/get-tsconfig /app/node_modules/get-tsconfig && \
+  mv /app/rt-deps/resolve-pkg-maps /app/node_modules/resolve-pkg-maps && \
+  rm -rf /app/rt-deps
 
 # Copy entrypoint
 COPY --from=builder /app/entrypoint.sh /app/entrypoint.sh
