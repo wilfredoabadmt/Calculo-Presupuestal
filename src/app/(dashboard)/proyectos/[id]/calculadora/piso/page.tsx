@@ -1,15 +1,15 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { InputWithHelp } from "@/components/ui/input-with-help"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ArrowLeft, Calculator, Save, Box, CheckCircle, Loader2 } from "lucide-react"
-import { formatNumber } from "@/lib/utils"
+import { formatNumber, cn } from "@/lib/utils"
 
 const tiposCeramica = [
   { nombre: "Cerámica 30x30", areaM2: 0.09, unidadesCaja: 11, precioCaja: 45 },
@@ -25,14 +25,47 @@ export default function PisoCalculatorPage() {
   const projectId = params.id as string
 
   const [form, setForm] = useState({
-    ancho: "4.00",
-    largo: "5.00",
+    ancho: "",
+    largo: "",
     tipoCeramica: "Cerámica 60x60",
     despCeramica: "5",
     despAdhesivo: "5",
     despBoquilla: "5",
-    cantidad: "1",
+    cantidad: "",
   })
+
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
+
+  const validateAllFields = () => {
+    const errors: Record<string, string> = {}
+
+    if (!form.ancho || parseFloat(form.ancho) <= 0) {
+      errors.ancho = "Debe ser un número mayor a 0"
+    }
+    if (!form.largo || parseFloat(form.largo) <= 0) {
+      errors.largo = "Debe ser un número mayor a 0"
+    }
+    if (!form.cantidad || parseInt(form.cantidad) <= 0) {
+      errors.cantidad = "Debe ser mayor a 0"
+    }
+
+    setFormErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  const getFieldError = (field: string) => formErrors[field]
+
+  const getFieldSuccess = (field: string) => {
+    const value = form[field as keyof typeof form]
+    if (!value) return false
+    if (field === "ancho" || field === "largo") {
+      return parseFloat(value) > 0
+    }
+    if (field === "cantidad") {
+      return parseInt(value) > 0
+    }
+    return true
+  }
 
   const [results, setResults] = useState<{
     area: number
@@ -49,11 +82,48 @@ export default function PisoCalculatorPage() {
 
   const selectedCeramica = tiposCeramica.find(t => t.nombre === form.tipoCeramica) || tiposCeramica[2]
 
+  const validateAllFields = () => {
+    const errors: Record<string, string> = {}
+
+    if (!form.ancho || parseFloat(form.ancho) <= 0) {
+      errors.ancho = "Debe ser un número mayor a 0"
+    }
+    if (!form.largo || parseFloat(form.largo) <= 0) {
+      errors.largo = "Debe ser un número mayor a 0"
+    }
+    if (!form.cantidad || parseInt(form.cantidad) <= 0) {
+      errors.cantidad = "Debe ser mayor a 0"
+    }
+
+    setFormErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  const getFieldError = (field: string) => formErrors[field]
+
+  const getFieldSuccess = (field: string) => {
+    const value = form[field as keyof typeof form]
+    if (!value) return false
+    if (field === "ancho" || field === "largo") {
+      return parseFloat(value) > 0
+    }
+    if (field === "cantidad") {
+      return parseInt(value) > 0
+    }
+    return true
+  }
+
   const calculate = () => {
+    if (!validateAllFields()) {
+      return
+    }
+
     const ancho = parseFloat(form.ancho)
     const largo = parseFloat(form.largo)
     const cantidad = parseInt(form.cantidad)
     if (!ancho || !largo || !cantidad) return
+
+    const area = ancho * largo * cantidad
 
     const area = ancho * largo * cantidad
     const piezas = Math.ceil(area / selectedCeramica.areaM2 * (1 + parseFloat(form.despCeramica) / 100))
@@ -145,42 +215,94 @@ export default function PisoCalculatorPage() {
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2"><Label>Ancho (m)</Label><Input type="number" step="0.01" value={form.ancho} onChange={e => setForm({...form, ancho: e.target.value})} /></div>
-            <div className="space-y-2"><Label>Largo (m)</Label><Input type="number" step="0.01" value={form.largo} onChange={e => setForm({...form, largo: e.target.value})} /></div>
+            <InputWithHelp
+              label="Ancho (m)"
+              helpText="Longitud horizontal del área a pavimentar"
+              example="4.00 para área de 4 metros de ancho"
+              unit="m"
+              value={form.ancho}
+              onChange={(e) => setForm({...form, ancho: e.target.value})}
+              placeholder="4.00"
+              error={getFieldError("ancho")}
+              success={getFieldSuccess("ancho")}
+              min="0.01"
+              step="0.01"
+            />
+            <InputWithHelp
+              label="Largo (m)"
+              helpText="Longitud vertical del área a pavimentar"
+              example="5.00 para área de 5 metros de largo"
+              unit="m"
+              value={form.largo}
+              onChange={(e) => setForm({...form, largo: e.target.value})}
+              placeholder="5.00"
+              error={getFieldError("largo")}
+              success={getFieldSuccess("largo")}
+              min="0.01"
+              step="0.01"
+            />
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2"><Label>Tipo de Cerámica</Label>
+            <div className="space-y-2">
+              <Label>Tipo de Cerámica</Label>
               <Select value={form.tipoCeramica} onValueChange={v => setForm({...form, tipoCeramica: v})}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{tiposCeramica.map(t => <SelectItem key={t.nombre} value={t.nombre}>{t.nombre} ({t.unidadesCaja} pzas/caja)</SelectItem>)}</SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground mt-1">Selecione el tipo de cerámica para cálculo de cantidad y costo</p>
             </div>
-            <div className="space-y-2"><Label>Cantidad</Label><Input type="number" min="1" value={form.cantidad} onChange={e => setForm({...form, cantidad: e.target.value})} /></div>
+            <InputWithHelp
+              label="Cantidad"
+              helpText="Número de áreas idénticas a pavimentar"
+              example="1 para un área individual, 3 para tres áreas"
+              unit="unidades"
+              value={form.cantidad}
+              onChange={(e) => setForm({...form, cantidad: e.target.value})}
+              placeholder="1"
+              error={getFieldError("cantidad")}
+              success={getFieldSuccess("cantidad")}
+              min="1"
+            />
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="space-y-2"><Label>Desp. Cerámica (%)</Label>
-              <Select value={form.despCeramica} onValueChange={v => setForm({...form, despCeramica: v})}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].map(d => <SelectItem key={d} value={d.toString()}>{d}%</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2"><Label>Desp. Adhesivo (%)</Label>
-              <Select value={form.despAdhesivo} onValueChange={v => setForm({...form, despAdhesivo: v})}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].map(d => <SelectItem key={d} value={d.toString()}>{d}%</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2"><Label>Desp. Boquilla (%)</Label>
-              <Select value={form.despBoquilla} onValueChange={v => setForm({...form, despBoquilla: v})}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].map(d => <SelectItem key={d} value={d.toString()}>{d}%</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
+            <InputWithHelp
+              label="Desp. Cerámica (%)"
+              helpText="Material extra por pérdidas, roturas, errores de corte en cerámica"
+              example="5% es estándar en pavimentos"
+              unit="%"
+              value={form.despCeramica}
+              onChange={(e) => setForm({...form, despCeramica: e.target.value})}
+              min="0"
+              max="100"
+              success={parseFloat(form.despCeramica) >= 0 && parseFloat(form.despCeramica) <= 100}
+            />
+            <InputWithHelp
+              label="Desp. Adhesivo (%)"
+              helpText="Extra por pérdidas en adhesivo de pegado"
+              example="5% para aplicación típica de adhesivo"
+              unit="%"
+              value={form.despAdhesivo}
+              onChange={(e) => setForm({...form, despAdhesivo: e.target.value})}
+              min="0"
+              max="100"
+              success={parseFloat(form.despAdhesivo) >= 0 && parseFloat(form.despAdhesivo) <= 100}
+            />
+            <InputWithHelp
+              label="Desp. Boquilla (%)"
+              helpText="Extra por pérdidas en mortero de juntas para baldosa"
+              example="5% para juntas estándar de baldosa"
+              unit="%"
+              value={form.despBoquilla}
+              onChange={(e) => setForm({...form, despBoquilla: e.target.value})}
+              min="0"
+              max="100"
+              success={parseFloat(form.despBoquilla) >= 0 && parseFloat(form.despBoquilla) <= 100}
+            />
           </div>
 
-          <Button onClick={calculate} className="w-full" size="lg"><Calculator className="mr-2 h-4 w-4" /> Calcular</Button>
+          <Button onClick={calculate} className="w-full" size="lg" disabled={!validateAllFields()}><Calculator className="mr-2 h-4 w-4" /> Calcular Materiales</Button>
         </CardContent>
       </Card>
 

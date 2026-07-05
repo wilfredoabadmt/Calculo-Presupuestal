@@ -278,76 +278,207 @@ export default function VigaCalculatorPage() {
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="space-y-2"><Label>Largo (m)</Label><Input type="number" step="0.01" value={form.largo} onChange={e => setForm({...form, largo: e.target.value})} /></div>
-            <div className="space-y-2"><Label>Alto a (m)</Label><Input type="number" step="0.01" value={form.dimA} onChange={e => setForm({...form, dimA: e.target.value})} /></div>
-            <div className="space-y-2"><Label>Ancho b (m)</Label><Input type="number" step="0.01" value={form.dimB} onChange={e => setForm({...form, dimB: e.target.value})} /></div>
+            <InputWithHelp
+              label="Largo (m)"
+              helpText="Longitud longitudinal de la viga"
+              example="4.00 para viga de 4 metros"
+              unit="m"
+              value={form.largo}
+              onChange={(e) => setForm({...form, largo: e.target.value})}
+              placeholder="4.00"
+              error={getFieldError("largo")}
+              success={getFieldSuccess("largo")}
+              min="0.01"
+              step="0.01"
+            />
+            <InputWithHelp
+              label="Alto a (m)"
+              helpText="Dimensión vertical de la viga"
+              example="0.40 para viga de 40cm"
+              unit="m"
+              value={form.dimA}
+              onChange={(e) => setForm({...form, dimA: e.target.value})}
+              placeholder="0.40"
+              error={getFieldError("dimA")}
+              success={getFieldSuccess("dimA")}
+              min="0.01"
+              step="0.01"
+            />
+            <InputWithHelp
+              label="Ancho b (m)"
+              helpText="Dimensión horizontal de la viga"
+              example="0.25 para viga de 25cm"
+              unit="m"
+              value={form.dimB}
+              onChange={(e) => setForm({...form, dimB: e.target.value})}
+              placeholder="0.25"
+              error={getFieldError("dimB")}
+              success={getFieldSuccess("dimB")}
+              min="0.01"
+              step="0.01"
+            />
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="space-y-2"><Label>Dosificación</Label>
+            <div className="space-y-2">
+              <Label>Dosificación</Label>
               <Select value={form.dosificacion} onValueChange={v => setForm({...form, dosificacion: v})}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{dosificaciones.map(d => <SelectItem key={d.ratio} value={d.ratio}>{d.ratio}</SelectItem>)}</SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground mt-1">Selecione la dosificación de concreto para resistencia y proporciones</p>
             </div>
-            <div className="space-y-2"><Label>Desp. Concreto (%)</Label>
-              <Select value={form.desperdicioConcreto} onValueChange={v => setForm({...form, desperdicioConcreto: v})}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].map(d => <SelectItem key={d} value={d.toString()}>{d}%</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2"><Label>Cantidad</Label><Input type="number" min="1" value={form.cantidad} onChange={e => setForm({...form, cantidad: e.target.value})} /></div>
+            <InputWithHelp
+              label="Desp. Concreto (%)"
+              helpText="Material extra para pérdidas, roturas"
+              example="5% es estándar en obras"
+              unit="%"
+              value={form.desperdicioConcreto}
+              onChange={(e) => setForm({...form, desperdicioConcreto: e.target.value})}
+              placeholder="5"
+              min="0"
+              max="100"
+              success={parseFloat(form.desperdicioConcreto) >= 0 && parseFloat(form.desperdicioConcreto) <= 100}
+            />
+            <InputWithHelp
+              label="Cantidad"
+              helpText="Número de vigas idénticas a calcular"
+              example="1 para una sola viga, 3 para tres vigas"
+              unit="unidades"
+              value={form.cantidad}
+              onChange={(e) => setForm({...form, cantidad: e.target.value})}
+              placeholder="1"
+              error={getFieldError("cantidad")}
+              success={getFieldSuccess("cantidad")}
+              min="1"
+            />
           </div>
 
           <div className="border rounded-lg p-4 space-y-4">
             <h3 className="font-semibold flex items-center gap-2"><Weight className="h-4 w-4" /> Acero Positivo (+)</h3>
             <div className="grid gap-4 md:grid-cols-3">
-              <div className="space-y-2"><Label>Ø</Label>
+              <div className="space-y-2">
+                <Label>Ø Varillas</Label>
                 <Select value={form.diametroPos} onValueChange={v => setForm({...form, diametroPos: v})}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>{diametros.map(d => <SelectItem key={d.value} value={d.value}>Ø{d.value}</SelectItem>)}</SelectContent>
                 </Select>
+                <p className="text-xs text-muted-foreground mt-1">Diámetro de las varillas de refuerzo positivo (superior)</p>
               </div>
-              <div className="space-y-2"><Label>Varillas</Label><Input type="number" min="1" value={form.varillasPos} onChange={e => setForm({...form, varillasPos: e.target.value})} /></div>
-              <div className="space-y-2"><Label>Long. (m)</Label><Input type="number" step="0.01" value={form.longVarillasPos} onChange={e => setForm({...form, longVarillasPos: e.target.value})} /></div>
+              <InputWithHelp
+                label="Varillas"
+                helpText="Número de varillas de acero longitudinal positivo"
+                example="3 para tres varillas"
+                unit="uds"
+                value={form.varillasPos}
+                onChange={(e) => setForm({...form, varillasPos: e.target.value})}
+                placeholder="3"
+                error={getFieldError("varillasPos")}
+                success={getFieldSuccess("varillasPos")}
+                min="1"
+              />
+              <InputWithHelp
+                label="Long. (m)"
+                helpText="Longitud de cada varilla de acero"
+                example="4.50 para varillas de 4.5 metros"
+                unit="m"
+                value={form.longVarillasPos}
+                onChange={(e) => setForm({...form, longVarillasPos: e.target.value})}
+                placeholder="4.50"
+                error={getFieldError("longVarillasPos")}
+                success={getFieldSuccess("longVarillasPos")}
+                min="0.01"
+                step="0.01"
+              />
             </div>
           </div>
 
           <div className="border rounded-lg p-4 space-y-4">
             <h3 className="font-semibold flex items-center gap-2"><Weight className="h-4 w-4" /> Acero Negativo (-)</h3>
             <div className="grid gap-4 md:grid-cols-3">
-              <div className="space-y-2"><Label>Ø</Label>
+              <div className="space-y-2">
+                <Label>Ø Varillas</Label>
                 <Select value={form.diametroNeg} onValueChange={v => setForm({...form, diametroNeg: v})}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>{diametros.map(d => <SelectItem key={d.value} value={d.value}>Ø{d.value}</SelectItem>)}</SelectContent>
                 </Select>
+                <p className="text-xs text-muted-foreground mt-1">Diámetro de las varillas de refuerzo negativo (inferior)</p>
               </div>
-              <div className="space-y-2"><Label>Varillas</Label><Input type="number" min="1" value={form.varillasNeg} onChange={e => setForm({...form, varillasNeg: e.target.value})} /></div>
-              <div className="space-y-2"><Label>Long. (m)</Label><Input type="number" step="0.01" value={form.longVarillasNeg} onChange={e => setForm({...form, longVarillasNeg: e.target.value})} /></div>
+              <InputWithHelp
+                label="Varillas"
+                helpText="Número de varillas de acero longitudinal negativo"
+                example="2 para dos varillas"
+                unit="uds"
+                value={form.varillasNeg}
+                onChange={(e) => setForm({...form, varillasNeg: e.target.value})}
+                placeholder="2"
+                error={getFieldError("varillasNeg")}
+                success={getFieldSuccess("varillasNeg")}
+                min="1"
+              />
+              <InputWithHelp
+                label="Long. (m)"
+                helpText="Longitud de cada varilla de acero negativo"
+                example="4.50 para varillas de 4.5 metros"
+                unit="m"
+                value={form.longVarillasNeg}
+                onChange={(e) => setForm({...form, longVarillasNeg: e.target.value})}
+                placeholder="4.50"
+                error={getFieldError("longVarillasNeg")}
+                success={getFieldSuccess("longVarillasNeg")}
+                min="0.01"
+                step="0.01"
+              />
             </div>
           </div>
 
           <div className="border rounded-lg p-4 space-y-4">
             <h3 className="font-semibold">Estribos</h3>
             <div className="grid gap-4 md:grid-cols-3">
-              <div className="space-y-2"><Label>Ø</Label>
+              <div className="space-y-2">
+                <Label>Ø Estribo</Label>
                 <Select value={form.diametroEstribo} onValueChange={v => setForm({...form, diametroEstribo: v})}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>{diametros.filter(d => ["3/8","1/2"].includes(d.value)).map(d => <SelectItem key={d.value} value={d.value}>Ø{d.value}</SelectItem>)}</SelectContent>
                 </Select>
+                <p className="text-xs text-muted-foreground mt-1">Diámetro de los estribos de confinamiento</p>
               </div>
-              <div className="space-y-2"><Label>Separación Confinada (cm)</Label><Input type="number" value={form.separacionConfinada} onChange={e => setForm({...form, separacionConfinada: e.target.value})} /></div>
-              <div className="space-y-2"><Label>Separación Central (cm)</Label><Input type="number" value={form.separacionCentral} onChange={e => setForm({...form, separacionCentral: e.target.value})} /></div>
+              <InputWithHelp
+                label="Separación Confinada (cm)"
+                helpText="Distancia entre estribos en zona confinada (inicio a 0.15m)"
+                example="10cm para separación típica"
+                unit="cm"
+                value={form.separacionConfinada}
+                onChange={(e) => setForm({...form, separacionConfinada: e.target.value})}
+                min="1"
+                success={parseFloat(form.separacionConfinada) > 0}
+              />
+              <InputWithHelp
+                label="Separación Central (cm)"
+                helpText="Distancia entre estribos en zona central (0.15m a 0.7m)"
+                example="20cm para zona central"
+                unit="cm"
+                value={form.separacionCentral}
+                onChange={(e) => setForm({...form, separacionCentral: e.target.value})}
+                min="1"
+                success={parseFloat(form.separacionCentral) > 0}
+              />
             </div>
-            <div className="space-y-2"><Label>Desp. Acero (%)</Label>
-              <Select value={form.despAcero} onValueChange={v => setForm({...form, despAcero: v})}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].map(d => <SelectItem key={d} value={d.toString()}>{d}%</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
+            <InputWithHelp
+              label="Desp. Acero (%)"
+              helpText="Extra por pérdidas, recubrimiento, errores"
+              example="5% es estándar en estructuras"
+              unit="%"
+              value={form.despAcero}
+              onChange={(e) => setForm({...form, despAcero: e.target.value})}
+              placeholder="5"
+              min="0"
+              max="100"
+              success={parseFloat(form.despAcero) >= 0 && parseFloat(form.despAcero) <= 100}
+            />
           </div>
 
-          <Button onClick={calculate} className="w-full" size="lg"><Calculator className="mr-2 h-4 w-4" /> Calcular</Button>
+          <Button onClick={calculate} className="w-full" size="lg" disabled={!validateAllFields()}><Calculator className="mr-2 h-4 w-4" /> Calcular Materiales</Button>
         </CardContent>
       </Card>
 
