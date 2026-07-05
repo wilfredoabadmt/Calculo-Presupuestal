@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { InputWithHelp } from "@/components/ui/input-with-help"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { 
@@ -67,6 +67,36 @@ export default function ParedCalculatorPage() {
     cantidad: "1",
     redondeo: "entero",
   })
+
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
+
+  const validateAllFields = () => {
+    const errors: Record<string, string> = {}
+
+    if (!form.area || parseFloat(form.area) <= 0) {
+      errors.area = "Debe ser un número mayor a 0"
+    }
+    if (!form.cantidad || parseInt(form.cantidad) <= 0) {
+      errors.cantidad = "Debe ser mayor a 0"
+    }
+
+    setFormErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  const getFieldError = (field: string) => formErrors[field]
+
+  const getFieldSuccess = (field: string) => {
+    const value = form[field as keyof typeof form]
+    if (!value) return false
+    if (field === "area") {
+      return parseFloat(value) > 0
+    }
+    if (field === "cantidad") {
+      return parseInt(value) > 0
+    }
+    return true
+  }
 
   const [results, setResults] = useState<any>(null)
   const [isCalculating, setIsCalculating] = useState(false)
@@ -216,14 +246,31 @@ export default function ParedCalculatorPage() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="area">Área del Muro (m²)</Label>
-                <Input id="area" value={form.area} onChange={e => setForm({...form, area: e.target.value})} placeholder="10.00" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="cantidad">Cantidad de Muros</Label>
-                <Input id="cantidad" type="number" value={form.cantidad} onChange={e => setForm({...form, cantidad: e.target.value})} placeholder="1" />
-              </div>
+              <InputWithHelp
+                label="Área del Muro (m²)"
+                helpText="Área superficial del muro (ancho × alto)"
+                example="10.00 para muro 3m × 3.33m"
+                unit="m²"
+                value={form.area}
+                onChange={(e) => setForm({...form, area: e.target.value})}
+                placeholder="10.00"
+                error={getFieldError("area")}
+                success={getFieldSuccess("area")}
+                min="0.01"
+                step="0.01"
+              />
+              <InputWithHelp
+                label="Cantidad de Muros"
+                helpText="Número de paneles idénticos a construir"
+                example="1 para muro individual"
+                unit="unidades"
+                value={form.cantidad}
+                onChange={(e) => setForm({...form, cantidad: e.target.value})}
+                placeholder="1"
+                error={getFieldError("cantidad")}
+                success={getFieldSuccess("cantidad")}
+                min="1"
+              />
             </div>
 
             <div className="space-y-2">
@@ -257,10 +304,17 @@ export default function ParedCalculatorPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label>Espesor Repello (cm)</Label>
-                <Input value={form.espesorRepello} onChange={e => setForm({...form, espesorRepello: e.target.value})} placeholder="1.5" />
-              </div>
+              <InputWithHelp
+                label="Espesor Repello (cm)"
+                helpText="Alto del repello (2a cara del muro)"
+                example="1.5cm estándar para repello"
+                unit="cm"
+                value={form.espesorRepello}
+                onChange={(e) => setForm({...form, espesorRepello: e.target.value})}
+                placeholder="1.5"
+                min="0.1"
+                step="0.1"
+              />
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
@@ -273,21 +327,42 @@ export default function ParedCalculatorPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label>Espesor Afinado (mm)</Label>
-                <Input value={form.espesorAfinado} onChange={e => setForm({...form, espesorAfinado: e.target.value})} placeholder="5" />
-              </div>
+              <InputWithHelp
+                label="Espesor Afinado (mm)"
+                helpText="Alto del acabado de afinado (2a cara del muro)"
+                example="5mm fino, 19mm grosor"
+                unit="mm"
+                value={form.espesorAfinado}
+                onChange={(e) => setForm({...form, espesorAfinado: e.target.value})}
+                placeholder="5"
+                min="1"
+                step="1"
+              />
             </div>
 
             <div className="grid gap-4 md:grid-cols-4">
-              <div className="space-y-2">
-                <Label>Desperdicio Bloques (%)</Label>
-                <Input type="number" value={form.desperdicioBloques} onChange={e => setForm({...form, desperdicioBloques: e.target.value})} placeholder="5" />
-              </div>
-              <div className="space-y-2">
-                <Label>Desperdicio Acabados (%)</Label>
-                <Input type="number" value={form.desperdicioAcabados} onChange={e => setForm({...form, desperdicioAcabados: e.target.value})} placeholder="10" />
-              </div>
+              <InputWithHelp
+                label="Desperdicio Bloques (%)"
+                helpText="Extra por pérdidas, roturas, errores de corte en bloques"
+                example="5% estándar en albañilería"
+                unit="%"
+                value={form.desperdicioBloques}
+                onChange={(e) => setForm({...form, desperdicioBloques: e.target.value})}
+                placeholder="5"
+                min="0"
+                max="100"
+              />
+              <InputWithHelp
+                label="Desperdicio Acabados (%)"
+                helpText="Extra por pérdidas en pega, repello y afinado"
+                example="10% para todos los acabados"
+                unit="%"
+                value={form.desperdicioAcabados}
+                onChange={(e) => setForm({...form, desperdicioAcabados: e.target.value})}
+                placeholder="10"
+                min="0"
+                max="100"
+              />
               <div className="space-y-2">
                 <Label>Incluir Acabados</Label>
                 <Select value={form.incluirAcabados} onValueChange={v => setForm({...form, incluirAcabados: v})}>
@@ -310,7 +385,7 @@ export default function ParedCalculatorPage() {
               </div>
             </div>
 
-            <Button className="w-full" onClick={calculate} disabled={isCalculating} size="lg">
+            <Button className="w-full" onClick={calculate} disabled={isCalculating || !validateAllFields()} size="lg">
               {isCalculating ? "Calculando..." : "Calcular Materiales"}
             </Button>
           </CardContent>

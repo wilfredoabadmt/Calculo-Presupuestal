@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { InputWithHelp } from "@/components/ui/input-with-help"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { 
@@ -47,14 +47,70 @@ export default function ConcretoCalculatorPage() {
 
   const [form, setForm] = useState({
     descripcion: "",
-    dimA: "0.30",
-    dimB: "0.40",
-    dimH: "3.00",
+    dimA: "",
+    dimB: "",
+    dimH: "",
     dosificacion: "1:3:4",
-    cantidad: "1",
+    cantidad: "",
     desperdicio: "5",
     redondeo: "entero",
   })
+
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
+
+  const validateForm = () => {
+    const errors: Record<string, string> = {}
+
+    if (!form.dimA || parseFloat(form.dimA) <= 0) {
+      errors.dimA = "Debe ser un número mayor a 0"
+    }
+    if (!form.dimB || parseFloat(form.dimB) <= 0) {
+      errors.dimB = "Debe ser un número mayor a 0"
+    }
+    if (!form.dimH || parseFloat(form.dimH) <= 0) {
+      errors.dimH = "Debe ser un número mayor a 0"
+    }
+    if (!form.cantidad || parseInt(form.cantidad) <= 0) {
+      errors.cantidad = "Debe ser mayor a 0"
+    }
+
+    setFormErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  const validateAllFields = () => {
+    const errors: Record<string, string> = {}
+
+    if (!form.dimA || parseFloat(form.dimA) <= 0) {
+      errors.dimA = "Debe ser un número mayor a 0"
+    }
+    if (!form.dimB || parseFloat(form.dimB) <= 0) {
+      errors.dimB = "Debe ser un número mayor a 0"
+    }
+    if (!form.dimH || parseFloat(form.dimH) <= 0) {
+      errors.dimH = "Debe ser un número mayor a 0"
+    }
+    if (!form.cantidad || parseInt(form.cantidad) <= 0) {
+      errors.cantidad = "Debe ser mayor a 0"
+    }
+
+    setFormErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  const getFieldError = (field: string) => formErrors[field]
+
+  const getFieldSuccess = (field: string) => {
+    const value = form[field as keyof typeof form]
+    if (!value) return false
+    if (field === "dimA" || field === "dimB" || field === "dimH") {
+      return parseFloat(value) > 0
+    }
+    if (field === "cantidad") {
+      return parseInt(value) > 0
+    }
+    return true
+  }
 
   const [results, setResults] = useState<{
     volumen: number
@@ -69,9 +125,13 @@ export default function ConcretoCalculatorPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
-  const selectedDosificacion = dosificaciones.find(d => d.ratio === form.dosificacion) || dosificaciones[7]
+  const selectedDosificacion = dosificaciones.find(d => d.ratio === form.dosificacion) || { ratio: "1:3:4", resistencia: 159, cemento: 260, arena: 0.63, grava: 0.83, agua: 163 }
 
   const calculate = () => {
+    if (!validateAllFields()) {
+      return
+    }
+    
     setIsCalculating(true)
     
     const a = parseFloat(form.dimA)
@@ -80,14 +140,12 @@ export default function ConcretoCalculatorPage() {
     const cantidad = parseInt(form.cantidad)
     const desperdicio = parseFloat(form.desperdicio) / 100
 
-    if (!a || !b || !h || !cantidad) {
-      setIsCalculating(false)
-      return
-    }
+    const volA = a * b * h
+    const volDesp = volA * cantidad
+    const factorDesperdicio = 1 + desperdicio
 
     const volumen = a * b * h
-    const factorDesperdicio = 1 + desperdicio
-    const volumenTotal = volumen * cantidad
+    const volumenTotal = volA * cantidad
 
     const cementoKg = volumenTotal * selectedDosificacion.cemento * factorDesperdicio
     const cementoBolsas = Math.ceil(cementoKg / PESO_BOLSA)
@@ -197,149 +255,146 @@ export default function ConcretoCalculatorPage() {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_400px]">
         {/* Formulario */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">Parámetros de Entrada</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Esquema visual */}
-            <div className="bg-muted/50 rounded-lg p-6 text-center">
-              <div className="text-sm text-muted-foreground mb-2">Esquema Guía: Elemento de Concreto</div>
-              <svg className="mx-auto max-w-xs" viewBox="0 0 300 200" style={{ strokeWidth: 1.5 }}>
-                <rect x="50" y="50" width="200" height="100" fill="none" stroke="currentColor" strokeDasharray="5,5" opacity="0.3"/>
-                <text x="150" y="40" textAnchor="middle" fontSize="12" fill="currentColor" opacity="0.6">Alto (h)</text>
-                <text x="30" y="105" textAnchor="middle" fontSize="12" fill="currentColor" opacity="0.6" transform="rotate(-90 30 105)">Largo (a)</text>
-                <text x="150" y="170" textAnchor="middle" fontSize="12" fill="currentColor" opacity="0.6">Ancho (b)</text>
-                <line x1="150" y1="50" x2="150" y2="40" stroke="currentColor" opacity="0.6" strokeWidth="0.5"/>
-                <line x1="150" y1="150" x2="150" y2="160" stroke="currentColor" opacity="0.6" strokeWidth="0.5"/>
-                <line x1="50" y1="100" x2="40" y2="100" stroke="currentColor" opacity="0.6" strokeWidth="0.5"/>
-                <line x1="250" y1="100" x2="260" y2="100" stroke="currentColor" opacity="0.6" strokeWidth="0.5"/>
-              </svg>
-            </div>
+<Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">Parámetros de Entrada</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Esquema visual */}
+          <div className="bg-muted/50 rounded-lg p-6 text-center">
+            <div className="text-sm text-muted-foreground mb-2">Esquema Guía: Elemento de Concreto</div>
+            <svg className="mx-auto max-w-xs" viewBox="0 0 300 200" style={{ strokeWidth: 1.5 }}>
+              <rect x="50" y="50" width="200" height="100" fill="none" stroke="currentColor" strokeDasharray="5,5" opacity="0.3"/>
+              <text x="150" y="40" textAnchor="middle" fontSize="12" fill="currentColor" opacity="0.6">Alto (h)</text>
+              <text x="30" y="105" textAnchor="middle" fontSize="12" fill="currentColor" opacity="0.6" transform="rotate(-90 30 105)">Largo (a)</text>
+              <text x="150" y="170" textAnchor="middle" fontSize="12" fill="currentColor" opacity="0.6">Ancho (b)</text>
+              <line x1="150" y1="50" x2="150" y2="40" stroke="currentColor" opacity="0.6" strokeWidth="0.5"/>
+              <line x1="150" y1="150" x2="150" y2="160" stroke="currentColor" opacity="0.6" strokeWidth="0.5"/>
+              <line x1="50" y1="100" x2="40" y2="100" stroke="currentColor" opacity="0.6" strokeWidth="0.5"/>
+              <line x1="250" y1="100" x2="260" y2="100" stroke="currentColor" opacity="0.6" strokeWidth="0.5"/>
+            </svg>
+          </div>
 
-            {/* Descripción */}
-            <div className="space-y-2">
-              <Label htmlFor="descripcion">Descripción del Elemento</Label>
-              <Input
-                id="descripcion"
-                value={form.descripcion}
-                onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
-                placeholder="Ej: Columna C1 - Nivel 1"
+          {/* Descripción */}
+          <InputWithHelp
+            label="Descripción del Elemento (opcional)"
+            helpText="Da un nombre identificable al elemento de concreto para referencia rápida"
+            example="Ej: Columna C1 - Nivel 1, Viga V2 - Tramo Norte"
+            value={form.descripcion}
+            onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
+            placeholder="Ej: Columna C1 - Nivel 1"
+          />
+
+          {/* Dimensiones */}
+          <div className="space-y-4">
+            <div className="text-sm font-medium text-muted-foreground mb-2">Dimensiones del Elemento (en metros)</div>
+            <div className="grid gap-4 md:grid-cols-3">
+              <InputWithHelp
+                label="Alto (a)"
+                helpText="Dimensión vertical del elemento"
+                example="0.30 para columna de 30cm"
+                unit="m"
+                value={form.dimA}
+                onChange={(e) => setForm({ ...form, dimA: e.target.value })}
+                min="0.01"
+                step="0.01"
+                success={!!form.dimA && parseFloat(form.dimA) > 0}
+              />
+              <InputWithHelp
+                label="Ancho (b)"
+                helpText="Dimensión lateral del elemento"
+                example="0.40 para columna de 40cm"
+                unit="m"
+                value={form.dimB}
+                onChange={(e) => setForm({ ...form, dimB: e.target.value })}
+                min="0.01"
+                step="0.01"
+                success={!!form.dimB && parseFloat(form.dimB) > 0}
+              />
+              <InputWithHelp
+                label="Largo (h)"
+                helpText="Dimensión longitudinal del elemento"
+                example="3.00 para columna de 3m"
+                unit="m"
+                value={form.dimH}
+                onChange={(e) => setForm({ ...form, dimH: e.target.value })}
+                min="0.01"
+                step="0.01"
+                success={!!form.dimH && parseFloat(form.dimH) > 0}
               />
             </div>
+          </div>
 
-            {/* Dimensiones */}
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="space-y-2">
-                <Label htmlFor="dimA">Alto (a) en metros</Label>
-                <Input
-                  id="dimA"
-                  type="number"
-                  step="0.01"
-                  min="0.01"
-                  value={form.dimA}
-                  onChange={(e) => setForm({ ...form, dimA: e.target.value })}
-                  placeholder="0.30"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="dimB">Ancho (b) en metros</Label>
-                <Input
-                  id="dimB"
-                  type="number"
-                  step="0.01"
-                  min="0.01"
-                  value={form.dimB}
-                  onChange={(e) => setForm({ ...form, dimB: e.target.value })}
-                  placeholder="0.40"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="dimH">Largo (h) en metros</Label>
-                <Input
-                  id="dimH"
-                  type="number"
-                  step="0.01"
-                  min="0.01"
-                  value={form.dimH}
-                  onChange={(e) => setForm({ ...form, dimH: e.target.value })}
-                  placeholder="3.00"
-                />
-              </div>
-            </div>
+          {/* Dosificación */}
+          <div className="space-y-2">
+            <Label htmlFor="dosificacion">Dosificación de Concreto</Label>
+            <Select value={form.dosificacion} onValueChange={(v) => setForm({ ...form, dosificacion: v })}>
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccionar dosificación" />
+              </SelectTrigger>
+              <SelectContent>
+                {dosificaciones.map((d) => (
+                  <SelectItem key={d.ratio} value={d.ratio}>
+                    {d.ratio} - {d.resistencia} kg/cm²
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground mt-1">
+              Dosificación seleccionada: <span className="font-medium text-foreground">{selectedDosificacion.ratio}</span> - 
+              {selectedDosificacion.resistencia} kg/cm² | 
+              Cemento: {selectedDosificacion.cemento} kg/m³ | 
+              Arena: {selectedDosificacion.arena} m³/m³ | 
+              Grava: {selectedDosificacion.grava} m³/m³ | 
+              Agua: {selectedDosificacion.agua} lt/m³
+            </p>
+          </div>
 
-            {/* Dosificación */}
+          {/* Cantidad y desperdicio en una fila */}
+          <div className="grid gap-4 md:grid-cols-3">
+            <InputWithHelp
+              label="Cantidad de Elementos"
+              helpText="Número de elementos idénticos a calcular"
+              example="1 para un solo elemento, 3 para tres columnas"
+              unit="unidades"
+              value={form.cantidad}
+              onChange={(e) => setForm({ ...form, cantidad: e.target.value })}
+              min="1"
+              success={!!form.cantidad && parseInt(form.cantidad) > 0}
+            />
+            <InputWithHelp
+              label="Desperdicio (%)"
+              helpText="Material extra para pérdidas, roturas, errores de corte"
+              example="5% es estándar en obras"
+              unit="%"
+              value={form.desperdicio}
+              onChange={(e) => setForm({ ...form, desperdicio: e.target.value })}
+              min="0"
+              max="100"
+              success={parseFloat(form.desperdicio) >= 0 && parseFloat(form.desperdicio) <= 100}
+            />
             <div className="space-y-2">
-              <Label htmlFor="dosificacion">Dosificación de Concreto</Label>
-              <Select value={form.dosificacion} onValueChange={(v) => setForm({ ...form, dosificacion: v })}>
+              <Label htmlFor="redondeo">Redondeo de Cemento</Label>
+              <Select value={form.redondeo} onValueChange={(v) => setForm({ ...form, redondeo: v })}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar dosificación" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {dosificaciones.map((d) => (
-                    <SelectItem key={d.ratio} value={d.ratio}>
-                      {d.ratio} - {d.resistencia} kg/cm²
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="entero">Bolsas enteras (redondear hacia arriba)</SelectItem>
+                  <SelectItem value="exacto">Exacto (decimal - calcula peso preciso)</SelectItem>
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground mt-1">
+                {form.redondeo === "entero" ? "Siempre redondea hacia arriba" : "Permite cálculos decimales precisos"}
+              </p>
             </div>
+          </div>
 
-            {/* Detalle dosificación seleccionada */}
-            <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
-              <div className="flex flex-wrap gap-4 text-sm">
-                <div className="flex items-center gap-1"><Package className="h-4 w-4" /> Cemento: {selectedDosificacion.cemento} kg/m³</div>
-                <div className="flex items-center gap-1"><Box className="h-4 w-4" /> Arena: {selectedDosificacion.arena} m³/m³</div>
-                <div className="flex items-center gap-1"><Weight className="h-4 w-4" /> Grava: {selectedDosificacion.grava} m³/m³</div>
-                <div className="flex items-center gap-1"><Droplets className="h-4 w-4" /> Agua: {selectedDosificacion.agua} lt/m³</div>
-                <div className="flex items-center gap-1">Resistencia: {selectedDosificacion.resistencia} kg/cm²</div>
-              </div>
-            </div>
-
-            {/* Cantidad y desperdicio */}
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="space-y-2">
-                <Label htmlFor="cantidad">Cantidad de Elementos</Label>
-                <Input
-                  id="cantidad"
-                  type="number"
-                  min="1"
-                  value={form.cantidad}
-                  onChange={(e) => setForm({ ...form, cantidad: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="desperdicio">Desperdicio (%)</Label>
-                <Select value={form.desperdicio} onValueChange={(v) => setForm({ ...form, desperdicio: v })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].map(d => (
-                      <SelectItem key={d} value={d.toString()}>{d}%</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="redondeo">Redondeo Cemento</Label>
-                <Select value={form.redondeo} onValueChange={(v) => setForm({ ...form, redondeo: v })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="entero">Bolsas enteras (ROUNDUP)</SelectItem>
-                    <SelectItem value="exacto">Exacto (decimal)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <Button onClick={calculate} className="w-full" disabled={isCalculating} size="lg">
-              {isCalculating ? "Calculando..." : "Calcular Materiales"}
-            </Button>
-          </CardContent>
-        </Card>
+          <Button onClick={calculate} className="w-full" disabled={isCalculating} size="lg">
+            {isCalculating ? "Calculando..." : "Calcular Materiales"}
+          </Button>
+        </CardContent>
+      </Card>
 
         {/* Tabla de referencia */}
         <Card>

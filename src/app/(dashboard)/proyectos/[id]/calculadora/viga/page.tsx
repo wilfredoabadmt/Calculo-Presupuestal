@@ -1,16 +1,35 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { InputWithHelp } from "@/components/ui/input-with-help"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ArrowLeft, Calculator, Save, Box, Weight, CheckCircle, Loader2 } from "lucide-react"
 import { formatNumber, cn } from "@/lib/utils"
 import { PlanGuard } from "@/components/shared/PlanGuard"
+
+const dosificaciones = [
+  { ratio: "1:2:2", cemento: 420, arena: 0.67, grava: 0.67 },
+  { ratio: "1:2:3", cemento: 350, arena: 0.55, grava: 0.84 },
+  { ratio: "1:2:4", cemento: 300, arena: 0.48, grava: 0.95 },
+  { ratio: "1:3:4", cemento: 260, arena: 0.63, grava: 0.83 },
+  { ratio: "1:3:5", cemento: 230, arena: 0.55, grava: 0.92 },
+  { ratio: "1:3:6", cemento: 210, arena: 0.50, grava: 1.00 },
+]
+
+const diametros = [
+  { value: "1/4", kgM: 0.395 },
+  { value: "3/8", kgM: 0.888 },
+  { value: "1/2", kgM: 1.580 },
+  { value: "5/8", kgM: 2.466 },
+  { value: "3/4", kgM: 3.556 },
+]
+
+const PESO_BOLSA = 42.5
 
 const dosificaciones = [
   { ratio: "1:2:2", cemento: 420, arena: 0.67, grava: 0.67 },
@@ -37,26 +56,74 @@ export default function VigaCalculatorPage() {
   const projectId = params.id as string
 
   const [form, setForm] = useState({
-    largo: "4.00",
-    dimA: "0.40",
-    dimB: "0.25",
+    largo: "",
+    dimA: "",
+    dimB: "",
     dosificacion: "1:3:4",
-    cantidad: "1",
+    cantidad: "",
     desperdicioConcreto: "5",
     // Acero positivo
     diametroPos: "1/2",
-    varillasPos: "3",
-    longVarillasPos: "4.50",
+    varillasPos: "",
+    longVarillasPos: "",
     // Acero negativo
     diametroNeg: "1/2",
-    varillasNeg: "2",
-    longVarillasNeg: "4.50",
+    varillasNeg: "",
+    longVarillasNeg: "",
     // Estribos
     diametroEstribo: "3/8",
     separacionConfinada: "10",
     separacionCentral: "20",
     despAcero: "5",
   })
+
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
+
+  const validateAllFields = () => {
+    const errors: Record<string, string> = {}
+
+    if (!form.largo || parseFloat(form.largo) <= 0) {
+      errors.largo = "Debe ser un número mayor a 0"
+    }
+    if (!form.dimA || parseFloat(form.dimA) <= 0) {
+      errors.dimA = "Debe ser un número mayor a 0"
+    }
+    if (!form.dimB || parseFloat(form.dimB) <= 0) {
+      errors.dimB = "Debe ser un número mayor a 0"
+    }
+    if (!form.cantidad || parseInt(form.cantidad) <= 0) {
+      errors.cantidad = "Debe ser mayor a 0"
+    }
+    if (!form.varillasPos || parseInt(form.varillasPos) <= 0) {
+      errors.varillasPos = "Debe ser mayor a 0"
+    }
+    if (!form.longVarillasPos || parseFloat(form.longVarillasPos) <= 0) {
+      errors.longVarillasPos = "Debe ser un número mayor a 0"
+    }
+    if (!form.varillasNeg || parseInt(form.varillasNeg) <= 0) {
+      errors.varillasNeg = "Debe ser mayor a 0"
+    }
+    if (!form.longVarillasNeg || parseFloat(form.longVarillasNeg) <= 0) {
+      errors.longVarillasNeg = "Debe ser un número mayor a 0"
+    }
+
+    setFormErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  const getFieldError = (field: string) => formErrors[field]
+
+  const getFieldSuccess = (field: string) => {
+    const value = form[field as keyof typeof form]
+    if (!value) return false
+    if (field === "largo" || field === "dimA" || field === "dimB" || field === "longVarillasPos" || field === "longVarillasNeg") {
+      return parseFloat(value) > 0
+    }
+    if (field === "cantidad" || field === "varillasPos" || field === "varillasNeg") {
+      return parseInt(value) > 0
+    }
+    return true
+  }
 
   const [results, setResults] = useState<{
     concreto: { volumen: number; cemento: { kg: number; bolsas: number }; arena: number; grava: number }
@@ -77,11 +144,16 @@ export default function VigaCalculatorPage() {
   const dEst = diametros.find(d => d.value === form.diametroEstribo) || diametros[1]
 
   const calculate = () => {
+    if (!validateAllFields()) {
+      return
+    }
+
     const largo = parseFloat(form.largo)
     const a = parseFloat(form.dimA)
     const b = parseFloat(form.dimB)
     const cantidad = parseInt(form.cantidad)
     const desp = parseFloat(form.desperdicioConcreto) / 100
+
     if (!largo || !a || !b || !cantidad) return
 
     const volumen = largo * a * b * cantidad

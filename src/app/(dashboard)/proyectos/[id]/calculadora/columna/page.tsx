@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { InputWithHelp } from "@/components/ui/input-with-help"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ArrowLeft, Calculator, Save, Box, Package, Weight, Ruler, CheckCircle, Loader2 } from "lucide-react"
@@ -39,16 +39,16 @@ export default function ColumnaCalculatorPage() {
   const [saved, setSaved] = useState(false)
 
   const [form, setForm] = useState({
-    alto: "3.00",
-    dimA: "0.30",
-    dimB: "0.40",
+    alto: "",
+    dimA: "",
+    dimB: "",
     dosificacion: "1:3:4",
-    cantidad: "1",
+    cantidad: "",
     desperdicioConcreto: "5",
     // Acero longitudinal
-    longVarillas: "3.50",
+    longVarillas: "",
     diametroLong: "1/2",
-    cantidadVarillas: "4",
+    cantidadVarillas: "",
     traslapes: "si",
     largoTraslape: "0.40",
     despAcero: "5",
@@ -57,6 +57,48 @@ export default function ColumnaCalculatorPage() {
     separacionConfinada: "10",
     separacionCentral: "20",
   })
+
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
+
+  const validateAllFields = () => {
+    const errors: Record<string, string> = {}
+
+    if (!form.alto || parseFloat(form.alto) <= 0) {
+      errors.alto = "Debe ser un número mayor a 0"
+    }
+    if (!form.dimA || parseFloat(form.dimA) <= 0) {
+      errors.dimA = "Debe ser un número mayor a 0"
+    }
+    if (!form.dimB || parseFloat(form.dimB) <= 0) {
+      errors.dimB = "Debe ser un número mayor a 0"
+    }
+    if (!form.cantidad || parseInt(form.cantidad) <= 0) {
+      errors.cantidad = "Debe ser mayor a 0"
+    }
+    if (!form.longVarillas || parseFloat(form.longVarillas) <= 0) {
+      errors.longVarillas = "Debe ser un número mayor a 0"
+    }
+    if (!form.cantidadVarillas || parseInt(form.cantidadVarillas) <= 0) {
+      errors.cantidadVarillas = "Debe ser mayor a 0"
+    }
+
+    setFormErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  const getFieldError = (field: string) => formErrors[field]
+
+  const getFieldSuccess = (field: string) => {
+    const value = form[field as keyof typeof form]
+    if (!value) return false
+    if (field === "alto" || field === "dimA" || field === "dimB" || field === "longVarillas") {
+      return parseFloat(value) > 0
+    }
+    if (field === "cantidad" || field === "cantidadVarillas") {
+      return parseInt(value) > 0
+    }
+    return true
+  }
 
   const [results, setResults] = useState<{
     concreto: { volumen: number; cemento: { kg: number; bolsas: number }; arena: number; grava: number }
@@ -70,6 +112,66 @@ export default function ColumnaCalculatorPage() {
   const selectedDosificacion = dosificaciones.find(d => d.ratio === form.dosificacion) || dosificaciones[3]
   const selectedDiametroLong = diametros.find(d => d.value === form.diametroLong) || diametros[3]
   const selectedDiametroEstribo = diametros.find(d => d.value === form.diametroEstribo) || diametros[1]
+
+  const calculate = () => {
+    if (!validateAllFields()) {
+      return
+    }
+
+    const a = parseFloat(form.dimA)
+    const b = parseFloat(form.dimB)
+    const alto = parseFloat(form.alto)
+    const cantidad = parseInt(form.cantidad)
+    const desp = parseFloat(form.desperdicioConcreto) / 100
+
+    if (!a || !b || !alto || !cantidad) return
+
+    // Concreto
+    const volumen = a * b * alto * cantidad
+    const volDesp = volumen * (1 + desp)
+    const cementoKg = volDesp * selectedDosificacion.cemento
+    const cementoBolsas = Math.ceil(cementoKg / PESO_BOLSA)
+    const arena = volDesp * selectedDosificacion.arena
+    const grava = volDesp * selectedDosificacion.grava
+
+    // Acero longitudinal
+    const numVarillas = parseInt(form.cantidadVarillas)
+    const longTotal = parseFloat(form.longVarillas) * numVarillas * cantidad
+    const traslapes = form.traslapes === "si" ? numVarillas * parseFloat(form.largoTraslape) * cantidad : 0
+    const pesoLong = (longTotal + traslapes) * selectedDiametroLong.kgM
+
+    // Estribos
+    const perimetro = 2 * (a + b) - 8 * 0.04 + 2 * 0.12
+    const zonas = 2
+    const estConfinada = Math.ceil((alto * 0.15) / (parseFloat(form.separacionConfinada) / 100))
+    const estCentral = Math.ceil((alto * 0.7) / (parseFloat(form.separacionCentral) / 100))
+    const totalEstribos = (estConfinada + estCentral + 4) * zonas * cantidad
+    const pesoEstribos = totalEstribos * perimetro * selectedDiametroEstribo.kgM
+
+    const despAcero = parseFloat(form.despAcero) / 100
+    const totalAcero = (pesoLong + pesoEstribos) * (1 + despAcero)
+
+    const precioCemento = cementoBolsas * 8.60
+    const precioArena = arena * 28.33
+    const precioGrava = grava * 36.66
+    const precioAcero = totalAcero * 10.50
+
+    const materiales = [
+      { nombre: "Cemento CP-40", cantidad: cementoBolsas, unidad: "bolsa", precio: precioCemento },
+      { nombre: "Arena media", cantidad: arena, unidad: "m³", precio: precioArena },
+      { nombre: "Grava 3/4\"", cantidad: grava, unidad: "m³", precio: precioGrava },
+      { nombre: `Acero long. Ø${form.diametroLong}`, cantidad: totalAcero, unidad: "kg", precio: precioAcero },
+    ]
+
+    setResults({
+      concreto: { volumen, cemento: { kg: cementoKg, bolsas: cementoBolsas }, arena, grava },
+      aceroLong: pesoLong,
+      estribos: { cantidad: totalEstribos, peso: pesoEstribos },
+      totalAcero,
+      materiales,
+      total: precioCemento + precioArena + precioGrava + precioAcero,
+    })
+  }
 
   const handleSave = async () => {
     if (!results) return
