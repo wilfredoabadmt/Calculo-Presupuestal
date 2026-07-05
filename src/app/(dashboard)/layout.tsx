@@ -31,10 +31,10 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { signOut } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react"
 
-const navigation = [
-  { name: "Dashboard", href: "/", icon: LayoutDashboard },
+const baseNavigation = [
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Proyectos", href: "/proyectos", icon: FolderKanban },
   { name: "Materiales", href: "/materiales", icon: Box },
   { name: "Configuración", href: "/configuracion", icon: Settings },
@@ -43,6 +43,17 @@ const navigation = [
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
+  const { data: session } = useSession()
+  const user = session?.user
+
+  const navigation = [...baseNavigation]
+  if ((user as any)?.role === "ADMIN") {
+    navigation.push({ name: "Administración", href: "/admin/usuarios", icon: User })
+  }
+
+  const initials = user?.name 
+    ? user.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().substring(0, 2)
+    : "U"
 
   return (
     <div className="min-h-screen bg-background">
@@ -64,7 +75,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         <div className="flex h-full flex-col">
           {/* Header */}
           <div className="flex h-16 items-center justify-between px-4 border-b">
-            <Link href="/" className="flex items-center gap-2 font-bold text-xl text-primary">
+            <Link href="/dashboard" className="flex items-center gap-2 font-bold text-xl text-primary">
               <Zap className="h-6 w-6" />
               <span>Cálculo Presupuestal</span>
             </Link>
@@ -80,7 +91,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
             {navigation.map((item) => {
               const isActive = pathname === item.href || 
-                (item.href !== "/" && pathname.startsWith(item.href))
+                (item.href !== "/dashboard" && pathname.startsWith(item.href))
               return (
                 <Link
                   key={item.name}
@@ -103,11 +114,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <div className="p-4 border-t">
             <div className="flex items-center gap-3 px-3 py-2">
               <Avatar className="h-9 w-9">
-                <AvatarFallback>U</AvatarFallback>
+                <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">Usuario</p>
-                <p className="text-xs text-muted-foreground">FREE</p>
+                <p className="text-sm font-medium truncate">{user?.name || "Usuario"}</p>
+                <p className="text-xs text-muted-foreground">{(user as any)?.plan || "FREE"}</p>
               </div>
             </div>
           </div>
@@ -127,7 +138,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 <Menu className="h-5 w-5" />
               </button>
               <h1 className="text-lg font-semibold hidden sm:block">
-                {navigation.find(n => pathname === n.href || (n.href !== "/" && pathname.startsWith(n.href)))?.name || "Dashboard"}
+                {navigation.find(n => pathname === n.href || (n.href !== "/dashboard" && pathname.startsWith(n.href)))?.name || "Dashboard"}
               </h1>
             </div>
 
@@ -136,7 +147,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-9 w-9 rounded-full">
                     <Avatar className="h-9 w-9">
-                      <AvatarFallback>U</AvatarFallback>
+                      <AvatarFallback>{initials}</AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>

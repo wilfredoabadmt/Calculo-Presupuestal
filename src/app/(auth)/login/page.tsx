@@ -14,7 +14,7 @@ import { Loader2, Mail, Lock, Zap, CheckCircle } from "lucide-react"
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get("callbackUrl") || "/proyectos"
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"
   const error = searchParams.get("error")
   const registered = searchParams.get("registered")
 

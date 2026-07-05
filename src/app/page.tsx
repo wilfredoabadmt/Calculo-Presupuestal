@@ -2,8 +2,15 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Calculator, Building, FileText, Calendar, BarChart, Users, Shield, Zap, Check, ArrowRight, Star } from "lucide-react"
+import { auth } from "@/lib/auth"
+import { redirect } from "next/navigation"
 
-export default function HomePage() {
+export default async function HomePage() {
+  const session = await auth()
+  if (session) {
+    redirect("/dashboard")
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero - Industrial/Construction aesthetic */}

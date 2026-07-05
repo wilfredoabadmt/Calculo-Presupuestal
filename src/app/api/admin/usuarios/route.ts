@@ -19,6 +19,7 @@ export async function GET() {
       email: true,
       role: true,
       plan: true,
+      planExpiresAt: true,
       createdAt: true,
       _count: { select: { proyectos: true } },
     },
