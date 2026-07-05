@@ -20,11 +20,11 @@ ENV NODE_OPTIONS="--max-old-space-size=4096"
 # Install OpenSSL for Prisma postinstall
 RUN apk add --no-cache openssl
 
-# Copy package files
+# Copy package files FIRST for layer caching
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Install dependencies
+# Install dependencies (cached unless package.json changes)
 RUN npm ci --network-timeout 300000
 
 # Copy source code
@@ -33,7 +33,7 @@ COPY . .
 # Generate Prisma Client
 RUN npx prisma generate
 
-# Build application
+# Build application (skip lint for speed)
 RUN npm run build
 
 # Production stage
@@ -59,9 +59,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/node_modules/.package-lock.json ./node_modules/.package-lock.json
 
-# Copy only what we need for seed: tsx, esbuild, and their deps
+# Copy runtime deps: prisma CLI, tsx, bcryptjs, zod
+COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
+COPY --from=builder /app/node_modules/.bin ./node_modules/.bin
 COPY --from=builder /app/node_modules/tsx ./node_modules/tsx
 COPY --from=builder /app/node_modules/esbuild ./node_modules/esbuild
 COPY --from=builder /app/node_modules/@esbuild ./node_modules/@esbuild
@@ -69,8 +70,6 @@ COPY --from=builder /app/node_modules/typescript ./node_modules/typescript
 COPY --from=builder /app/node_modules/bcryptjs ./node_modules/bcryptjs
 COPY --from=builder /app/node_modules/@types ./node_modules/@types
 COPY --from=builder /app/node_modules/zod ./node_modules/zod
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /app/node_modules/.bin ./node_modules/.bin
 
 # Copy entrypoint
 COPY --from=builder /app/entrypoint.sh /app/entrypoint.sh
