@@ -86,7 +86,7 @@ export default function CimientoCalculatorPage() {
           body: JSON.stringify({
           tipoElemento: "CIMIENTO",
           descripcion: `Cimiento ${form.base}x${form.altura}x${form.largo}m`,
-          cantidad: 1,
+          cantidad: parseInt(form.cantidad) || 1,
           dimA: parseFloat(form.base),
           dimB: parseFloat(form.altura),
           dimLargo: parseFloat(form.largo),

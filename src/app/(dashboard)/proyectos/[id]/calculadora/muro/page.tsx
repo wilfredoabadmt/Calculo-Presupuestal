@@ -91,13 +91,13 @@ export default function MuroCalculatorPage() {
         body: JSON.stringify({
           tipoElemento: "MURO",
           descripcion: `Muro piedra ${form.base}x${form.altura}x${form.largo}m`,
-          cantidad: 1,
+          cantidad: parseInt(form.cantidad) || 1,
           dimA: parseFloat(form.base),
           dimB: parseFloat(form.altura),
           dimLargo: parseFloat(form.largo),
           desperdicio: parseFloat(form.desperdicio),
           materiales: JSON.stringify([
-            { nombre: "Piedra", cantidad: results.piedra, unidad: "m³", precio: results.piedra * 120 },
+            { nombre: "Piedra", cantidad: results.piedra, unidad: "m³", precio: results.piedra * 35.00 },
             { nombre: "Cemento CP-40", cantidad: results.cemento?.bolsas || 0, unidad: "bolsa", precio: (results.cemento?.bolsas || 0) * 8.60 },
             { nombre: "Arena media", cantidad: results.arena, unidad: "m³", precio: results.arena * 28.33 },
           ]),

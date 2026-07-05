@@ -13,10 +13,10 @@ import { formatNumber, cn } from "@/lib/utils"
 import { PlanGuard } from "@/components/shared/PlanGuard"
 
 const dosificaciones = [
-  { ratio: "1:2:4", cemento: 300, arena: 0.48, grava: 0.95 },
-  { ratio: "1:3:4", cemento: 260, arena: 0.63, grava: 0.83 },
-  { ratio: "1:3:5", cemento: 230, arena: 0.55, grava: 0.92 },
-  { ratio: "1:3:6", cemento: 210, arena: 0.50, grava: 1.00 },
+  { ratio: "1:2:4", resistencia: 200, cemento: 300, arena: 0.48, grava: 0.95 },
+  { ratio: "1:3:4", resistencia: 159, cemento: 260, arena: 0.63, grava: 0.83 },
+  { ratio: "1:3:5", resistencia: 140, cemento: 230, arena: 0.55, grava: 0.92 },
+  { ratio: "1:3:6", resistencia: 119, cemento: 210, arena: 0.50, grava: 1.00 },
 ]
 
 const PESO_BOLSA = 42.5
@@ -100,12 +100,12 @@ export default function LosaCalculatorPage() {
         body: JSON.stringify({
           tipoElemento: "LOSA",
           descripcion: `Losa ${form.largo}x${form.ancho}x${form.espesor}m`,
-          cantidad: 1,
+          cantidad: parseInt(form.cantidad) || 1,
           dimLargo: parseFloat(form.largo),
           dimAncho: parseFloat(form.ancho),
           dimEspesor: parseFloat(form.espesor),
           dosificacionConcretoId: null,
-          resistencia: selectedDos.ratio,
+          resistencia: selectedDos.resistencia || 0,
           desperdicio: parseFloat(form.desperdicio),
           aceroLongitudinal: { peso: results.acero },
           materiales: JSON.stringify({

@@ -51,6 +51,25 @@ export async function POST(request: Request, { params }: { params: { id: string 
     aceroLongitudinal, estribos, materiales, costoTotal,
   } = body
 
+  if (!tipoElemento || typeof tipoElemento !== "string") {
+    return NextResponse.json({ error: "tipoElemento es requerido" }, { status: 400 })
+  }
+  if (!descripcion || typeof descripcion !== "string") {
+    return NextResponse.json({ error: "descripcion es requerida" }, { status: 400 })
+  }
+  if (cantidad !== undefined && (typeof cantidad !== "number" || cantidad <= 0)) {
+    return NextResponse.json({ error: "cantidad debe ser un numero positivo" }, { status: 400 })
+  }
+  if (costoTotal !== undefined && (typeof costoTotal !== "number" || costoTotal <= 0)) {
+    return NextResponse.json({ error: "costoTotal debe ser un numero positivo" }, { status: 400 })
+  }
+
+  const stringifyIfObject = (value: unknown): string | null => {
+    if (value == null) return null
+    if (typeof value === "string") return value
+    return JSON.stringify(value)
+  }
+
   const elemento = await prisma.elementoPresupuesto.create({
     data: {
       proyectoId: params.id,
@@ -60,9 +79,9 @@ export async function POST(request: Request, { params }: { params: { id: string 
       dimA, dimB, dimH, dimLargo, dimAncho, dimEspesor,
       dosificacionConcretoId, resistencia, desperdicio,
       tipoBloqueId, tipoCeramicaId, tipoTejaId,
-      aceroLongitudinal: aceroLongitudinal ? JSON.stringify(aceroLongitudinal) : null,
-      estribos: estribos ? JSON.stringify(estribos) : null,
-      materiales: materiales ? JSON.stringify(materiales) : null,
+      aceroLongitudinal: stringifyIfObject(aceroLongitudinal),
+      estribos: stringifyIfObject(estribos),
+      materiales: stringifyIfObject(materiales),
       costoTotal: costoTotal || 0,
     },
   })

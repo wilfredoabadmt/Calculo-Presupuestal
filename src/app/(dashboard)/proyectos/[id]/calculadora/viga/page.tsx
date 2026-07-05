@@ -100,7 +100,7 @@ export default function VigaCalculatorPage() {
     const pesoNeg = numNeg * longNeg * dNeg.kgM * cantidad
 
     const perimetro = 2 * (a + b) - 8 * 0.04 + 2 * 0.12
-    const estConf = Math.ceil((largo * 0.15) / (parseFloat(form.separacionConfinada) / 100))
+    const estConf = Math.ceil((largo * 0.30) / (parseFloat(form.separacionConfinada) / 100))
     const estCen = Math.ceil((largo * 0.7) / (parseFloat(form.separacionCentral) / 100))
     const totalEst = (estConf + estCen + 4) * cantidad
     const pesoEst = totalEst * perimetro * dEst.kgM

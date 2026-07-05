@@ -79,15 +79,15 @@ export default function PisoCalculatorPage() {
         body: JSON.stringify({
           tipoElemento: "PISO",
           descripcion: `Piso ${form.tipoCeramica} - ${form.ancho}x${form.largo}m`,
-          cantidad: 1,
+          cantidad: parseInt(form.cantidad) || 1,
           dimAncho: parseFloat(form.ancho),
           dimLargo: parseFloat(form.largo),
           tipoCeramicaId: null,
           desperdicio: parseFloat(form.despCeramica),
           materiales: JSON.stringify([
-            { nombre: "Cerámica", cantidad: results.cajas, unidad: "caja", precio: results.cajas * 35 },
+            { nombre: "Cerámica", cantidad: results.cajas, unidad: "caja", precio: results.cajas * selectedCeramica.precioCaja },
             { nombre: "Adhesivo", cantidad: results.adhesivo, unidad: "kg", precio: results.adhesivo * 4.5 },
-            { nombre: "Boquilla", cantidad: results.boquilla, unidad: "kg", precio: results.boquilla * 3.8 },
+            { nombre: "Boquilla", cantidad: results.boquilla, unidad: "kg", precio: results.boquilla * 6.00 },
           ]),
           costoTotal: results.total,
         }),

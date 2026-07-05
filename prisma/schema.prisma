@@ -311,6 +311,7 @@ model CronogramaItem {
   duracion    Int      // días
   fechaFinal  DateTime
   dependeDe   String?  // JSON string array
+  progreso    Float    @default(0)
   creadoManualmente Boolean @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

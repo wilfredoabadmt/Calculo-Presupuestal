@@ -77,7 +77,7 @@ export function calcularViga(input: InputViga): ResultadoCalculo {
 
   // Estribos
   const perimetroEstribo = 2 * (input.a + input.b) - 8 * 0.04 + 2 * 0.12
-  const numEstribosConfinada = Math.ceil((input.largo * 0.15) / (input.estribos.separacionConfinada / 100))
+  const numEstribosConfinada = Math.ceil((input.largo * 0.30) / (input.estribos.separacionConfinada / 100))
   const numEstribosCentral = Math.ceil((input.largo * 0.7) / (input.estribos.separacionCentral / 100))
   const totalEstribos = numEstribosConfinada + numEstribosCentral + 4
   const longTotalEstribos = redondear(totalEstribos * input.estribos.longitud * input.cantidad)

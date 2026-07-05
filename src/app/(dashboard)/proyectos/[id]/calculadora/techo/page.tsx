@@ -75,7 +75,7 @@ export default function TechoCalculatorPage() {
         body: JSON.stringify({
           tipoElemento: "TECHO",
           descripcion: `Techo ${form.tipoTeja} - ${form.ancho}x${form.largo}m`,
-          cantidad: 1,
+          cantidad: parseInt(form.cantidad) || 1,
           dimAncho: parseFloat(form.ancho),
           dimLargo: parseFloat(form.largo),
           tipoTejaId: null,

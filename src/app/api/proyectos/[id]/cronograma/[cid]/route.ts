@@ -18,6 +18,7 @@ export async function PUT(request: Request, { params }: { params: { id: string; 
       duracion: body.duracion,
       fechaFinal: body.fechaFinal ? new Date(body.fechaFinal) : undefined,
       dependeDe: body.dependeDe,
+      progreso: body.progreso ?? undefined,
     },
   })
 

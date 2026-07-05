@@ -124,7 +124,7 @@ export default function ColumnaCalculatorPage() {
 
     // Acero longitudinal
     const numVarillas = parseInt(form.cantidadVarillas)
-    const longTotal = parseFloat(form.longVarillas) * alto * numVarillas * cantidad
+    const longTotal = parseFloat(form.longVarillas) * numVarillas * cantidad
     const traslapes = form.traslapes === "si" ? numVarillas * parseFloat(form.largoTraslape) * cantidad : 0
     const pesoLong = (longTotal + traslapes) * selectedDiametroLong.kgM
 

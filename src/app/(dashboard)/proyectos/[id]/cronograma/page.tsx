@@ -25,16 +25,6 @@ interface CronogramaItem {
   dependeDe: string | null
 }
 
-interface GanttTask {
-  id: string
-  name: string
-  start: Date
-  end: Date
-  progress: number
-  dependencies?: string
-  customStyles?: { progressColor?: string; barBackgroundColor?: string }
-}
-
 const coloresPorTipo: Record<string, string> = {
   OP: "#f97316",
   OG: "#3b82f6",
@@ -42,6 +32,8 @@ const coloresPorTipo: Record<string, string> = {
   IHS: "#06b6d4",
   IE: "#a855f7",
 }
+
+type ViewMode = "semana" | "mes" | "trimestre"
 
 export default function CronogramaPage() {
   const params = useParams()
@@ -55,82 +47,78 @@ export default function CronogramaPage() {
     item: "",
     fechaInicio: format(new Date(), "yyyy-MM-dd"),
     duracion: "5",
-    dependeDe: "",
+    dependeDe: "none",
+    progreso: "0",
   })
   const [saving, setSaving] = useState(false)
+  const [viewMode, setViewMode] = useState<ViewMode>("semana")
 
-  const fetchItems = useCallback(() => {
-    fetch(`/api/proyectos/${projectId}/cronograma`)
-      .then(r => r.json())
-      .then(data => {
-        setItems(Array.isArray(data) ? data : [])
+  const fetchItems = useCallback(async () => {
+    try {
+      const r = await fetch(`/api/proyectos/${projectId}/cronograma`)
+      if (!r.ok) {
+        alert("Error al cargar el cronograma")
         setLoading(false)
-      })
-      .catch(() => setLoading(false))
+        return
+      }
+      const data = await r.json()
+      setItems(Array.isArray(data) ? data : [])
+    } catch {
+      alert("Error de conexión al cargar el cronograma")
+    } finally {
+      setLoading(false)
+    }
   }, [projectId])
 
   useEffect(() => {
     fetchItems()
   }, [fetchItems])
 
-  const ganttTasks: GanttTask[] = items.map(item => {
-    const start = new Date(item.fechaInicio)
-    const end = addDays(start, item.duracion)
-    const tipo = item.codigo.substring(0, 2)
-    return {
-      id: item.id,
-      name: `${item.codigo} ${item.item}`,
-      start,
-      end,
-      progress: item.progreso || 0,
-      dependencies: item.dependeDe || undefined,
-      customStyles: {
-        progressColor: coloresPorTipo[tipo] || "#3b82f6",
-        barBackgroundColor: coloresPorTipo[tipo] ? `${coloresPorTipo[tipo]}33` : "#3b82f633",
-      },
-    }
-  })
-
   const handleSave = async () => {
     setSaving(true)
     const fechaInicio = new Date(form.fechaInicio)
     const duracion = parseInt(form.duracion)
     const fechaFinal = addDays(fechaInicio, duracion)
+    const payload = {
+      codigo: form.codigo,
+      item: form.item,
+      fechaInicio: fechaInicio.toISOString(),
+      duracion,
+      fechaFinal: fechaFinal.toISOString(),
+      dependeDe: form.dependeDe === "none" ? null : form.dependeDe,
+      progreso: parseFloat(form.progreso) || 0,
+    }
 
     try {
       if (editingItem) {
-        await fetch(`/api/proyectos/${projectId}/cronograma/${editingItem.id}`, {
+        const r = await fetch(`/api/proyectos/${projectId}/cronograma/${editingItem.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            codigo: form.codigo,
-            item: form.item,
-            fechaInicio: fechaInicio.toISOString(),
-            duracion,
-            fechaFinal: fechaFinal.toISOString(),
-            dependeDe: form.dependeDe || null,
-          }),
+          body: JSON.stringify(payload),
         })
+        if (!r.ok) {
+          alert("Error al actualizar la actividad")
+          setSaving(false)
+          return
+        }
       } else {
-        await fetch(`/api/proyectos/${projectId}/cronograma`, {
+        const r = await fetch(`/api/proyectos/${projectId}/cronograma`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            codigo: form.codigo,
-            item: form.item,
-            fechaInicio: fechaInicio.toISOString(),
-            duracion,
-            fechaFinal: fechaFinal.toISOString(),
-            dependeDe: form.dependeDe || null,
-          }),
+          body: JSON.stringify(payload),
         })
+        if (!r.ok) {
+          alert("Error al crear la actividad")
+          setSaving(false)
+          return
+        }
       }
       fetchItems()
       setShowDialog(false)
       setEditingItem(null)
-      setForm({ codigo: "", item: "", fechaInicio: format(new Date(), "yyyy-MM-dd"), duracion: "5", dependeDe: "" })
+      resetForm()
     } catch {
-      alert("Error al guardar")
+      alert("Error de conexión al guardar")
     }
     setSaving(false)
   }
@@ -138,11 +126,19 @@ export default function CronogramaPage() {
   const handleDelete = async (id: string) => {
     if (!confirm("¿Eliminar esta actividad?")) return
     try {
-      await fetch(`/api/proyectos/${projectId}/cronograma/${id}`, { method: "DELETE" })
+      const r = await fetch(`/api/proyectos/${projectId}/cronograma/${id}`, { method: "DELETE" })
+      if (!r.ok) {
+        alert("Error al eliminar la actividad")
+        return
+      }
       fetchItems()
     } catch {
-      alert("Error al eliminar")
+      alert("Error de conexión al eliminar")
     }
+  }
+
+  const resetForm = () => {
+    setForm({ codigo: "", item: "", fechaInicio: format(new Date(), "yyyy-MM-dd"), duracion: "5", dependeDe: "none", progreso: "0" })
   }
 
   const openEdit = (item: CronogramaItem) => {
@@ -152,9 +148,34 @@ export default function CronogramaPage() {
       item: item.item,
       fechaInicio: format(new Date(item.fechaInicio), "yyyy-MM-dd"),
       duracion: item.duracion.toString(),
-      dependeDe: item.dependeDe || "",
+      dependeDe: item.dependeDe || "none",
+      progreso: (item.progreso ?? 0).toString(),
     })
     setShowDialog(true)
+  }
+
+  const handleExport = () => {
+    const header = "Código,Actividad,Fecha Inicio,Duración (días),Fecha Fin,Progreso (%),Depende De\n"
+    const rows = items.map(i =>
+      [
+        i.codigo,
+        `"${i.item}"`,
+        format(new Date(i.fechaInicio), "yyyy-MM-dd"),
+        i.duracion,
+        format(new Date(i.fechaFinal), "yyyy-MM-dd"),
+        i.progreso ?? 0,
+        i.dependeDe || "",
+      ].join(",")
+    ).join("\n")
+
+    const csv = header + rows
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `cronograma-${format(new Date(), "yyyy-MM-dd")}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
   }
 
   const totalDias = items.length > 0
@@ -181,8 +202,8 @@ export default function CronogramaPage() {
         icon={<Calendar className="h-7 w-7 text-primary" />}
         actions={
           <>
-            <Button variant="outline"><Download className="mr-2 h-4 w-4" /> Exportar</Button>
-            <Button onClick={() => { setEditingItem(null); setForm({ codigo: "", item: "", fechaInicio: format(new Date(), "yyyy-MM-dd"), duracion: "5", dependeDe: "" }); setShowDialog(true) }}>
+            <Button variant="outline" onClick={handleExport}><Download className="mr-2 h-4 w-4" /> Exportar</Button>
+            <Button onClick={() => { setEditingItem(null); resetForm(); setShowDialog(true) }}>
               <Plus className="mr-2 h-4 w-4" /> Agregar Actividad
             </Button>
           </>
@@ -219,9 +240,18 @@ export default function CronogramaPage() {
             Diagrama de Gantt
           </CardTitle>
           <div className="flex gap-2 text-sm">
-            <span className="px-3 py-1 rounded bg-primary/10 text-primary">Semana</span>
-            <span className="px-3 py-1 rounded bg-muted text-muted-foreground">Mes</span>
-            <span className="px-3 py-1 rounded bg-muted text-muted-foreground">Trimestre</span>
+            <button
+              onClick={() => setViewMode("semana")}
+              className={`px-3 py-1 rounded cursor-pointer transition-colors ${viewMode === "semana" ? "bg-primary/10 text-primary font-medium" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
+            >Semana</button>
+            <button
+              onClick={() => setViewMode("mes")}
+              className={`px-3 py-1 rounded cursor-pointer transition-colors ${viewMode === "mes" ? "bg-primary/10 text-primary font-medium" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
+            >Mes</button>
+            <button
+              onClick={() => setViewMode("trimestre")}
+              className={`px-3 py-1 rounded cursor-pointer transition-colors ${viewMode === "trimestre" ? "bg-primary/10 text-primary font-medium" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
+            >Trimestre</button>
           </div>
         </CardHeader>
         <CardContent>
@@ -252,6 +282,7 @@ export default function CronogramaPage() {
                 const allStart = new Date(Math.min(...items.map(i => new Date(i.fechaInicio).getTime())))
                 const allEnd = new Date(Math.max(...items.map(i => new Date(i.fechaFinal).getTime())))
                 const totalRange = differenceInCalendarDays(allEnd, allStart) || 1
+                const viewScale = viewMode === "semana" ? 1 : viewMode === "mes" ? 0.6 : 0.35
                 const itemStart = differenceInCalendarDays(new Date(item.fechaInicio), allStart)
                 const startPercent = (itemStart / totalRange) * 100
                 const widthPercent = (item.duracion / totalRange) * 100
@@ -266,7 +297,7 @@ export default function CronogramaPage() {
                         className="absolute h-full rounded transition-all"
                         style={{
                           left: `${startPercent}%`,
-                          width: `${Math.max(widthPercent, 2)}%`,
+                          width: `${Math.max(widthPercent * viewScale, 2)}%`,
                           backgroundColor: `${color}33`,
                         }}
                       />
@@ -274,7 +305,7 @@ export default function CronogramaPage() {
                         className="absolute h-full rounded transition-all"
                         style={{
                           left: `${startPercent}%`,
-                          width: `${Math.max(widthPercent * (item.progreso / 100), 1)}%`,
+                          width: `${Math.max(widthPercent * viewScale * ((item.progreso ?? 0) / 100), 1)}%`,
                           backgroundColor: color,
                         }}
                       />
@@ -282,7 +313,7 @@ export default function CronogramaPage() {
                         {item.codigo} - {item.duracion}d
                       </div>
                     </div>
-                    <div className="w-16 text-right text-sm text-muted-foreground">{item.progreso}%</div>
+                    <div className="w-16 text-right text-sm text-muted-foreground">{item.progreso ?? 0}%</div>
                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => openEdit(item)}>
                         <span className="text-xs">✏️</span>
@@ -311,7 +342,6 @@ export default function CronogramaPage() {
                   const minDate = new Date(sorted[0].fechaInicio)
                   const maxDate = new Date(sorted.reduce((max, i) => Math.max(max, new Date(i.fechaFinal).getTime()), 0))
                   const totalDays = differenceInCalendarDays(maxDate, minDate) || 1
-                  const totalCost = sorted.reduce((sum, i) => sum + (i.progreso || 0), 0)
                   const maxProgress = sorted.length * 100
 
                   // Build cumulative points
@@ -321,6 +351,10 @@ export default function CronogramaPage() {
                     cumulative += item.progreso || 0
                     points.push({ date: new Date(item.fechaFinal), pct: cumulative })
                   }
+
+                  // SVG dimensions (must match container)
+                  const svgW = 800
+                  const svgH = 128
 
                   return (
                     <>
@@ -336,12 +370,16 @@ export default function CronogramaPage() {
                           </div>
                         ))}
                         {/* S-curve line */}
-                        <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
+                        <svg
+                          className="absolute inset-0 w-full h-full"
+                          viewBox={`0 0 ${svgW} ${svgH}`}
+                          preserveAspectRatio="none"
+                        >
                           <polyline
-                            points={points.map((p, i) => {
-                              const x = ((new Date(p.date).getTime() - minDate.getTime()) / (maxDate.getTime() - minDate.getTime())) * 100
-                              const y = 100 - (maxProgress > 0 ? (p.pct / maxProgress) * 100 : 0)
-                              return `${x}%,${y}%`
+                            points={points.map((p) => {
+                              const x = ((new Date(p.date).getTime() - minDate.getTime()) / (maxDate.getTime() - minDate.getTime())) * svgW
+                              const y = svgH - (maxProgress > 0 ? (p.pct / maxProgress) * svgH : 0)
+                              return `${x},${y}`
                             }).join(" ")}
                             fill="none"
                             stroke="hsl(var(--primary))"
@@ -420,6 +458,18 @@ export default function CronogramaPage() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Progreso: {form.progreso}%</Label>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                step="5"
+                value={form.progreso}
+                onChange={e => setForm({ ...form, progreso: e.target.value })}
+                className="w-full accent-primary"
+              />
             </div>
           </div>
           <DialogFooter>

@@ -23,7 +23,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
   }
 
   const body = await request.json()
-  const { codigo, item, fechaInicio, duracion, fechaFinal, dependeDe } = body
+  const { codigo, item, fechaInicio, duracion, fechaFinal, dependeDe, progreso } = body
 
   if (!codigo || !item || !fechaInicio || !duracion) {
     return NextResponse.json({ error: "Campos requeridos: codigo, item, fechaInicio, duracion" }, { status: 400 })
@@ -38,6 +38,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
       duracion,
       fechaFinal: fechaFinal ? new Date(fechaFinal) : new Date(new Date(fechaInicio).getTime() + duracion * 86400000),
       dependeDe: dependeDe || null,
+      progreso: progreso ?? 0,
     },
   })
 
