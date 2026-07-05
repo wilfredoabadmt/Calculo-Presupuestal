@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -15,19 +15,21 @@ datasource db {
 // ============================================
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  name          String?
-  password      String
-  role          String    @default("USER")
-  plan          String    @default("FREE")
-  planExpiresAt DateTime?
-  emailVerified DateTime?
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id              String    @id @default(cuid())
+  email           String    @unique
+  name            String?
+  password        String
+  role            String    @default("USER")
+  plan            String    @default("FREE")
+  planExpiresAt   DateTime?
+  emailVerified   DateTime?
+  image           String?
+  resetToken      String?   @unique
+  resetTokenExpiry DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  proyectos     Proyecto[]
+  proyectos       Proyecto[]
 
   @@map("users")
 }
