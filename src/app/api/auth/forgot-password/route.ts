@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 import crypto from "crypto"
+import { sendPasswordResetEmail } from "@/lib/email"
 
 export async function POST(req: NextRequest) {
   try {
@@ -29,10 +30,15 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    // In production, send actual email here
-    // For now, log the reset link to console for testing
     const resetLink = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`
-    console.log(`🔐 Password reset link for ${email}: ${resetLink}`)
+    
+    // Send email using Resend
+    const emailResult = await sendPasswordResetEmail(email, resetLink)
+    
+    if (!emailResult.success) {
+      // Log reset link as a fallback if the email service fails (e.g. invalid API key)
+      console.log(`🔐 [Email Service Failed/Dev Mode] Reset Link: ${resetLink}`)
+    }
 
     return NextResponse.json({ message: "Si el email existe, recibirás un enlace de restablecimiento" })
   } catch (error) {
