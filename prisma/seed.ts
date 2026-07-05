@@ -15,7 +15,9 @@ async function main() {
 
   await prisma.user.upsert({
     where: { email: 'demo@calculo.com' },
-    update: {},
+    update: {
+      password: demoPassword,
+    },
     create: {
       name: 'Usuario Demo',
       email: 'demo@calculo.com',
@@ -27,7 +29,9 @@ async function main() {
 
   await prisma.user.upsert({
     where: { email: 'admin@calculo.com' },
-    update: {},
+    update: {
+      password: adminPassword,
+    },
     create: {
       name: 'Administrador',
       email: 'admin@calculo.com',
