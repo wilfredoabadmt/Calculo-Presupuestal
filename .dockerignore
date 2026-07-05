@@ -12,3 +12,11 @@ guia
 .vscode
 .idea
 coverage
+.swc
+*.md
+*.tsbuildinfo
+jest.config.js
+jest.setup.ts
+docker-compose.yml
+plan-de-implementacion md
+tsconfig.tsbuildinfo
