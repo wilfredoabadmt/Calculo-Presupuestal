@@ -15,10 +15,11 @@ import {
   TrendingUp,
   FolderKanban,
   Box,
-  Users,
-  Loader2
+  Loader2,
+  ArrowRight
 } from "lucide-react"
-import { formatCurrency, formatNumber } from "@/lib/utils"
+import { formatCurrency } from "@/lib/utils"
+import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist"
 
 const quickActions = [
   { name: "Nuevo Proyecto", href: "/proyectos/nuevo", icon: Plus, description: "Crear un proyecto de construcción", color: "bg-blue-500" },
@@ -40,6 +41,21 @@ export default function DashboardPage() {
   const [projects, setProjects] = useState<Project[]>([])
   const [materialCount, setMaterialCount] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [showOnboarding, setShowOnboarding] = useState(false)
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("onboarding_completed")
+      if (!stored) {
+        setShowOnboarding(true)
+      } else {
+        const data = JSON.parse(stored)
+        setShowOnboarding(!data.dismissed)
+      }
+    } catch {
+      setShowOnboarding(true)
+    }
+  }, [])
 
   useEffect(() => {
     async function loadData() {
@@ -82,20 +98,31 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      {/* Welcome header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Bienvenido, {session.user.name || "Usuario"}</h1>
+          <h1 className="text-3xl font-bold">
+            {projects.length === 0 ? "¡Bienvenido!" : `Hola, ${session.user.name?.split(" ")[0] || "Usuario"}`}
+          </h1>
           <p className="text-muted-foreground mt-1">
-            Plan {(session.user as any).plan} • {session.user.email}
+            {projects.length === 0
+              ? "Comienza calculando presupuestos de construcción"
+              : `Plan ${(session.user as any).plan} • ${session.user.email}`
+            }
           </p>
         </div>
         <Link href="/proyectos/nuevo">
-          <Button className="gap-2">
+          <Button className="gap-2 font-bold" size="lg">
             <Plus className="h-4 w-4" />
             Nuevo Proyecto
           </Button>
         </Link>
       </div>
+
+      {/* Onboarding checklist for new users */}
+      {showOnboarding && projects.length === 0 && (
+        <OnboardingChecklist />
+      )}
 
       {loading ? (
         <div className="flex justify-center py-12">
@@ -103,6 +130,7 @@ export default function DashboardPage() {
         </div>
       ) : (
         <>
+          {/* Stats */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {stats.map((stat) => (
               <Card key={stat.label}>
@@ -119,6 +147,7 @@ export default function DashboardPage() {
             ))}
           </div>
 
+          {/* Quick actions */}
           <div>
             <h2 className="text-xl font-semibold mb-4">Acciones Rápidas</h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -142,12 +171,15 @@ export default function DashboardPage() {
             </div>
           </div>
 
+          {/* Recent projects or empty state */}
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">Proyectos Recientes</h2>
-              <Link href="/proyectos" className="text-sm text-primary hover:underline">
-                Ver todos
-              </Link>
+              {projects.length > 0 && (
+                <Link href="/proyectos" className="text-sm text-primary hover:underline flex items-center gap-1">
+                  Ver todos <ArrowRight className="h-3 w-3" />
+                </Link>
+              )}
             </div>
             {recentProjects.length > 0 ? (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -180,12 +212,18 @@ export default function DashboardPage() {
                 ))}
               </div>
             ) : (
-              <Card className="text-center py-8 border-dashed">
-                <Building2 className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-                <h3 className="text-lg font-medium">No hay proyectos aún</h3>
-                <p className="text-muted-foreground mt-1">Crea tu primer proyecto para comenzar</p>
-                <Link href="/proyectos/nuevo" className="mt-4 inline-block">
-                  <Button className="gap-2"><Plus className="h-4 w-4" /> Crear proyecto</Button>
+              <Card className="text-center py-12 border-dashed">
+                <Building2 className="h-16 w-16 mx-auto text-muted-foreground/30 mb-4" />
+                <h3 className="text-xl font-semibold mb-2">Crea tu primer proyecto</h3>
+                <p className="text-muted-foreground max-w-md mx-auto mb-6">
+                  Empieza agregando los datos de tu proyecto de construcción. 
+                  Luego usa las calculadoras para obtener materiales y costos exactos.
+                </p>
+                <Link href="/proyectos/nuevo">
+                  <Button size="lg" className="gap-2 font-bold">
+                    <Plus className="h-5 w-5" />
+                    Crear Proyecto
+                  </Button>
                 </Link>
               </Card>
             )}
@@ -193,6 +231,7 @@ export default function DashboardPage() {
         </>
       )}
 
+      {/* Upgrade banner for free users */}
       {session.user.plan === "FREE" && (
         <Card className="border-primary bg-primary/5">
           <CardContent className="p-6">
@@ -204,9 +243,12 @@ export default function DashboardPage() {
                   exportación PDF/Excel y banco de precios GMLP completo.
                 </p>
               </div>
-              <Button className="w-full md:w-auto" variant="default">
-                Ver planes - desde $19/mes
-              </Button>
+              <Link href="/precios">
+                <Button className="w-full md:w-auto font-bold gap-2" size="lg">
+                  Ver planes
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>

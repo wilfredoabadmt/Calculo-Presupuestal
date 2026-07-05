@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
@@ -9,13 +9,14 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, Mail, Lock, Zap } from "lucide-react"
+import { Loader2, Mail, Lock, Zap, CheckCircle } from "lucide-react"
 
 export default function LoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get("callbackUrl") || "/"
   const error = searchParams.get("error")
+  const registered = searchParams.get("registered")
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -49,7 +50,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted/30 px-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center">
           <div className="mx-auto w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
             <Zap className="h-7 w-7 text-primary" />
@@ -60,6 +61,14 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {registered && (
+            <Alert className="mb-4 border-green-500 bg-green-500/5">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-700">
+                ¡Cuenta creada exitosamente! Inicia sesión para continuar.
+              </AlertDescription>
+            </Alert>
+          )}
           {error && (
             <Alert className="mb-4" variant="destructive">
               <AlertDescription>
@@ -113,7 +122,7 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading} size="lg">
+            <Button type="submit" className="w-full font-bold" disabled={isLoading} size="lg">
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -125,14 +134,14 @@ export default function LoginPage() {
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="flex flex-col space-y-4">
+        <CardFooter className="flex flex-col space-y-4 border-t pt-6">
           <p className="text-sm text-muted-foreground text-center">
             ¿No tienes cuenta?{" "}
-            <Link href="/auth/register" className="text-primary hover:underline font-medium">
+            <Link href="/register" className="text-primary hover:underline font-medium">
               Regístrate gratis
             </Link>
           </p>
-          <div className="text-xs text-muted-foreground text-center">
+          <div className="text-xs text-muted-foreground text-center bg-muted/50 px-4 py-2 rounded-lg">
             <strong>Demo:</strong> demo@calculo.com / demo123
           </div>
         </CardFooter>

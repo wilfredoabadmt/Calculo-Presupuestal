@@ -267,16 +267,33 @@ export default function ProyectoDetailPage() {
           </div>
 
           {project.elementos.length === 0 && (
-            <Card className="text-center py-12">
-              <Calculator className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-              <h3 className="text-lg font-medium">No hay elementos calculados</h3>
-              <p className="text-muted-foreground mt-1">Agrega tu primer elemento usando la calculadora</p>
-              <Button className="mt-4 gap-2" asChild>
-                <Link href={`/proyectos/${projectId}/calculadora`}>
-                  <Calculator className="h-4 w-4" />
-                  Ir a Calculadoras
-                </Link>
-              </Button>
+            <Card className="text-center py-12 border-dashed">
+              <Calculator className="h-16 w-16 mx-auto text-muted-foreground/30 mb-4" />
+              <h3 className="text-xl font-semibold mb-2">Agrega tu primer elemento</h3>
+              <p className="text-muted-foreground max-w-md mx-auto mb-6">
+                Usa las calculadoras para calcular materiales, cantidades y costos. 
+                Empieza con <strong>Concreto</strong>, <strong>Paredes</strong> o <strong>Pisos</strong> (gratis).
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button className="gap-2 font-bold" size="lg" asChild>
+                  <Link href={`/proyectos/${projectId}/calculadora/concreto`}>
+                    <Calculator className="h-4 w-4" />
+                    Calculadora Concreto
+                  </Link>
+                </Button>
+                <Button variant="outline" className="gap-2" size="lg" asChild>
+                  <Link href={`/proyectos/${projectId}/calculadora/pared`}>
+                    <Calculator className="h-4 w-4" />
+                    Calculadora Paredes
+                  </Link>
+                </Button>
+                <Button variant="outline" className="gap-2" size="lg" asChild>
+                  <Link href={`/proyectos/${projectId}/calculadora/piso`}>
+                    <Calculator className="h-4 w-4" />
+                    Calculadora Pisos
+                  </Link>
+                </Button>
+              </div>
             </Card>
           )}
         </TabsContent>
@@ -294,8 +311,17 @@ export default function ProyectoDetailPage() {
             <CardContent>
               {project.elementos.length === 0 ? (
                 <div className="text-center py-8">
-                  <FileText className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
-                  <p className="text-muted-foreground">Agrega elementos para generar el presupuesto</p>
+                  <FileText className="h-12 w-12 mx-auto text-muted-foreground/30 mb-3" />
+                  <h3 className="font-semibold mb-1">Sin elementos aún</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Agrega elementos constructivos para generar el presupuesto automáticamente
+                  </p>
+                  <Button size="sm" className="gap-2" asChild>
+                    <Link href={`/proyectos/${projectId}/calculadora/concreto`}>
+                      <Calculator className="h-4 w-4" />
+                      Calcular primer elemento
+                    </Link>
+                  </Button>
                 </div>
               ) : (
                 <>
@@ -340,11 +366,15 @@ export default function ProyectoDetailPage() {
             </CardHeader>
             <CardContent>
               <div className="text-center py-8">
-                <Calendar className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
-                <p className="text-muted-foreground mb-3">Gantt interactivo con ruta crítica y Curva S</p>
-                <Button size="sm" asChild>
+                <Calendar className="h-12 w-12 mx-auto text-muted-foreground/30 mb-3" />
+                <h3 className="font-semibold mb-1">Cronograma de Obra</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Gantt interactivo con ruta crítica y Curva S de avance
+                </p>
+                <Button size="sm" className="gap-2" asChild>
                   <Link href={`/proyectos/${projectId}/cronograma`}>
-                    <Plus className="mr-2 h-4 w-4" /> Abrir Cronograma
+                    <Calendar className="h-4 w-4" />
+                    Abrir Cronograma
                   </Link>
                 </Button>
               </div>
