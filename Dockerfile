@@ -69,6 +69,8 @@ COPY --from=builder /app/node_modules/typescript ./node_modules/typescript
 COPY --from=builder /app/node_modules/bcryptjs ./node_modules/bcryptjs
 COPY --from=builder /app/node_modules/@types ./node_modules/@types
 COPY --from=builder /app/node_modules/zod ./node_modules/zod
+COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
+COPY --from=builder /app/node_modules/.bin ./node_modules/.bin
 
 # Copy entrypoint
 COPY --from=builder /app/entrypoint.sh /app/entrypoint.sh

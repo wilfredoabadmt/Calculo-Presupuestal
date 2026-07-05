@@ -242,56 +242,47 @@ async function main() {
   // PERFILES DRYWALL (mat10)
   // ============================================
   console.log('📦 Insertando perfiles drywall...')
-  const perfilesDrywall = [
-    { tipo: 'PARANTE', nombre: 'Parante 2.44m', largoM: 2.44, precio: 12.50 },
-    { tipo: 'PARANTE', nombre: 'Parante 2.60m', largoM: 2.60, precio: 13.50 },
-    { tipo: 'PARANTE', nombre: 'Parante 3.00m', largoM: 3.00, precio: 15.50 },
-    { tipo: 'CANAL', nombre: 'Canal 2.44m', largoM: 2.44, precio: 8.50 },
-    { tipo: 'CANAL', nombre: 'Canal 3.00m', largoM: 3.00, precio: 10.50 },
-    { tipo: 'OMEGA', nombre: 'Omega 3.00m', largoM: 3.00, precio: 11.00 },
-    { tipo: 'VIGUETA', nombre: 'Vigueta 3.00m', largoM: 3.00, precio: 14.00 },
-    { tipo: 'VIGUETA', nombre: 'Vigueta 4.00m', largoM: 4.00, precio: 18.50 },
-    { tipo: 'ANGULO', nombre: 'Ángulo perimetral 3.00m', largoM: 3.00, precio: 9.50 },
-    { tipo: 'TORNILLO', nombre: 'Tornillo PH 1" (caja 1000u)', largoM: 0, precio: 25.00 },
-  ]
-
-  for (const p of perfilesDrywall) {
-    await prisma.perfilDrywall.create({
-      data: p,
-    })
-  }
+  await prisma.perfilDrywall.deleteMany()
+  await prisma.perfilDrywall.createMany({
+    data: [
+      { tipo: 'PARANTE', nombre: 'Parante 2.44m', largoM: 2.44, precio: 12.50 },
+      { tipo: 'PARANTE', nombre: 'Parante 2.60m', largoM: 2.60, precio: 13.50 },
+      { tipo: 'PARANTE', nombre: 'Parante 3.00m', largoM: 3.00, precio: 15.50 },
+      { tipo: 'CANAL', nombre: 'Canal 2.44m', largoM: 2.44, precio: 8.50 },
+      { tipo: 'CANAL', nombre: 'Canal 3.00m', largoM: 3.00, precio: 10.50 },
+      { tipo: 'OMEGA', nombre: 'Omega 3.00m', largoM: 3.00, precio: 11.00 },
+      { tipo: 'VIGUETA', nombre: 'Vigueta 3.00m', largoM: 3.00, precio: 14.00 },
+      { tipo: 'VIGUETA', nombre: 'Vigueta 4.00m', largoM: 4.00, precio: 18.50 },
+      { tipo: 'ANGULO', nombre: 'Ángulo perimetral 3.00m', largoM: 3.00, precio: 9.50 },
+      { tipo: 'TORNILLO', nombre: 'Tornillo PH 1" (caja 1000u)', largoM: 0, precio: 25.00 },
+    ],
+  })
 
   // ============================================
   // PANELES YESO (mat11)
   // ============================================
   console.log('📦 Insertando paneles de yeso...')
-  const panelesYeso = [
-    { anchoM: 1.22, largoM: 2.44, areaM2: 2.9768, precio: 45.00 },
-    { anchoM: 1.23, largoM: 2.45, areaM2: 3.0135, precio: 46.00 },
-  ]
-
-  for (const p of panelesYeso) {
-    await prisma.panelYeso.create({
-      data: p,
-    })
-  }
+  await prisma.panelYeso.deleteMany()
+  await prisma.panelYeso.createMany({
+    data: [
+      { anchoM: 1.22, largoM: 2.44, areaM2: 2.9768, precio: 45.00 },
+      { anchoM: 1.23, largoM: 2.45, areaM2: 3.0135, precio: 46.00 },
+    ],
+  })
 
   // ============================================
   // LÁMINAS DE TECHO (mat12)
   // ============================================
   console.log('📦 Insertando láminas de techo...')
-  const laminasTecho = [
-    { tipo: 'ZINCALUM', anchoM: 1.00, largoM: 2.44, traslape: 0.15, precio: 45.00 },
-    { tipo: 'ZINCALUM', anchoM: 1.00, largoM: 3.05, traslape: 0.15, precio: 56.00 },
-    { tipo: 'GALVANIZADO', anchoM: 1.00, largoM: 2.44, traslape: 0.15, precio: 38.00 },
-    { tipo: 'GALVANIZADO', anchoM: 1.00, largoM: 3.05, traslape: 0.15, precio: 47.00 },
-  ]
-
-  for (const l of laminasTecho) {
-    await prisma.laminasTecho.create({
-      data: l,
-    })
-  }
+  await prisma.laminasTecho.deleteMany()
+  await prisma.laminasTecho.createMany({
+    data: [
+      { tipo: 'ZINCALUM', anchoM: 1.00, largoM: 2.44, traslape: 0.15, precio: 45.00 },
+      { tipo: 'ZINCALUM', anchoM: 1.00, largoM: 3.05, traslape: 0.15, precio: 56.00 },
+      { tipo: 'GALVANIZADO', anchoM: 1.00, largoM: 2.44, traslape: 0.15, precio: 38.00 },
+      { tipo: 'GALVANIZADO', anchoM: 1.00, largoM: 3.05, traslape: 0.15, precio: 47.00 },
+    ],
+  })
 
   // ============================================
   // MANO DE OBRA (16 oficios)
