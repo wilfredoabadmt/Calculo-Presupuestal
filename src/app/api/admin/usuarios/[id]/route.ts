@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import bcrypt from "bcryptjs"
 
 export async function PATCH(
   request: Request,
@@ -19,7 +20,20 @@ export async function PATCH(
 
   try {
     const body = await request.json()
-    const { plan, planExpiresAt, action } = body
+    const { plan, planExpiresAt, action, newPassword } = body
+
+    // Admin change password for user
+    if (action === "changePassword") {
+      if (!newPassword || typeof newPassword !== "string" || newPassword.length < 6) {
+        return NextResponse.json({ error: "La contraseña debe tener al menos 6 caracteres" }, { status: 400 })
+      }
+      const hashedPassword = await bcrypt.hash(newPassword, 12)
+      await prisma.user.update({
+        where: { id },
+        data: { password: hashedPassword },
+      })
+      return NextResponse.json({ success: true, message: "Contraseña actualizada exitosamente." })
+    }
 
     // Support email resending actions (simulated)
     if (action === "resendVerification") {

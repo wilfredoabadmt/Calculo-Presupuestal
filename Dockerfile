@@ -50,7 +50,8 @@ RUN mkdir -p /app/rt-deps && \
   cp -r /app/node_modules/@types /app/rt-deps/at-types && \
   cp -r /app/node_modules/zod /app/rt-deps/zod && \
   cp -r /app/node_modules/get-tsconfig /app/rt-deps/get-tsconfig && \
-  cp -r /app/node_modules/resolve-pkg-maps /app/rt-deps/resolve-pkg-maps
+  cp -r /app/node_modules/resolve-pkg-maps /app/rt-deps/resolve-pkg-maps && \
+  (cp -r /app/node_modules/@prisma/engines /app/rt-deps/prisma-engines 2>/dev/null || true)
 
 # Production stage
 FROM node:20-alpine AS runner
@@ -90,6 +91,7 @@ RUN mkdir -p /app/node_modules && \
   mv /app/rt-deps/zod /app/node_modules/zod && \
   mv /app/rt-deps/get-tsconfig /app/node_modules/get-tsconfig && \
   mv /app/rt-deps/resolve-pkg-maps /app/node_modules/resolve-pkg-maps && \
+  (test -d /app/rt-deps/prisma-engines && mkdir -p /app/node_modules/@prisma/engines && cp -r /app/rt-deps/prisma-engines/* /app/node_modules/@prisma/engines/ || true) && \
   rm -rf /app/rt-deps
 
 # Copy entrypoint

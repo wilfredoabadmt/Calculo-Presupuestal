@@ -4,6 +4,8 @@ import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { PageHeader } from "@/components/shared/PageHeader"
 import { SearchInput } from "@/components/shared/SearchInput"
@@ -24,7 +26,11 @@ import {
   MoreVertical,
   Mail,
   Key,
-  Trash2
+  Trash2,
+  Eye,
+  EyeOff,
+  Lock,
+  Save
 } from "lucide-react"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
@@ -51,6 +57,12 @@ export default function UsuariosPage() {
   // Deletion States
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
+  
+  // Password Change States
+  const [passwordUserId, setPasswordUserId] = useState<string | null>(null)
+  const [newPassword, setNewPassword] = useState("")
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [changingPassword, setChangingPassword] = useState(false)
   
   // Toast Notification State
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
@@ -127,6 +139,36 @@ export default function UsuariosPage() {
       alert("Error al conectar con el servidor.")
     } finally {
       setUpdatingId(null)
+    }
+  }
+
+  const handleChangePassword = async (userId: string) => {
+    if (!newPassword || newPassword.length < 6) {
+      alert("La contraseña debe tener al menos 6 caracteres")
+      return
+    }
+    setChangingPassword(true)
+    try {
+      const res = await fetch(`/api/admin/usuarios/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "changePassword", newPassword }),
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        triggerSuccessMsg(data.message || "Contraseña cambiada exitosamente.")
+        setPasswordUserId(null)
+        setNewPassword("")
+        setShowNewPassword(false)
+      } else {
+        const data = await res.json()
+        alert(data.error || "Error al cambiar la contraseña.")
+      }
+    } catch {
+      alert("Error al conectar con el servidor.")
+    } finally {
+      setChangingPassword(false)
     }
   }
 
@@ -251,6 +293,7 @@ export default function UsuariosPage() {
                     <TableHead>Nombre</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Detalles de Cuenta</TableHead>
+                    <TableHead>Contraseña</TableHead>
                     <TableHead>Fecha Registro</TableHead>
                     <TableHead>Vencimiento Suscripción</TableHead>
                     <TableHead>Correos</TableHead>
@@ -261,7 +304,7 @@ export default function UsuariosPage() {
                 <TableBody>
                   {filtered.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                         {search ? "No se encontraron usuarios" : "No hay usuarios registrados"}
                       </TableCell>
                     </TableRow>
@@ -291,6 +334,8 @@ export default function UsuariosPage() {
                         }
                       }
 
+                      const isEditingPassword = passwordUserId === u.id
+
                       return (
                         <TableRow key={u.id}>
                           <TableCell className="font-medium">{u.name || "-"}</TableCell>
@@ -304,6 +349,56 @@ export default function UsuariosPage() {
                                 Rol: {u.role} • Proyectos: {u._count?.proyectos || 0}
                               </span>
                             </div>
+                          </TableCell>
+                          {/* Password Column */}
+                          <TableCell>
+                            {isEditingPassword ? (
+                              <div className="flex items-center gap-1.5 min-w-[200px]">
+                                <div className="relative flex-1">
+                                  <Input
+                                    type={showNewPassword ? "text" : "password"}
+                                    value={newPassword}
+                                    onChange={e => setNewPassword(e.target.value)}
+                                    placeholder="Nueva contraseña"
+                                    className="h-8 text-xs pr-8"
+                                    disabled={changingPassword}
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowNewPassword(!showNewPassword)}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                  >
+                                    {showNewPassword ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                                  </button>
+                                </div>
+                                <Button
+                                  size="sm"
+                                  className="h-8 px-2"
+                                  onClick={() => handleChangePassword(u.id)}
+                                  disabled={changingPassword || !newPassword}
+                                >
+                                  {changingPassword ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-8 px-2"
+                                  onClick={() => { setPasswordUserId(null); setNewPassword(""); setShowNewPassword(false) }}
+                                >
+                                  <XCircle className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-7 text-xs gap-1"
+                                onClick={() => { setPasswordUserId(u.id); setNewPassword(""); setShowNewPassword(false) }}
+                              >
+                                <Lock className="h-3 w-3" />
+                                Cambiar
+                              </Button>
+                            )}
                           </TableCell>
                           <TableCell>{format(new Date(u.createdAt), "dd MMM yyyy", { locale: es })}</TableCell>
                           <TableCell>
@@ -427,4 +522,3 @@ export default function UsuariosPage() {
     </div>
   )
 }
-
