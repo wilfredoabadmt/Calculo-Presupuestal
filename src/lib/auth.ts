@@ -1,6 +1,5 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
-import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 import { z } from "zod"
@@ -11,11 +10,10 @@ const signInSchema = z.object({
 })
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
   pages: {
-    signIn: "/auth/login",
-    error: "/auth/login",
+    signIn: "/login",
+    error: "/login",
   },
   providers: [
     Credentials({
@@ -30,13 +28,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const user = await prisma.user.findUnique({ where: { email } })
 
         if (!user || !user.password) {
-          throw new Error("Credenciales inválidas")
+          return null
         }
 
         const isValid = await bcrypt.compare(password, user.password)
 
         if (!isValid) {
-          throw new Error("Credenciales inválidas")
+          return null
         }
 
         return {

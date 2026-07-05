@@ -14,6 +14,16 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const { name, email, password } = registerSchema.parse(body)
 
+    // Verify database is ready
+    try {
+      await prisma.$queryRaw`SELECT 1`
+    } catch {
+      return NextResponse.json(
+        { error: "Base de datos no disponible. Intenta en unos segundos." },
+        { status: 503 }
+      )
+    }
+
     // Check if user exists
     const existing = await prisma.user.findUnique({ where: { email } })
 
@@ -55,7 +65,7 @@ export async function POST(req: NextRequest) {
 
     console.error("Registration error:", error)
     return NextResponse.json(
-      { error: "Error al crear la cuenta" },
+      { error: "Error al crear la cuenta. Intenta de nuevo." },
       { status: 500 }
     )
   }

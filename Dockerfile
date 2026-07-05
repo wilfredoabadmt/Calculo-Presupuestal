@@ -55,21 +55,24 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Copy prisma files
+# Copy prisma files and seed
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/node_modules/.package-lock.json ./node_modules/.package-lock.json
 
-# Copy seed file
-COPY --from=builder /app/prisma/seed.ts ./prisma/seed.ts
+# Copy only what we need for seed: tsx, esbuild, and their deps
+COPY --from=builder /app/node_modules/tsx ./node_modules/tsx
+COPY --from=builder /app/node_modules/esbuild ./node_modules/esbuild
+COPY --from=builder /app/node_modules/@esbuild ./node_modules/@esbuild
+COPY --from=builder /app/node_modules/typescript ./node_modules/typescript
+COPY --from=builder /app/node_modules/bcryptjs ./node_modules/bcryptjs
+COPY --from=builder /app/node_modules/@types ./node_modules/@types
+COPY --from=builder /app/node_modules/zod ./node_modules/zod
 
-# Create entrypoint script
-RUN echo '#!/bin/sh' > /app/entrypoint.sh && \
-    echo 'echo "Running Prisma migrations in background..."' >> /app/entrypoint.sh && \
-    echo 'npx prisma db push --skip-generate &' >> /app/entrypoint.sh && \
-    echo 'echo "Starting application..."' >> /app/entrypoint.sh && \
-    echo 'exec node server.js' >> /app/entrypoint.sh && \
-    chmod +x /app/entrypoint.sh
+# Copy entrypoint
+COPY --from=builder /app/entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
 USER nextjs
 
@@ -78,7 +81,7 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=5 \
   CMD curl -f http://localhost:3000/api/health || exit 1
 
 ENTRYPOINT ["/bin/sh", "/app/entrypoint.sh"]
