@@ -78,6 +78,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/rt-deps /app/rt-deps
 
 # Restore runtime dependencies to node_modules
 RUN mkdir -p /app/node_modules && \
+  rm -rf /app/node_modules/.prisma /app/node_modules/@prisma /app/node_modules/prisma /app/node_modules/.bin /app/node_modules/tsx /app/node_modules/esbuild /app/node_modules/@esbuild /app/node_modules/typescript /app/node_modules/bcryptjs /app/node_modules/@types /app/node_modules/zod /app/node_modules/get-tsconfig /app/node_modules/resolve-pkg-maps && \
   mv /app/rt-deps/dot-prisma /app/node_modules/.prisma && \
   mv /app/rt-deps/at-prisma /app/node_modules/@prisma && \
   mv /app/rt-deps/prisma /app/node_modules/prisma && \
