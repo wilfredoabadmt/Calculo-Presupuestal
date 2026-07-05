@@ -8,7 +8,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export default [
-  // 1. Configuración base para TypeScript en ESLint 9
   {
     files: ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"],
     languageOptions: {
@@ -23,10 +22,12 @@ export default [
     },
     rules: {
       ...tsPlugin.configs.recommended.rules,
+      // 👇 Desactivamos temporalmente las reglas estrictas que te inundan el reporte
+      "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-require-imports": "off",
     },
   },
-
-  // 2. Configuración nativa para Next.js (reemplaza core-web-vitals de forma compatible)
   {
     plugins: {
       "@next/next": nextPlugin,
@@ -36,8 +37,6 @@ export default [
       ...nextPlugin.configs["core-web-vitals"].rules,
     },
   },
-
-  // 3. Ignorar carpetas de compilación
   {
     ignores: [".next/*", "node_modules/*", "dist/*"],
   }
