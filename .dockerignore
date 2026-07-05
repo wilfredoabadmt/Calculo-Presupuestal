@@ -4,7 +4,6 @@ node_modules
 .github
 docs
 guia
-*.md
 *.log
 .env
 .env.*
@@ -13,8 +12,3 @@ guia
 .vscode
 .idea
 coverage
-jest.config.*
-tsconfig.json
-tailwind.config.ts
-postcss.config.js
-next.config.mjs
