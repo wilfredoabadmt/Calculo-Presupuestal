@@ -1,21 +1,54 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageHeader } from "@/components/shared/PageHeader"
-import { Settings, Save, Box, DollarSign, Percent } from "lucide-react"
+import { Settings, Save, Box, DollarSign, Percent, CheckCircle } from "lucide-react"
 import Link from "next/link"
 
+const defaultConfig = {
+  moneda: "Bs.",
+  iva: 14.94,
+  impuestoIT: 3.09,
+  cargasSociales: 55,
+  gastosGenerales: 15,
+  utilidad: 10,
+  desperdicio: 5,
+  pesoBolsaCemento: 42.5,
+}
+
 export default function ConfiguracionPage() {
+  const [config, setConfig] = useState(defaultConfig)
+  const [saved, setSaved] = useState(false)
+
+  useEffect(() => {
+    const savedConfig = localStorage.getItem("app-config")
+    if (savedConfig) {
+      setConfig({ ...defaultConfig, ...JSON.parse(savedConfig) })
+    }
+  }, [])
+
+  function handleSave() {
+    localStorage.setItem("app-config", JSON.stringify(config))
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Configuración"
         description="Parámetros generales del sistema"
         icon={<Settings className="h-7 w-7 text-primary" />}
-        actions={<Button><Save className="mr-2 h-4 w-4" /> Guardar Cambios</Button>}
+        actions={
+          <Button onClick={handleSave}>
+            {saved ? <CheckCircle className="mr-2 h-4 w-4" /> : <Save className="mr-2 h-4 w-4" />}
+            {saved ? "Guardado" : "Guardar Cambios"}
+          </Button>
+        }
       />
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -27,19 +60,19 @@ export default function ConfiguracionPage() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label>Moneda Default</Label>
-              <Input defaultValue="Bs." />
+              <Input value={config.moneda} onChange={e => setConfig({...config, moneda: e.target.value})} />
             </div>
             <div className="space-y-2">
               <Label>IVA (%)</Label>
-              <Input type="number" defaultValue="14.94" />
+              <Input type="number" step="0.01" value={config.iva} onChange={e => setConfig({...config, iva: parseFloat(e.target.value) || 0})} />
             </div>
             <div className="space-y-2">
               <Label>Impuesto IT (%)</Label>
-              <Input type="number" defaultValue="3.09" />
+              <Input type="number" step="0.01" value={config.impuestoIT} onChange={e => setConfig({...config, impuestoIT: parseFloat(e.target.value) || 0})} />
             </div>
             <div className="space-y-2">
               <Label>Cargas Sociales (%)</Label>
-              <Input type="number" defaultValue="55" />
+              <Input type="number" step="0.01" value={config.cargasSociales} onChange={e => setConfig({...config, cargasSociales: parseFloat(e.target.value) || 0})} />
             </div>
           </CardContent>
         </Card>
@@ -52,19 +85,19 @@ export default function ConfiguracionPage() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label>Gastos Generales (%)</Label>
-              <Input type="number" defaultValue="15" />
+              <Input type="number" step="0.01" value={config.gastosGenerales} onChange={e => setConfig({...config, gastosGenerales: parseFloat(e.target.value) || 0})} />
             </div>
             <div className="space-y-2">
               <Label>Utilidad (%)</Label>
-              <Input type="number" defaultValue="10" />
+              <Input type="number" step="0.01" value={config.utilidad} onChange={e => setConfig({...config, utilidad: parseFloat(e.target.value) || 0})} />
             </div>
             <div className="space-y-2">
               <Label>Desperdicio Default (%)</Label>
-              <Input type="number" defaultValue="5" />
+              <Input type="number" value={config.desperdicio} onChange={e => setConfig({...config, desperdicio: parseFloat(e.target.value) || 0})} />
             </div>
             <div className="space-y-2">
               <Label>Peso Bolsa Cemento (kg)</Label>
-              <Input type="number" defaultValue="42.5" />
+              <Input type="number" step="0.1" value={config.pesoBolsaCemento} onChange={e => setConfig({...config, pesoBolsaCemento: parseFloat(e.target.value) || 42.5})} />
             </div>
           </CardContent>
         </Card>

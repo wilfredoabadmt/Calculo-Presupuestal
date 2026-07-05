@@ -2,13 +2,13 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft, Calculator, Save, Box, Weight } from "lucide-react"
+import { ArrowLeft, Calculator, Save, Box, Weight, CheckCircle, Loader2 } from "lucide-react"
 import { formatNumber, cn } from "@/lib/utils"
 
 const dosificaciones = [
@@ -32,6 +32,7 @@ const PESO_BOLSA = 42.5
 
 export default function VigaCalculatorPage() {
   const params = useParams()
+  const router = useRouter()
   const projectId = params.id as string
 
   const [form, setForm] = useState({
@@ -65,6 +66,9 @@ export default function VigaCalculatorPage() {
     materiales: { nombre: string; cantidad: number; unidad: string; precio: number }[]
     total: number
   } | null>(null)
+
+  const [isSaving, setIsSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
 
   const selectedDos = dosificaciones.find(d => d.ratio === form.dosificacion) || dosificaciones[3]
   const dPos = diametros.find(d => d.value === form.diametroPos) || diametros[3]
@@ -126,6 +130,40 @@ export default function VigaCalculatorPage() {
     })
   }
 
+  const handleSave = async () => {
+    if (!results) return
+    setIsSaving(true)
+    try {
+      const res = await fetch(`/api/proyectos/${projectId}/elementos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tipoElemento: "VIGA",
+          descripcion: `Viga ${form.dimA}x${form.dimB}x${form.largo}m`,
+          cantidad: parseInt(form.cantidad),
+          dimA: parseFloat(form.dimA),
+          dimB: parseFloat(form.dimB),
+          dimLargo: parseFloat(form.largo),
+          dosificacionConcretoId: null,
+          resistencia: 0,
+          desperdicio: parseFloat(form.desperdicioConcreto),
+          aceroLongitudinal: { peso: results.totalAcero },
+          estribos: { cantidad: results.estribos?.cantidad, peso: results.estribos?.peso },
+          materiales: JSON.stringify(results.materiales),
+          costoTotal: results.total,
+        }),
+      })
+      if (res.ok) {
+        setSaved(true)
+        setTimeout(() => router.push(`/proyectos/${projectId}/elementos`), 1500)
+      }
+    } catch {
+      alert("Error al guardar")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -141,8 +179,14 @@ export default function VigaCalculatorPage() {
             <p className="text-muted-foreground">Concreto + Acero (+) + Acero (-) + Estribos</p>
           </div>
         </div>
-        <Button variant="outline" disabled={!results}>
-          <Save className="mr-2 h-4 w-4" /> Guardar
+        <Button variant="outline" onClick={handleSave} disabled={!results || isSaving || saved}>
+          {isSaving ? (
+            <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Guardando...</>
+          ) : saved ? (
+            <><CheckCircle className="mr-2 h-4 w-4 text-green-600" /> Guardado</>
+          ) : (
+            <><Save className="mr-2 h-4 w-4" /> Guardar en Proyecto</>
+          )}
         </Button>
       </div>
 

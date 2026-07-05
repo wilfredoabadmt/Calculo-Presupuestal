@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -16,7 +16,9 @@ import {
   Package,
   Droplets,
   Weight,
-  ChevronDown
+  ChevronDown,
+  CheckCircle,
+  Loader2
 } from "lucide-react"
 import { formatNumber, cn } from "@/lib/utils"
 
@@ -48,6 +50,7 @@ const PESO_BOLSA = 42.5
 
 export default function ParedCalculatorPage() {
   const params = useParams()
+  const router = useRouter()
   const projectId = params.id as string
 
   const [form, setForm] = useState({
@@ -67,6 +70,8 @@ export default function ParedCalculatorPage() {
 
   const [results, setResults] = useState<any>(null)
   const [isCalculating, setIsCalculating] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
 
   const bloque = tiposBloque.find(b => b.nombre === form.tipoBloque) || tiposBloque[2]
   const pega = dosificacionesMortero.find(d => d.ratio === form.dosificacionPega) || dosificacionesMortero[2]
@@ -144,7 +149,36 @@ export default function ParedCalculatorPage() {
 
   const handleSave = async () => {
     if (!results) return
-    alert("Elemento guardado en el proyecto!")
+    setIsSaving(true)
+    try {
+      const res = await fetch(`/api/proyectos/${projectId}/elementos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tipoElemento: "PARED",
+          descripcion: `Pared ${form.tipoBloque} - ${form.area}m²`,
+          cantidad: parseInt(form.cantidad),
+          dimA: parseFloat(form.area),
+          tipoBloqueId: null,
+          desperdicio: parseFloat(form.desperdicioBloques),
+          materiales: JSON.stringify([
+            { nombre: "Bloques/Ladrillos", cantidad: results.bloques, unidad: "uds", precio: results.costoBloques },
+            { nombre: "Cemento CP-40", cantidad: results.bolsasCemento, unidad: "bolsa", precio: results.bolsasCemento * 8.60 },
+            { nombre: "Arena media", cantidad: results.totalArenaM3, unidad: "m³", precio: results.totalArenaM3 * 28.33 },
+            { nombre: "Agua", cantidad: results.totalAguaLt, unidad: "lt", precio: results.totalAguaLt * 0.003 },
+          ]),
+          costoTotal: results.totalCosto,
+        }),
+      })
+      if (res.ok) {
+        setSaved(true)
+        setTimeout(() => router.push(`/proyectos/${projectId}/elementos`), 1500)
+      }
+    } catch {
+      alert("Error al guardar")
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
@@ -163,9 +197,14 @@ export default function ParedCalculatorPage() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleSave} disabled={!results}>
-            <Save className="mr-2 h-4 w-4" />
-            Guardar en Proyecto
+          <Button variant="outline" onClick={handleSave} disabled={!results || isSaving || saved}>
+            {isSaving ? (
+              <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Guardando...</>
+            ) : saved ? (
+              <><CheckCircle className="mr-2 h-4 w-4 text-green-600" /> Guardado</>
+            ) : (
+              <><Save className="mr-2 h-4 w-4" /> Guardar en Proyecto</>
+            )}
           </Button>
         </div>
       </div>

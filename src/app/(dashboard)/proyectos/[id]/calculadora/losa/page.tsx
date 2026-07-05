@@ -2,13 +2,13 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft, Calculator, Save, Box } from "lucide-react"
+import { ArrowLeft, Calculator, Save, Box, CheckCircle, Loader2 } from "lucide-react"
 import { formatNumber, cn } from "@/lib/utils"
 
 const dosificaciones = [
@@ -23,6 +23,9 @@ const PESO_BOLSA = 42.5
 export default function LosaCalculatorPage() {
   const params = useParams()
   const projectId = params.id as string
+  const router = useRouter()
+  const [isSaving, setIsSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
 
   const [form, setForm] = useState({
     largo: "5.00",
@@ -86,6 +89,46 @@ export default function LosaCalculatorPage() {
     })
   }
 
+  const handleSave = async () => {
+    if (!results) return
+    setIsSaving(true)
+    try {
+      const res = await fetch(`/api/proyectos/${projectId}/elementos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tipoElemento: "LOSA",
+          descripcion: `Losa ${form.largo}x${form.ancho}x${form.espesor}m`,
+          cantidad: 1,
+          dimLargo: parseFloat(form.largo),
+          dimAncho: parseFloat(form.ancho),
+          dimEspesor: parseFloat(form.espesor),
+          dosificacionConcretoId: null,
+          resistencia: selectedDos.ratio,
+          desperdicio: parseFloat(form.desperdicio),
+          aceroLongitudinal: { peso: results.acero },
+          materiales: JSON.stringify({
+            cemento: results.cemento,
+            arena: results.arena,
+            grava: results.grava,
+            acero: results.acero,
+            bovedillas: results.bovedillas,
+            electromalla: results.electromalla,
+          }),
+          costoTotal: results.total,
+        }),
+      })
+      if (res.ok) {
+        setSaved(true)
+        setTimeout(() => router.push(`/proyectos/${projectId}/elementos`), 1500)
+      }
+    } catch {
+      alert("Error al guardar")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -96,7 +139,15 @@ export default function LosaCalculatorPage() {
             <p className="text-muted-foreground">Concreto + Acero 4 Direcciones + Bovedillas + Electromalla</p>
           </div>
         </div>
-        <Button variant="outline" disabled={!results}><Save className="mr-2 h-4 w-4" /> Guardar</Button>
+        <Button variant="outline" disabled={!results || isSaving || saved} onClick={handleSave}>
+          {isSaving ? (
+            <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Guardando...</>
+          ) : saved ? (
+            <><CheckCircle className="mr-2 h-4 w-4 text-green-600" /> Guardado</>
+          ) : (
+            <><Save className="mr-2 h-4 w-4" /> Guardar</>
+          )}
+        </Button>
       </div>
 
       <Card>

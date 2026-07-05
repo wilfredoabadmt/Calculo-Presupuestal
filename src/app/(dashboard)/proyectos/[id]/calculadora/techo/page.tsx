@@ -2,13 +2,13 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft, Calculator, Save, Box } from "lucide-react"
+import { ArrowLeft, Calculator, Save, Box, CheckCircle, Loader2 } from "lucide-react"
 import { formatNumber } from "@/lib/utils"
 
 const tiposTeja = [
@@ -20,7 +20,11 @@ const tiposTeja = [
 
 export default function TechoCalculatorPage() {
   const params = useParams()
+  const router = useRouter()
   const projectId = params.id as string
+
+  const [isSaving, setIsSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
 
   const [form, setForm] = useState({
     ancho: "6.00",
@@ -60,6 +64,38 @@ export default function TechoCalculatorPage() {
     })
   }
 
+  const handleSave = async () => {
+    if (!results) return
+    setIsSaving(true)
+    try {
+      const res = await fetch(`/api/proyectos/${projectId}/elementos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tipoElemento: "TECHO",
+          descripcion: `Techo ${form.tipoTeja} - ${form.ancho}x${form.largo}m`,
+          cantidad: 1,
+          dimAncho: parseFloat(form.ancho),
+          dimLargo: parseFloat(form.largo),
+          tipoTejaId: null,
+          desperdicio: parseFloat(form.desperdicio),
+          materiales: JSON.stringify([
+            { nombre: "Tejas", cantidad: results.tejas, unidad: "pza", precio: results.tejas * 15 },
+          ]),
+          costoTotal: results.total,
+        }),
+      })
+      if (res.ok) {
+        setSaved(true)
+        setTimeout(() => router.push(`/proyectos/${projectId}/elementos`), 1500)
+      }
+    } catch {
+      alert("Error al guardar")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -70,7 +106,10 @@ export default function TechoCalculatorPage() {
             <p className="text-muted-foreground">Tejas - area = √(L²+H²) × A</p>
           </div>
         </div>
-        <Button variant="outline" disabled={!results}><Save className="mr-2 h-4 w-4" /> Guardar</Button>
+        <Button variant="outline" disabled={!results || isSaving || saved} onClick={handleSave}>
+          {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : saved ? <CheckCircle className="mr-2 h-4 w-4" /> : <Save className="mr-2 h-4 w-4" />}
+          {isSaving ? "Guardando..." : saved ? "Guardado" : "Guardar"}
+        </Button>
       </div>
 
       <Card>

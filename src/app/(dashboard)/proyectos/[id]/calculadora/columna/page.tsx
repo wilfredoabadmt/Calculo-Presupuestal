@@ -2,13 +2,13 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft, Calculator, Save, Box, Package, Weight, Ruler } from "lucide-react"
+import { ArrowLeft, Calculator, Save, Box, Package, Weight, Ruler, CheckCircle, Loader2 } from "lucide-react"
 import { formatNumber, cn } from "@/lib/utils"
 
 const dosificaciones = [
@@ -32,7 +32,10 @@ const PESO_BOLSA = 42.5
 
 export default function ColumnaCalculatorPage() {
   const params = useParams()
+  const router = useRouter()
   const projectId = params.id as string
+  const [isSaving, setIsSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
 
   const [form, setForm] = useState({
     alto: "3.00",
@@ -66,6 +69,40 @@ export default function ColumnaCalculatorPage() {
   const selectedDosificacion = dosificaciones.find(d => d.ratio === form.dosificacion) || dosificaciones[3]
   const selectedDiametroLong = diametros.find(d => d.value === form.diametroLong) || diametros[3]
   const selectedDiametroEstribo = diametros.find(d => d.value === form.diametroEstribo) || diametros[1]
+
+  const handleSave = async () => {
+    if (!results) return
+    setIsSaving(true)
+    try {
+      const res = await fetch(`/api/proyectos/${projectId}/elementos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tipoElemento: "COLUMNA",
+          descripcion: `Columna ${form.dimA}x${form.dimB}x${form.alto}m`,
+          cantidad: parseInt(form.cantidad),
+          dimA: parseFloat(form.dimA),
+          dimB: parseFloat(form.dimB),
+          dimH: parseFloat(form.alto),
+          dosificacionConcretoId: null,
+          resistencia: selectedDosificacion.resistencia,
+          desperdicio: parseFloat(form.desperdicioConcreto),
+          aceroLongitudinal: { diametro: form.diametroLong, cantidad: parseInt(form.cantidadVarillas), largo: form.longVarillas, peso: results.aceroLong },
+          estribos: { diametro: form.diametroEstribo, cantidad: results.estribos.cantidad, peso: results.estribos.peso },
+          materiales: JSON.stringify(results.materiales),
+          costoTotal: results.total,
+        }),
+      })
+      if (res.ok) {
+        setSaved(true)
+        setTimeout(() => router.push(`/proyectos/${projectId}/elementos`), 1500)
+      }
+    } catch {
+      alert("Error al guardar")
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   const calculate = () => {
     const a = parseFloat(form.dimA)
@@ -138,9 +175,14 @@ export default function ColumnaCalculatorPage() {
             <p className="text-muted-foreground">Concreto + Acero Longitudinal + Estribos</p>
           </div>
         </div>
-        <Button variant="outline" disabled={!results}>
-          <Save className="mr-2 h-4 w-4" />
-          Guardar en Proyecto
+        <Button variant="outline" onClick={handleSave} disabled={!results || isSaving || saved}>
+          {isSaving ? (
+            <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Guardando...</>
+          ) : saved ? (
+            <><CheckCircle className="mr-2 h-4 w-4 text-green-600" /> Guardado</>
+          ) : (
+            <><Save className="mr-2 h-4 w-4" /> Guardar en Proyecto</>
+          )}
         </Button>
       </div>
 

@@ -1,6 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts"
 
 interface TortaItem {
   nombre: string
@@ -19,15 +20,41 @@ export function GraficoTorta({ items }: GraficoTortaProps) {
     <Card>
       <CardHeader><CardTitle>Composición de Costos</CardTitle></CardHeader>
       <CardContent>
-        <div className="space-y-3">
-          {items.map((item, i) => (
-            <div key={i} className="flex items-center gap-3">
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: item.color }} />
-              <div className="flex-1 text-sm">{item.nombre}</div>
-              <div className="w-20 text-right text-sm font-medium">{((item.valor / total) * 100).toFixed(1)}%</div>
+        {items.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">Sin datos para mostrar</div>
+        ) : (
+          <div className="flex flex-col md:flex-row items-center gap-6">
+            <ResponsiveContainer width="100%" height={280}>
+              <PieChart>
+                <Pie
+                  data={items}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={100}
+                  paddingAngle={2}
+                  dataKey="valor"
+                  nameKey="nombre"
+                >
+                  {items.map((item, i) => (
+                    <Cell key={i} fill={item.color} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value: number) => `Bs. ${value.toFixed(2)}`} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="space-y-2 min-w-[200px]">
+              {items.map((item, i) => (
+                <div key={i} className="flex items-center gap-2 text-sm">
+                  <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+                  <span className="flex-1 truncate">{item.nombre}</span>
+                  <span className="font-medium">{((item.valor / total) * 100).toFixed(1)}%</span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

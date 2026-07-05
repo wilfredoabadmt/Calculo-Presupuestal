@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { PageHeader } from "@/components/shared/PageHeader"
 import { FileBarChart, Download, FileText, Table2, Calendar, PieChart, BarChart3, Loader2 } from "lucide-react"
-import { exportarPDF, exportarExcel } from "@/lib/exports"
+import { exportarPDF, exportarExcel, exportarComputosPDF, exportarCronogramaPDF, exportarCronogramaExcel } from "@/lib/exports"
 
 interface Elemento {
   id: string
@@ -20,17 +20,19 @@ export default function ReportesPage() {
   const params = useParams()
   const projectId = params.id as string
   const [elementos, setElementos] = useState<Elemento[]>([])
+  const [cronograma, setCronograma] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [exporting, setExporting] = useState<string | null>(null)
 
   useEffect(() => {
-    fetch(`/api/proyectos/${projectId}/elementos`)
-      .then(r => r.json())
-      .then(data => {
-        setElementos(Array.isArray(data) ? data : [])
-        setLoading(false)
-      })
-      .catch(() => setLoading(false))
+    Promise.all([
+      fetch(`/api/proyectos/${projectId}/elementos`).then(r => r.json()),
+      fetch(`/api/proyectos/${projectId}/cronograma`).then(r => r.json()),
+    ]).then(([elemData, cronData]) => {
+      setElementos(Array.isArray(elemData) ? elemData : [])
+      setCronograma(Array.isArray(cronData) ? cronData : [])
+      setLoading(false)
+    }).catch(() => setLoading(false))
   }, [projectId])
 
   const subtotal = elementos.reduce((sum, e) => sum + e.costoTotal, 0)
@@ -64,12 +66,24 @@ export default function ReportesPage() {
       case "presupuesto-excel":
         exportarExcel(items, "Presupuesto General")
         break
+      case "computos-pdf":
+        exportarComputosPDF(elementos, "Computos Métricos")
+        break
+      case "computos-excel":
+        exportarExcel(items, "Computos Métricos")
+        break
+      case "cronograma-pdf":
+        exportarCronogramaPDF(cronograma)
+        break
+      case "cronograma-excel":
+        exportarCronogramaExcel(cronograma)
+        break
       case "materiales-excel":
         exportarExcel(items, "Lista de Materiales")
         break
     }
     setTimeout(() => setExporting(null), 1000)
-  }, [elementos, subtotal, totalAIU])
+  }, [elementos, cronograma, subtotal, totalAIU])
 
   const reportes = [
     { nombre: "Presupuesto General", descripcion: "Tabla completa con totales por módulo", icon: FileText, formatos: ["PDF", "Excel"], key: "presupuesto" },

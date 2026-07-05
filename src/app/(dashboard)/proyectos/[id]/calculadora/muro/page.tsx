@@ -2,13 +2,13 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft, Calculator, Save, Box } from "lucide-react"
+import { ArrowLeft, Calculator, Save, Box, CheckCircle, Loader2 } from "lucide-react"
 import { formatNumber } from "@/lib/utils"
 
 const dosificaciones = [
@@ -23,7 +23,11 @@ const PESO_BOLSA = 42.5
 
 export default function MuroCalculatorPage() {
   const params = useParams()
+  const router = useRouter()
   const projectId = params.id as string
+
+  const [isSaving, setIsSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
 
   const [form, setForm] = useState({
     corona: "0.30",
@@ -34,6 +38,7 @@ export default function MuroCalculatorPage() {
     porcentajePiedra: "60",
     porcentajeMortero: "40",
     cantidad: "1",
+    desperdicio: "10",
   })
 
   const [results, setResults] = useState<{
@@ -75,6 +80,40 @@ export default function MuroCalculatorPage() {
     })
   }
 
+  const handleSave = async () => {
+    if (!results) return
+    setIsSaving(true)
+    try {
+      const res = await fetch(`/api/proyectos/${projectId}/elementos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tipoElemento: "MURO",
+          descripcion: `Muro piedra ${form.base}x${form.altura}x${form.largo}m`,
+          cantidad: 1,
+          dimA: parseFloat(form.base),
+          dimB: parseFloat(form.altura),
+          dimLargo: parseFloat(form.largo),
+          desperdicio: parseFloat(form.desperdicio),
+          materiales: JSON.stringify([
+            { nombre: "Piedra", cantidad: results.piedra, unidad: "m³", precio: results.piedra * 120 },
+            { nombre: "Cemento CP-40", cantidad: results.cemento?.bolsas || 0, unidad: "bolsa", precio: (results.cemento?.bolsas || 0) * 8.60 },
+            { nombre: "Arena media", cantidad: results.arena, unidad: "m³", precio: results.arena * 28.33 },
+          ]),
+          costoTotal: results.total,
+        }),
+      })
+      if (res.ok) {
+        setSaved(true)
+        setTimeout(() => router.push(`/proyectos/${projectId}/elementos`), 1500)
+      }
+    } catch {
+      alert("Error al guardar")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -85,7 +124,10 @@ export default function MuroCalculatorPage() {
             <p className="text-muted-foreground">Piedra + Mortero - Volumen promedio ((C+B)/2 × H × L)</p>
           </div>
         </div>
-        <Button variant="outline" disabled={!results}><Save className="mr-2 h-4 w-4" /> Guardar</Button>
+        <Button variant="outline" disabled={!results || isSaving || saved} onClick={handleSave}>
+          {saved ? <CheckCircle className="mr-2 h-4 w-4" /> : isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+          {saved ? "Guardado" : isSaving ? "Guardando..." : "Guardar"}
+        </Button>
       </div>
 
       <Card>
@@ -123,6 +165,7 @@ export default function MuroCalculatorPage() {
           </div>
 
           <div className="space-y-2"><Label>Cantidad</Label><Input type="number" min="1" value={form.cantidad} onChange={e => setForm({...form, cantidad: e.target.value})} /></div>
+          <div className="space-y-2"><Label>Desperdicio (%)</Label><Input type="number" min="0" max="100" value={form.desperdicio} onChange={e => setForm({...form, desperdicio: e.target.value})} /></div>
 
           <Button onClick={calculate} className="w-full" size="lg"><Calculator className="mr-2 h-4 w-4" /> Calcular</Button>
         </CardContent>

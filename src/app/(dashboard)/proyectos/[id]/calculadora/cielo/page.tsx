@@ -2,18 +2,22 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft, Calculator, Save, Box } from "lucide-react"
+import { ArrowLeft, Calculator, Save, Box, CheckCircle, Loader2 } from "lucide-react"
 import { formatNumber } from "@/lib/utils"
 
 export default function CieloCalculatorPage() {
   const params = useParams()
+  const router = useRouter()
   const projectId = params.id as string
+
+  const [isSaving, setIsSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
 
   const [form, setForm] = useState({
     ancho: "4.00",
@@ -59,6 +63,40 @@ export default function CieloCalculatorPage() {
     })
   }
 
+  const handleSave = async () => {
+    if (!results) return
+    setIsSaving(true)
+    try {
+      const res = await fetch(`/api/proyectos/${projectId}/elementos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tipoElemento: "CIELO_RASO",
+          descripcion: `Cielo raso ${form.ancho}x${form.largo}m`,
+          cantidad: 1,
+          dimAncho: parseFloat(form.ancho),
+          dimLargo: parseFloat(form.largo),
+          desperdicio: parseFloat(form.despPaneles),
+          materiales: JSON.stringify([
+            { nombre: "Paneles", cantidad: results.paneles, unidad: "pza", precio: results.paneles * 45 },
+            { nombre: "Viguetas", cantidad: results.viguetas, unidad: "ml", precio: results.viguetas * 12 },
+            { nombre: "Omegas", cantidad: results.omegas, unidad: "ml", precio: results.omegas * 8 },
+            { nombre: "Ángulo", cantidad: results.angulos, unidad: "ml", precio: results.angulos * 6 },
+          ]),
+          costoTotal: results.total,
+        }),
+      })
+      if (res.ok) {
+        setSaved(true)
+        setTimeout(() => router.push(`/proyectos/${projectId}/elementos`), 1500)
+      }
+    } catch {
+      alert("Error al guardar")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -69,7 +107,10 @@ export default function CieloCalculatorPage() {
             <p className="text-muted-foreground">Paneles + Viguetas + Omegas + Ángulo Perimetral</p>
           </div>
         </div>
-        <Button variant="outline" disabled={!results}><Save className="mr-2 h-4 w-4" /> Guardar</Button>
+        <Button variant="outline" disabled={!results || isSaving || saved} onClick={handleSave}>
+          {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : saved ? <CheckCircle className="mr-2 h-4 w-4" /> : <Save className="mr-2 h-4 w-4" />}
+          {isSaving ? "Guardando..." : saved ? "Guardado" : "Guardar"}
+        </Button>
       </div>
 
       <Card>
