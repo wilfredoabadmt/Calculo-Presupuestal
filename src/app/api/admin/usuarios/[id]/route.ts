@@ -19,7 +19,20 @@ export async function PATCH(
 
   try {
     const body = await request.json()
-    const { plan, planExpiresAt } = body
+    const { plan, planExpiresAt, action } = body
+
+    // Support email resending actions (simulated)
+    if (action === "resendVerification") {
+      // Simulate sending email
+      await new Promise((resolve) => setTimeout(resolve, 800))
+      return NextResponse.json({ success: true, message: "Correo de verificación reenviado exitosamente." })
+    }
+
+    if (action === "resendPasswordReset") {
+      // Simulate sending password reset email
+      await new Promise((resolve) => setTimeout(resolve, 800))
+      return NextResponse.json({ success: true, message: "Correo de restablecimiento de contraseña enviado exitosamente." })
+    }
 
     // Validate plan
     if (plan !== undefined && plan !== "FREE" && plan !== "PRO") {
@@ -48,6 +61,37 @@ export async function PATCH(
     return NextResponse.json(updatedUser)
   } catch (error) {
     console.error("Error al actualizar usuario:", error)
+    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 })
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "No autenticado" }, { status: 401 })
+  }
+
+  if ((session.user as any).role !== "ADMIN") {
+    return NextResponse.json({ error: "No autorizado" }, { status: 403 })
+  }
+
+  const { id } = await params
+
+  // Prevent self-deletion
+  if (id === session.user.id) {
+    return NextResponse.json({ error: "No puedes eliminarte a ti mismo" }, { status: 400 })
+  }
+
+  try {
+    await prisma.user.delete({
+      where: { id },
+    })
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error("Error al eliminar usuario:", error)
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 })
   }
 }
