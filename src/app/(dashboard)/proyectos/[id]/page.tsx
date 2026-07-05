@@ -17,7 +17,8 @@ import {
   Trash2,
   Eye,
   Edit,
-  Loader2
+  Loader2,
+  Ruler
 } from "lucide-react"
 import { formatCurrency, formatNumber } from "@/lib/utils"
 import { format } from "date-fns"
@@ -281,41 +282,113 @@ export default function ProyectoDetailPage() {
         </TabsContent>
 
         <TabsContent value="presupuesto">
-          <div className="text-center py-12">
-            <FileText className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-            <h3 className="text-lg font-bold">Presupuesto General</h3>
-            <p className="text-muted-foreground mt-1">Aquí verás el presupuesto consolidado con todos los elementos</p>
-            <Button className="mt-4 gap-2" asChild>
-              <Link href={`/proyectos/${projectId}/presupuesto`}>
-                Ir al Presupuesto
-              </Link>
-            </Button>
-          </div>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Presupuesto General</CardTitle>
+              <Button variant="outline" size="sm" asChild>
+                <Link href={`/proyectos/${projectId}/presupuesto`}>
+                  <FileText className="mr-2 h-4 w-4" /> Ver completo
+                </Link>
+              </Button>
+            </CardHeader>
+            <CardContent>
+              {project.elementos.length === 0 ? (
+                <div className="text-center py-8">
+                  <FileText className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
+                  <p className="text-muted-foreground">Agrega elementos para generar el presupuesto</p>
+                </div>
+              ) : (
+                <>
+                  <div className="space-y-2">
+                    {project.elementos.slice(0, 5).map(el => (
+                      <div key={el.id} className="flex justify-between items-center py-2 border-b last:border-0">
+                        <div>
+                          <span className="font-medium">{el.descripcion}</span>
+                          <span className="text-sm text-muted-foreground ml-2">({el.tipoElemento})</span>
+                        </div>
+                        <span className="font-medium">{formatCurrency(el.costoTotal)}</span>
+                      </div>
+                    ))}
+                    {project.elementos.length > 5 && (
+                      <p className="text-sm text-muted-foreground text-center pt-2">
+                        +{project.elementos.length - 5} elementos más
+                      </p>
+                    )}
+                  </div>
+                  <div className="mt-4 pt-4 border-t space-y-1">
+                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Subtotal</span><span>{formatCurrency(totalCosto)}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Gastos Generales (15%)</span><span>{formatCurrency(gastosGenerales)}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Utilidad (10%)</span><span>{formatCurrency(utilidad)}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">IT (3.09%)</span><span>{formatCurrency(impuestos)}</span></div>
+                    <div className="flex justify-between font-bold pt-2 border-t"><span>TOTAL</span><span className="text-primary">{formatCurrency(totalAIU)}</span></div>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="cronograma">
-          <div className="text-center py-12">
-            <Calendar className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-            <h3 className="text-lg font-bold">Cronograma Gantt</h3>
-            <p className="text-muted-foreground mt-1">Diagrama de Gantt interactivo con ruta crítica</p>
-            <Button className="mt-4 gap-2" asChild>
-              <Link href={`/proyectos/${projectId}/cronograma`}>
-                Ver Cronograma
-              </Link>
-            </Button>
-          </div>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Cronograma de Obra</CardTitle>
+              <Button variant="outline" size="sm" asChild>
+                <Link href={`/proyectos/${projectId}/cronograma`}>
+                  <Calendar className="mr-2 h-4 w-4" /> Ver completo
+                </Link>
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8">
+                <Calendar className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
+                <p className="text-muted-foreground mb-3">Gantt interactivo con ruta crítica y Curva S</p>
+                <Button size="sm" asChild>
+                  <Link href={`/proyectos/${projectId}/cronograma`}>
+                    <Plus className="mr-2 h-4 w-4" /> Abrir Cronograma
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="reportes">
-          <div className="text-center py-12">
-            <BarChart className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-            <h3 className="text-lg font-bold">Reportes</h3>
-            <p className="text-muted-foreground mt-1">Exporta PDF, Excel y genera reportes profesionales</p>
-            <Button className="mt-4 gap-2" asChild>
-              <Link href={`/proyectos/${projectId}/reportes`}>
-                Ver Reportes
-              </Link>
-            </Button>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader><CardTitle className="text-base">Exportar Datos</CardTitle></CardHeader>
+              <CardContent className="space-y-2">
+                <Button variant="outline" className="w-full justify-start gap-2" asChild>
+                  <Link href={`/proyectos/${projectId}/reportes`}>
+                    <FileText className="h-4 w-4" /> Presupuesto PDF/Excel
+                  </Link>
+                </Button>
+                <Button variant="outline" className="w-full justify-start gap-2" asChild>
+                  <Link href={`/proyectos/${projectId}/reportes`}>
+                    <Ruler className="h-4 w-4" /> Computos Métricos
+                  </Link>
+                </Button>
+                <Button variant="outline" className="w-full justify-start gap-2" asChild>
+                  <Link href={`/proyectos/${projectId}/reportes`}>
+                    <Calendar className="h-4 w-4" /> Cronograma PDF
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader><CardTitle className="text-base">Análisis</CardTitle></CardHeader>
+              <CardContent className="space-y-2">
+                <Button variant="outline" className="w-full justify-start gap-2" asChild>
+                  <Link href={`/proyectos/${projectId}/reportes`}>
+                    <BarChart className="h-4 w-4" /> Gráficos de Costos
+                  </Link>
+                </Button>
+                <Button variant="outline" className="w-full justify-start gap-2" asChild>
+                  <Link href={`/proyectos/${projectId}/analisis-precios`}>
+                    <TrendingUp className="h-4 w-4" /> Análisis Precios Unitarios
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
       </Tabs>

@@ -300,23 +300,89 @@ export default function CronogramaPage() {
       </Card>
 
       {items.length > 0 && (
-        <Card>
-          <CardHeader><CardTitle>Leyenda</CardTitle></CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-4 text-sm">
-              {Object.entries(coloresPorTipo).map(([tipo, color]) => (
-                <div key={tipo} className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded" style={{ backgroundColor: color }} />
-                  {tipo === "OP" && "Obras Preliminares"}
-                  {tipo === "OG" && "Obra Gruesa"}
-                  {tipo === "OF" && "Obra Fina"}
-                  {tipo === "IHS" && "Inst. Hidrosanitarias"}
-                  {tipo === "IE" && "Inst. Eléctricas"}
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <>
+          {/* S-Curve */}
+          <Card>
+            <CardHeader><CardTitle>Curva S - Inversión Acumulada</CardTitle></CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {(() => {
+                  const sorted = [...items].sort((a, b) => new Date(a.fechaInicio).getTime() - new Date(b.fechaInicio).getTime())
+                  const minDate = new Date(sorted[0].fechaInicio)
+                  const maxDate = new Date(sorted.reduce((max, i) => Math.max(max, new Date(i.fechaFinal).getTime()), 0))
+                  const totalDays = differenceInCalendarDays(maxDate, minDate) || 1
+                  const totalCost = sorted.reduce((sum, i) => sum + (i.progreso || 0), 0)
+                  const maxProgress = sorted.length * 100
+
+                  // Build cumulative points
+                  const points: { date: Date; pct: number }[] = []
+                  let cumulative = 0
+                  for (const item of sorted) {
+                    cumulative += item.progreso || 0
+                    points.push({ date: new Date(item.fechaFinal), pct: cumulative })
+                  }
+
+                  return (
+                    <>
+                      <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                        <span>{format(minDate, "dd MMM", { locale: es })}</span>
+                        <span>{format(maxDate, "dd MMM yyyy", { locale: es })}</span>
+                      </div>
+                      <div className="relative h-32 bg-muted/30 rounded-lg overflow-hidden">
+                        {/* Grid lines */}
+                        {[0, 25, 50, 75, 100].map(pct => (
+                          <div key={pct} className="absolute w-full border-t border-muted" style={{ bottom: `${pct}%` }}>
+                            <span className="absolute -top-4 -left-1 text-[10px] text-muted-foreground">{pct}%</span>
+                          </div>
+                        ))}
+                        {/* S-curve line */}
+                        <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
+                          <polyline
+                            points={points.map((p, i) => {
+                              const x = ((new Date(p.date).getTime() - minDate.getTime()) / (maxDate.getTime() - minDate.getTime())) * 100
+                              const y = 100 - (maxProgress > 0 ? (p.pct / maxProgress) * 100 : 0)
+                              return `${x}%,${y}%`
+                            }).join(" ")}
+                            fill="none"
+                            stroke="hsl(var(--primary))"
+                            strokeWidth="2"
+                            vectorEffect="non-scaling-stroke"
+                          />
+                        </svg>
+                        {/* Progress indicator */}
+                        <div className="absolute bottom-2 right-2 text-sm font-medium text-primary">
+                          {maxProgress > 0 ? Math.round((cumulative / maxProgress) * 100) : 0}% completado
+                        </div>
+                      </div>
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>Total: {sorted.length} actividades</span>
+                        <span>Duración: {totalDays} días</span>
+                      </div>
+                    </>
+                  )
+                })()}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader><CardTitle>Leyenda</CardTitle></CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-4 text-sm">
+                {Object.entries(coloresPorTipo).map(([tipo, color]) => (
+                  <div key={tipo} className="flex items-center gap-2">
+                    <div className="w-4 h-4 rounded" style={{ backgroundColor: color }} />
+                    {tipo === "OP" && "Obras Preliminares"}
+                    {tipo === "OG" && "Obra Gruesa"}
+                    {tipo === "OF" && "Obra Fina"}
+                    {tipo === "IHS" && "Inst. Hidrosanitarias"}
+                    {tipo === "IE" && "Inst. Eléctricas"}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </>
       )}
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>

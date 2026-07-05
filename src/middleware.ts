@@ -1,25 +1,33 @@
-import { auth } from "@/lib/auth"
 import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
 
-const publicRoutes = ["/", "/auth/login", "/auth/register"]
-const authRoutes = ["/auth/login", "/auth/register"]
+const publicPaths = ["/", "/login", "/register", "/api/auth"]
 
-export default auth((req) => {
-  const isLoggedIn = !!req.auth
-  const isPublicRoute = publicRoutes.includes(req.nextUrl.pathname)
-  const isAuthRoute = authRoutes.includes(req.nextUrl.pathname)
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
 
-  if (isAuthRoute && isLoggedIn) {
-    return NextResponse.redirect(new URL("/", req.nextUrl))
+  // Allow public paths
+  if (publicPaths.some(p => pathname === p || pathname.startsWith(p + "/"))) {
+    return NextResponse.next()
   }
 
-  if (!isLoggedIn && !isPublicRoute) {
-    return NextResponse.redirect(new URL("/auth/login", req.nextUrl))
+  // Allow static files and assets
+  if (pathname.startsWith("/_next") || pathname.startsWith("/favicon") || pathname.includes(".")) {
+    return NextResponse.next()
+  }
+
+  // Check for session cookie (simplified - NextAuth handles actual JWT verification)
+  const sessionCookie = request.cookies.get("next-auth.session-token") || request.cookies.get("__Secure-next-auth.session-token")
+
+  if (!sessionCookie) {
+    const loginUrl = new URL("/login", request.url)
+    loginUrl.searchParams.set("callbackUrl", pathname)
+    return NextResponse.redirect(loginUrl)
   }
 
   return NextResponse.next()
-})
+}
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 }
