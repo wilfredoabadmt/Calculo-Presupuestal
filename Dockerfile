@@ -25,7 +25,11 @@ COPY package*.json ./
 COPY prisma ./prisma/
 
 # Install dependencies (cached unless package.json changes)
-RUN npm ci --network-timeout 300000
+# Retry up to 3 times on network errors (ECONNRESET, ETIMEDOUT)
+RUN for i in 1 2 3; do \
+      npm ci --network-timeout 300000 --maxsockets 5 && break || \
+      echo "npm ci attempt $i failed, retrying in 5s..." && sleep 5; \
+    done
 
 # Copy source code
 COPY . .
