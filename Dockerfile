@@ -47,6 +47,22 @@ RUN for i in 1 2 3 4 5; do \
 # Build application (skip lint for speed)
 RUN npm run build
 
+# Prepare runtime dependencies in a temp folder to avoid '@' symbols in COPY instructions (which can corrupt Coolify parses)
+RUN mkdir -p /app/rt-deps && \
+  cp -r /app/node_modules/.prisma /app/rt-deps/dot-prisma && \
+  cp -r /app/node_modules/@prisma /app/rt-deps/at-prisma && \
+  cp -r /app/node_modules/prisma /app/rt-deps/prisma && \
+  cp -r /app/node_modules/.bin /app/rt-deps/bin && \
+  cp -r /app/node_modules/tsx /app/rt-deps/tsx && \
+  cp -r /app/node_modules/esbuild /app/rt-deps/esbuild && \
+  cp -r /app/node_modules/@esbuild /app/rt-deps/at-esbuild && \
+  cp -r /app/node_modules/typescript /app/rt-deps/typescript && \
+  cp -r /app/node_modules/bcryptjs /app/rt-deps/bcryptjs && \
+  cp -r /app/node_modules/@types /app/rt-deps/at-types && \
+  cp -r /app/node_modules/zod /app/rt-deps/zod && \
+  cp -r /app/node_modules/get-tsconfig /app/rt-deps/get-tsconfig && \
+  cp -r /app/node_modules/resolve-pkg-maps /app/rt-deps/resolve-pkg-maps
+
 # Production stage
 FROM node:20-alpine AS runner
 
@@ -68,19 +84,26 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # Copy prisma files and seed
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
 
-# Copy runtime deps: prisma CLI, tsx, bcryptjs, zod
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /app/node_modules/.bin ./node_modules/.bin
-COPY --from=builder /app/node_modules/tsx ./node_modules/tsx
-COPY --from=builder /app/node_modules/esbuild ./node_modules/esbuild
-COPY --from=builder /app/node_modules/@esbuild ./node_modules/@esbuild
-COPY --from=builder /app/node_modules/typescript ./node_modules/typescript
-COPY --from=builder /app/node_modules/bcryptjs ./node_modules/bcryptjs
-COPY --from=builder /app/node_modules/@types ./node_modules/@types
-COPY --from=builder /app/node_modules/zod ./node_modules/zod
+# Copy prepared runtime dependencies from helper folder (no '@' in source/dest path to avoid parser bugs)
+COPY --from=builder --chown=nextjs:nodejs /app/rt-deps /app/rt-deps
+
+# Restore runtime dependencies to node_modules with their proper names
+RUN mkdir -p /app/node_modules && \
+  mv /app/rt-deps/dot-prisma /app/node_modules/.prisma && \
+  mv /app/rt-deps/at-prisma /app/node_modules/@prisma && \
+  mv /app/rt-deps/prisma /app/node_modules/prisma && \
+  mv /app/rt-deps/bin /app/node_modules/.bin && \
+  mv /app/rt-deps/tsx /app/node_modules/tsx && \
+  mv /app/rt-deps/esbuild /app/node_modules/esbuild && \
+  mv /app/rt-deps/at-esbuild /app/node_modules/@esbuild && \
+  mv /app/rt-deps/typescript /app/node_modules/typescript && \
+  mv /app/rt-deps/bcryptjs /app/node_modules/bcryptjs && \
+  mv /app/rt-deps/at-types /app/node_modules/@types && \
+  mv /app/rt-deps/zod /app/node_modules/zod && \
+  mv /app/rt-deps/get-tsconfig /app/node_modules/get-tsconfig && \
+  mv /app/rt-deps/resolve-pkg-maps /app/node_modules/resolve-pkg-maps && \
+  rm -rf /app/rt-deps
 
 # Copy entrypoint
 COPY --from=builder /app/entrypoint.sh /app/entrypoint.sh
