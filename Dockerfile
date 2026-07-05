@@ -25,14 +25,24 @@ COPY package*.json ./
 COPY prisma ./prisma/
 
 # Install dependencies (cached unless package.json changes)
-# Retry up to 3 times on network errors (ECONNRESET, ETIMEDOUT)
-RUN for i in 1 2 3; do \
-  npm ci --network-timeout 300000 --maxsockets 5 && break || \
-  echo "npm ci attempt $i failed, retrying in 10s..." && sleep 10; \
+# Use --ignore-scripts to skip prisma postinstall (downloads engine binary)
+# Engine binary is downloaded separately below for better reliability
+RUN for i in 1 2 3 4 5; do \
+  echo "npm ci attempt $i of 5..." && \
+  npm ci --ignore-scripts --network-timeout 300000 --maxsockets 3 && break || \
+  echo "npm ci attempt $i failed, retrying in 30s..." && sleep 30; \
   done
 
 # Copy source code
 COPY . .
+
+# Generate Prisma client and download engine binary (separate step with retry)
+# This separates the heavy download from npm ci for reliability on slow networks
+RUN for i in 1 2 3 4 5; do \
+  echo "prisma generate attempt $i of 5..." && \
+  npx prisma generate && break || \
+  echo "prisma generate attempt $i failed, retrying in 30s..." && sleep 30; \
+  done
 
 # Build application (skip lint for speed)
 RUN npm run build
