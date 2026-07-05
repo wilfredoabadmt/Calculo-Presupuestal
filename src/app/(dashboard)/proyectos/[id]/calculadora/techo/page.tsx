@@ -38,7 +38,7 @@ export default function TechoCalculatorPage() {
 
   const [formErrors, setFormErrors] = useState<Record<string, string>>({})
 
-  const validateAllFields = () => {
+  const validateAllFields = (shouldSetState = false) => {
     const errors: Record<string, string> = {}
 
     if (!form.ancho || parseFloat(form.ancho) <= 0) {
@@ -54,7 +54,9 @@ export default function TechoCalculatorPage() {
       errors.cantidad = "Debe ser mayor a 0"
     }
 
-    setFormErrors(errors)
+    if (shouldSetState) {
+      setFormErrors(errors)
+    }
     return Object.keys(errors).length === 0
   }
 
@@ -82,7 +84,7 @@ export default function TechoCalculatorPage() {
   const selectedTeja = tiposTeja.find(t => t.nombre === form.tipoTeja) || tiposTeja[0]
 
   const calculate = () => {
-    if (!validateAllFields()) {
+    if (!validateAllFields(true)) {
       return
     }
 

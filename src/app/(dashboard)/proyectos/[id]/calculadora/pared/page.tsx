@@ -70,7 +70,7 @@ export default function ParedCalculatorPage() {
 
   const [formErrors, setFormErrors] = useState<Record<string, string>>({})
 
-  const validateAllFields = () => {
+  const validateAllFields = (shouldSetState = false) => {
     const errors: Record<string, string> = {}
 
     if (!form.area || parseFloat(form.area) <= 0) {
@@ -80,7 +80,9 @@ export default function ParedCalculatorPage() {
       errors.cantidad = "Debe ser mayor a 0"
     }
 
-    setFormErrors(errors)
+    if (shouldSetState) {
+      setFormErrors(errors)
+    }
     return Object.keys(errors).length === 0
   }
 
@@ -111,16 +113,16 @@ export default function ParedCalculatorPage() {
   const calculate = () => {
     setIsCalculating(true)
     
+    if (!validateAllFields(true)) {
+      setIsCalculating(false)
+      return
+    }
+    
     const area = parseFloat(form.area)
     const cantidad = parseInt(form.cantidad)
     const desBloques = parseFloat(form.desperdicioBloques) / 100
     const desAcabados = parseFloat(form.desperdicioAcabados) / 100
     const incluirAcabados = form.incluirAcabados === "si"
-
-    if (!area || !cantidad) {
-      setIsCalculating(false)
-      return
-    }
 
     const areaTotal = area * cantidad
 

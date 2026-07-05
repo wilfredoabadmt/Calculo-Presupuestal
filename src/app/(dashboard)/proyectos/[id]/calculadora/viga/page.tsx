@@ -61,7 +61,7 @@ export default function VigaCalculatorPage() {
 
   const [formErrors, setFormErrors] = useState<Record<string, string>>({})
 
-  const validateAllFields = () => {
+  const validateAllFields = (shouldSetState = false) => {
     const errors: Record<string, string> = {}
 
     if (!form.largo || parseFloat(form.largo) <= 0) {
@@ -89,7 +89,9 @@ export default function VigaCalculatorPage() {
       errors.longVarillasNeg = "Debe ser un número mayor a 0"
     }
 
-    setFormErrors(errors)
+    if (shouldSetState) {
+      setFormErrors(errors)
+    }
     return Object.keys(errors).length === 0
   }
 
@@ -126,7 +128,7 @@ export default function VigaCalculatorPage() {
   const dEst = diametros.find(d => d.value === form.diametroEstribo) || diametros[1]
 
   const calculate = () => {
-    if (!validateAllFields()) {
+    if (!validateAllFields(true)) {
       return
     }
 
