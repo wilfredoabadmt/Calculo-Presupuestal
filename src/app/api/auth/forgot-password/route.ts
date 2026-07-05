@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
 
     // In production, send actual email here
     // For now, log the reset link to console for testing
-    const resetLink = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/auth/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`
+    const resetLink = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`
     console.log(`🔐 Password reset link for ${email}: ${resetLink}`)
 
     return NextResponse.json({ message: "Si el email existe, recibirás un enlace de restablecimiento" })

@@ -104,7 +104,7 @@ function LoginForm() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Contraseña</Label>
-                <Link href="/auth/forgot-password" className="text-sm text-primary hover:underline">
+                <Link href="/forgot-password" prefetch={false} className="text-sm text-primary hover:underline">
                   ¿Olvidaste la contraseña?
                 </Link>
               </div>
@@ -138,7 +138,7 @@ function LoginForm() {
         <CardFooter className="flex flex-col space-y-4 border-t pt-6">
           <p className="text-sm text-muted-foreground text-center">
             ¿No tienes cuenta?{" "}
-            <Link href="/register" className="text-primary hover:underline font-medium">
+            <Link href="/register" prefetch={false} className="text-primary hover:underline font-medium">
               Regístrate gratis
             </Link>
           </p>
@@ -146,7 +146,7 @@ function LoginForm() {
               <strong>Demo:</strong> demo@calculo.com / demo123
             </div>
             <div className="mt-2 text-center">
-              <Link href="/auth/reset-password" className="text-xs text-muted-foreground hover:text-primary transition-colors">
+              <Link href="/reset-password" prefetch={false} className="text-xs text-muted-foreground hover:text-primary transition-colors">
                 ¿Olvidaste tu contraseña? Solicitar restablecimiento
               </Link>
             </div>

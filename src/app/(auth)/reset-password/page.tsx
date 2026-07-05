@@ -89,7 +89,7 @@ function ResetPasswordForm() {
                 Solicita un nuevo enlace de restablecimiento
               </AlertDescription>
             </Alert>
-            <Button onClick={() => router.push("/auth/forgot-password")} className="w-full">
+            <Button onClick={() => router.push("/forgot-password")} className="w-full">
               Solicitar nuevo enlace
             </Button>
           </CardContent>

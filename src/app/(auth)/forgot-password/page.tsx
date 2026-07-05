@@ -124,7 +124,7 @@ function ForgotPasswordForm() {
         <CardFooter className="flex flex-col space-y-4 border-t pt-6">
           <p className="text-sm text-muted-foreground text-center">
             ¿Recordaste tu contraseña?{" "}
-            <Link href="/login" className="text-primary hover:underline font-medium">
+            <Link href="/login" prefetch={false} className="text-primary hover:underline font-medium">
               Iniciar sesión
             </Link>
           </p>
