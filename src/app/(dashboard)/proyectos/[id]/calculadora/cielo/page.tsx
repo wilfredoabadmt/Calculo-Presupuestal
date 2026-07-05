@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ArrowLeft, Calculator, Save, Box, CheckCircle, Loader2 } from "lucide-react"
 import { formatNumber } from "@/lib/utils"
+import { PlanGuard } from "@/components/shared/PlanGuard"
 
 export default function CieloCalculatorPage() {
   const params = useParams()
@@ -98,6 +99,7 @@ export default function CieloCalculatorPage() {
   }
 
   return (
+    <PlanGuard>
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-4">
@@ -227,5 +229,6 @@ export default function CieloCalculatorPage() {
         </Card>
       )}
     </div>
+    </PlanGuard>
   )
 }

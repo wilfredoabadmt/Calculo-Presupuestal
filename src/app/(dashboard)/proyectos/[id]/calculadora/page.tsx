@@ -2,7 +2,9 @@
 
 import Link from "next/link"
 import { useParams } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { 
   Building2, 
   Calculator, 
@@ -14,9 +16,10 @@ import {
   Triangle,
   Grid,
   Square,
-  RectangleHorizontal
+  RectangleHorizontal,
+  Lock,
+  ArrowRight
 } from "lucide-react"
-import { formatCurrency } from "@/lib/utils"
 
 const calculators = [
   { 
@@ -104,6 +107,8 @@ const calculators = [
 export default function CalculadoraSelectorPage() {
   const params = useParams()
   const projectId = params.id as string
+  const { data: session } = useSession()
+  const isPro = (session?.user as any)?.plan === "PRO"
 
   return (
     <div className="space-y-6">
@@ -113,40 +118,78 @@ export default function CalculadoraSelectorPage() {
             ← Volver al proyecto
           </Link>
           <h1 className="text-3xl font-bold">Seleccionar Calculadora</h1>
-          <p className="text-muted-foreground">Elige el tipo de elemento constructivo a calcular</p>
+          <p className="text-muted-foreground">
+            {isPro ? "Acceso completo a las 10 calculadoras" : "Plan Free: 3 calculadoras disponibles · Plan Pro: las 10 completas"}
+          </p>
         </div>
+        {!isPro && (
+          <Link href="/precios">
+            <Button className="gap-2 font-bold">
+              Desbloquear Pro
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
+        )}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        {calculators.map((calc) => (
-          <Link key={calc.id} href={`/proyectos/${projectId}/calculadora/${calc.id}`}>
-            <Card className="h-full hover:shadow-lg transition-all duration-300 cursor-pointer border-l-4 border-primary group">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="p-3 bg-primary/10 rounded-lg group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                    <calc.icon className="h-6 w-6 text-primary group-hover:text-primary-foreground" />
+        {calculators.map((calc) => {
+          const locked = calc.free === false && !isPro
+          return (
+            <Link 
+              key={calc.id} 
+              href={locked ? "/precios" : `/proyectos/${projectId}/calculadora/${calc.id}`}
+            >
+              <Card className={`h-full transition-all duration-300 cursor-pointer border-l-4 group ${
+                locked 
+                  ? "border-muted hover:border-primary/50 opacity-75 hover:opacity-100" 
+                  : "border-primary hover:shadow-lg"
+              }`}>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div className={`p-3 rounded-lg transition-colors ${
+                      locked 
+                        ? "bg-muted group-hover:bg-primary/10" 
+                        : "bg-primary/10 group-hover:bg-primary group-hover:text-primary-foreground"
+                    }`}>
+                      <calc.icon className={`h-6 w-6 ${locked ? "text-muted-foreground" : "text-primary group-hover:text-primary-foreground"}`} />
+                    </div>
+                    {calc.free ? (
+                      <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full font-medium">Gratis</span>
+                    ) : locked ? (
+                      <span className="px-2 py-1 text-xs bg-orange-100 text-orange-800 rounded-full font-medium flex items-center gap-1">
+                        <Lock className="h-3 w-3" />
+                        Pro
+                      </span>
+                    ) : (
+                      <span className="px-2 py-1 text-xs bg-primary/10 text-primary rounded-full font-medium">Pro</span>
+                    )}
                   </div>
-                  {calc.free && (
-                    <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">Gratis</span>
+                  <CardTitle className="text-lg">{calc.name}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-sm text-muted-foreground">{calc.desc}</p>
+                  <div className="pt-2 border-t space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground">Fórmulas principales:</p>
+                    {calc.formulas.map((f, i) => (
+                      <p key={i} className="text-xs text-muted-foreground flex items-center gap-1">
+                        <span className={`w-1.5 h-1.5 rounded-full ${locked ? "bg-muted-foreground/30" : "bg-primary/50"}`} />
+                        {f}
+                      </p>
+                    ))}
+                  </div>
+                  {locked && (
+                    <div className="pt-2">
+                      <span className="text-xs text-primary font-medium flex items-center gap-1">
+                        Desbloquear con Pro <ArrowRight className="h-3 w-3" />
+                      </span>
+                    </div>
                   )}
-                </div>
-                <CardTitle className="text-lg">{calc.name}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p className="text-sm text-muted-foreground">{calc.desc}</p>
-                <div className="pt-2 border-t space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground">Fórmulas principales:</p>
-                  {calc.formulas.map((f, i) => (
-                    <p key={i} className="text-xs text-muted-foreground flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary/50" />
-                      {f}
-                    </p>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
+                </CardContent>
+              </Card>
+            </Link>
+          )
+        })}
       </div>
 
       <Card className="border-primary bg-primary/5">

@@ -1,9 +1,44 @@
 import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
 async function main() {
   console.log('🌱 Iniciando seed de base de datos...')
+
+  // ============================================
+  // USUARIOS DEMO
+  // ============================================
+  console.log('👤 Creando usuarios demo...')
+  const demoPassword = await bcrypt.hash('demo123', 12)
+  const adminPassword = await bcrypt.hash('admin123', 12)
+
+  await prisma.user.upsert({
+    where: { email: 'demo@calculo.com' },
+    update: {},
+    create: {
+      name: 'Usuario Demo',
+      email: 'demo@calculo.com',
+      password: demoPassword,
+      role: 'USER',
+      plan: 'FREE',
+    },
+  })
+
+  await prisma.user.upsert({
+    where: { email: 'admin@calculo.com' },
+    update: {},
+    create: {
+      name: 'Administrador',
+      email: 'admin@calculo.com',
+      password: adminPassword,
+      role: 'ADMIN',
+      plan: 'PRO',
+    },
+  })
+
+  console.log('   → demo@calculo.com / demo123 (FREE)')
+  console.log('   → admin@calculo.com / admin123 (PRO)')
 
   // ============================================
   // DOSIFICACIONES DE CONCRETO (mat1 - 12 tipos)
@@ -405,84 +440,10 @@ async function main() {
   }
 
   // ============================================
-  // BANCO DE PRECIOS GMLP (representativo)
+  // BANCO DE PRECIOS GMLP
+  // Nota: Ejecutar `npx tsx prisma/seed-gmlp.ts` para importar los 946 ítems completos
   // ============================================
-  console.log('📦 Insertando banco de precios GMLP...')
-  const bancoPrecios = [
-    // GENERALIDADES
-    { actividad: 'Limpieza general del terreno', unidad: 'm2', cantidad: 1, categoria: 'GENERALIDADES', subcategoria: 'Limpieza', materiales: JSON.stringify([]), manoObra: JSON.stringify([{ oficio: 'Peon', cantidad: 0.02 }]), precioUnitario: 2.50 },
-    { actividad: 'Nivelación manual del terreno', unidad: 'm3', cantidad: 1, categoria: 'GENERALIDADES', subcategoria: 'Movimiento de Tierra', materiales: JSON.stringify([]), manoObra: JSON.stringify([{ oficio: 'Peon', cantidad: 0.05 }]), precioUnitario: 12.00 },
-    { actividad: 'Nivelación con maquinaria', unidad: 'm3', cantidad: 1, categoria: 'GENERALIDADES', subcategoria: 'Movimiento de Tierra', materiales: JSON.stringify([]), manoObra: JSON.stringify([{ oficio: 'Operario Mezcladora', cantidad: 0.01 }]), equipoMaquinaria: 8, precioUnitario: 18.50 },
-    { actividad: 'Habilitación de oficina en obra', unidad: 'global', cantidad: 1, categoria: 'GENERALIDADES', subcategoria: 'Habilitación', materiales: JSON.stringify([{ nombre: 'Madera', cantidad: 15, unidad: 'ml', precio: 12 }]), manoObra: JSON.stringify([{ oficio: 'Carpintero', cantidad: 0.5 }]), precioUnitario: 850.00 },
-    { actividad: 'Señalización de obra', unidad: 'global', cantidad: 1, categoria: 'GENERALIDADES', subcategoria: 'Seguridad', materiales: JSON.stringify([{ nombre: 'Lona', cantidad: 3, unidad: 'm2', precio: 12 }]), manoObra: JSON.stringify([{ oficio: 'Peon', cantidad: 0.2 }]), precioUnitario: 120.00 },
-    { actividad: 'Explotación de banco de material', unidad: 'm3', cantidad: 1, categoria: 'GENERALIDADES', subcategoria: 'Material', materiales: JSON.stringify([]), manoObra: JSON.stringify([{ oficio: 'Peon', cantidad: 0.03 }]), precioUnitario: 35.00 },
-    { actividad: 'Transporte de material a obra (por km)', unidad: 'm3.km', cantidad: 1, categoria: 'GENERALIDADES', subcategoria: 'Transporte', materiales: JSON.stringify([]), manoObra: JSON.stringify([{ oficio: 'Peon', cantidad: 0.01 }]), precioUnitario: 8.50 },
-    { actividad: 'Habilitación de andamios', unidad: 'm2', cantidad: 1, categoria: 'GENERALIDADES', subcategoria: 'Andamios', materiales: JSON.stringify([{ nombre: 'Tubo andamio', cantidad: 0.15, unidad: 'ml', precio: 18 }]), manoObra: JSON.stringify([{ oficio: 'Peon', cantidad: 0.03 }]), precioUnitario: 15.00 },
-    { actividad: 'Demolición de mampostería', unidad: 'm3', cantidad: 1, categoria: 'GENERALIDADES', subcategoria: 'Demolición', materiales: JSON.stringify([]), manoObra: JSON.stringify([{ oficio: 'Peon', cantidad: 0.15 }]), precioUnitario: 45.00 },
-    { actividad: 'Demolición de concreto', unidad: 'm3', cantidad: 1, categoria: 'GENERALIDADES', subcategoria: 'Demolición', materiales: JSON.stringify([]), manoObra: JSON.stringify([{ oficio: 'Peon', cantidad: 0.25 }]), precioUnitario: 75.00 },
-
-    // ESTRUCTURAS - Concreto
-    { actividad: 'Hormigón f\'c=150 kg/cm² in situ', unidad: 'm3', cantidad: 1, categoria: 'ESTRUCTURAS', subcategoria: 'Concreto', materiales: JSON.stringify([{ nombre: 'Cemento', cantidad: 160, unidad: 'kg', precio: 0.203 }, { nombre: 'Arena', cantidad: 0.55, unidad: 'm3', precio: 28.33 }, { nombre: 'Grava', cantidad: 0.98, unidad: 'm3', precio: 36.66 }, { nombre: 'Agua', cantidad: 133, unidad: 'lt', precio: 0.003 }]), manoObra: JSON.stringify([{ oficio: 'Albañil', cantidad: 0.15 }, { oficio: 'Peon', cantidad: 0.15 }]), precioUnitario: 285.00 },
-    { actividad: 'Hormigón f\'c=210 kg/cm² in situ', unidad: 'm3', cantidad: 1, categoria: 'ESTRUCTURAS', subcategoria: 'Concreto', materiales: JSON.stringify([{ nombre: 'Cemento', cantidad: 260, unidad: 'kg', precio: 0.203 }, { nombre: 'Arena', cantidad: 0.63, unidad: 'm3', precio: 28.33 }, { nombre: 'Grava', cantidad: 0.83, unidad: 'm3', precio: 36.66 }, { nombre: 'Agua', cantidad: 163, unidad: 'lt', precio: 0.003 }]), manoObra: JSON.stringify([{ oficio: 'Albañil', cantidad: 0.18 }, { oficio: 'Peon', cantidad: 0.18 }]), precioUnitario: 365.00 },
-    { actividad: 'Hormigón f\'c=250 kg/cm² in situ', unidad: 'm3', cantidad: 1, categoria: 'ESTRUCTURAS', subcategoria: 'Concreto', materiales: JSON.stringify([{ nombre: 'Cemento', cantidad: 320, unidad: 'kg', precio: 0.203 }, { nombre: 'Arena', cantidad: 0.52, unidad: 'm3', precio: 28.33 }, { nombre: 'Grava', cantidad: 0.90, unidad: 'm3', precio: 36.66 }, { nombre: 'Agua', cantidad: 170, unidad: 'lt', precio: 0.003 }]), manoObra: JSON.stringify([{ oficio: 'Albañil', cantidad: 0.20 }, { oficio: 'Peon', cantidad: 0.20 }]), precioUnitario: 420.00 },
-    { actividad: 'Hormigón f\'c=300 kg/cm² in situ', unidad: 'm3', cantidad: 1, categoria: 'ESTRUCTURAS', subcategoria: 'Concreto', materiales: JSON.stringify([{ nombre: 'Cemento', cantidad: 380, unidad: 'kg', precio: 0.203 }, { nombre: 'Arena', cantidad: 0.60, unidad: 'm3', precio: 28.33 }, { nombre: 'Grava', cantidad: 0.76, unidad: 'm3', precio: 36.66 }, { nombre: 'Agua', cantidad: 180, unidad: 'lt', precio: 0.003 }]), manoObra: JSON.stringify([{ oficio: 'Albañil', cantidad: 0.22 }, { oficio: 'Peon', cantidad: 0.22 }]), precioUnitario: 495.00 },
-    { actividad: 'Hormigón f\'c=350 kg/cm² in situ', unidad: 'm3', cantidad: 1, categoria: 'ESTRUCTURAS', subcategoria: 'Concreto', materiales: JSON.stringify([{ nombre: 'Cemento', cantidad: 420, unidad: 'kg', precio: 0.203 }, { nombre: 'Arena', cantidad: 0.67, unidad: 'm3', precio: 28.33 }, { nombre: 'Grava', cantidad: 0.67, unidad: 'm3', precio: 36.66 }, { nombre: 'Agua', cantidad: 190, unidad: 'lt', precio: 0.003 }]), manoObra: JSON.stringify([{ oficio: 'Albañil', cantidad: 0.25 }, { oficio: 'Peon', cantidad: 0.25 }]), precioUnitario: 550.00 },
-
-    // ESTRUCTURAS - Encofrado
-    { actividad: 'Encofrado de losa maciza', unidad: 'm2', cantidad: 1, categoria: 'ESTRUCTURAS', subcategoria: 'Encofrado', materiales: JSON.stringify([{ nombre: 'Madera', cantidad: 0.02, unidad: 'm3', precio: 1800 }, { nombre: 'Clavo', cantidad: 0.5, unidad: 'kg', precio: 8 }]), manoObra: JSON.stringify([{ oficio: 'Encofrador', cantidad: 0.12 }]), precioUnitario: 65.00 },
-    { actividad: 'Encofrado de viga', unidad: 'm2', cantidad: 1, categoria: 'ESTRUCTURAS', subcategoria: 'Encofrado', materiales: JSON.stringify([{ nombre: 'Madera', cantidad: 0.025, unidad: 'm3', precio: 1800 }, { nombre: 'Clavo', cantidad: 0.6, unidad: 'kg', precio: 8 }]), manoObra: JSON.stringify([{ oficio: 'Encofrador', cantidad: 0.15 }]), precioUnitario: 85.00 },
-    { actividad: 'Encofrado de columna', unidad: 'm2', cantidad: 1, categoria: 'ESTRUCTURAS', subcategoria: 'Encofrado', materiales: JSON.stringify([{ nombre: 'Madera', cantidad: 0.03, unidad: 'm3', precio: 1800 }, { nombre: 'Clavo', cantidad: 0.8, unidad: 'kg', precio: 8 }]), manoObra: JSON.stringify([{ oficio: 'Encofrador', cantidad: 0.18 }]), precioUnitario: 95.00 },
-    { actividad: 'Encofrado de pedestal', unidad: 'm2', cantidad: 1, categoria: 'ESTRUCTURAS', subcategoria: 'Encofrado', materiales: JSON.stringify([{ nombre: 'Madera', cantidad: 0.035, unidad: 'm3', precio: 1800 }, { nombre: 'Clavo', cantidad: 1.0, unidad: 'kg', precio: 8 }]), manoObra: JSON.stringify([{ oficio: 'Encofrador', cantidad: 0.20 }]), precioUnitario: 110.00 },
-
-    // ESTRUCTURAS - Acero
-    { actividad: 'Colocación de acero longitudinal', unidad: 'kg', cantidad: 1, categoria: 'ESTRUCTURAS', subcategoria: 'Acero', materiales: JSON.stringify([{ nombre: 'Fierro corrugado', cantidad: 1.05, unidad: 'kg', precio: 4.10 }, { nombre: 'Alambre #16', cantidad: 0.02, unidad: 'kg', precio: 5.50 }]), manoObra: JSON.stringify([{ oficio: 'Armador', cantidad: 0.025 }]), precioUnitario: 8.50 },
-    { actividad: 'Colocación de estribos', unidad: 'kg', cantidad: 1, categoria: 'ESTRUCTURAS', subcategoria: 'Acero', materiales: JSON.stringify([{ nombre: 'Fierro corrugado 3/8"', cantidad: 1.05, unidad: 'kg', precio: 3.85 }, { nombre: 'Alambre #16', cantidad: 0.03, unidad: 'kg', precio: 5.50 }]), manoObra: JSON.stringify([{ oficio: 'Armador', cantidad: 0.03 }]), precioUnitario: 9.20 },
-
-    // MAMPOSTERÍA
-    { actividad: 'Muro de bloque 20x20x40 - 1 cara', unidad: 'm2', cantidad: 1, categoria: 'ESTRUCTURAS', subcategoria: 'Mampostería', materiales: JSON.stringify([{ nombre: 'Bloque 20x20x40', cantidad: 12.5, unidad: 'pza', precio: 4.50 }, { nombre: 'Cemento', cantidad: 5.2, unidad: 'kg', precio: 0.203 }, { nombre: 'Arena', cantidad: 0.008, unidad: 'm3', precio: 28.33 }]), manoObra: JSON.stringify([{ oficio: 'Albañil', cantidad: 0.08 }, { oficio: 'Peon', cantidad: 0.05 }]), precioUnitario: 78.00 },
-    { actividad: 'Muro de bloque 15x20x40 - 1 cara', unidad: 'm2', cantidad: 1, categoria: 'ESTRUCTURAS', subcategoria: 'Mampostería', materiales: JSON.stringify([{ nombre: 'Bloque 15x20x40', cantidad: 12.5, unidad: 'pza', precio: 3.80 }, { nombre: 'Cemento', cantidad: 4.8, unidad: 'kg', precio: 0.203 }, { nombre: 'Arena', cantidad: 0.007, unidad: 'm3', precio: 28.33 }]), manoObra: JSON.stringify([{ oficio: 'Albañil', cantidad: 0.07 }, { oficio: 'Peon', cantidad: 0.04 }]), precioUnitario: 65.00 },
-    { actividad: 'Muro de ladrillo 8 huecos', unidad: 'm2', cantidad: 1, categoria: 'ESTRUCTURAS', subcategoria: 'Mampostería', materiales: JSON.stringify([{ nombre: 'Ladrillo 8 huecos', cantidad: 50, unidad: 'pza', precio: 0.70 }, { nombre: 'Cemento', cantidad: 3.5, unidad: 'kg', precio: 0.203 }, { nombre: 'Arena', cantidad: 0.005, unidad: 'm3', precio: 28.33 }]), manoObra: JSON.stringify([{ oficio: 'Albañil', cantidad: 0.10 }, { oficio: 'Peon', cantidad: 0.06 }]), precioUnitario: 52.00 },
-    { actividad: 'Muro de ladrillo 6 huecos', unidad: 'm2', cantidad: 1, categoria: 'ESTRUCTURAS', subcategoria: 'Mampostería', materiales: JSON.stringify([{ nombre: 'Ladrillo 6 huecos', cantidad: 55, unidad: 'pza', precio: 0.60 }, { nombre: 'Cemento', cantidad: 3.2, unidad: 'kg', precio: 0.203 }, { nombre: 'Arena', cantidad: 0.005, unidad: 'm3', precio: 28.33 }]), manoObra: JSON.stringify([{ oficio: 'Albañil', cantidad: 0.09 }, { oficio: 'Peon', cantidad: 0.05 }]), precioUnitario: 48.00 },
-
-    // INSTALACIONES HIDRÁULICAS
-    { actividad: 'Agua potable PVC 1/2"', unidad: 'ml', cantidad: 1, categoria: 'HIDRAULICA', subcategoria: 'Agua Potable', materiales: JSON.stringify([{ nombre: 'Tubo PVC 1/2"', cantidad: 1.1, unidad: 'ml', precio: 5.50 }, { nombre: 'Codo PVC 1/2"', cantidad: 0.3, unidad: 'pza', precio: 2.80 }]), manoObra: JSON.stringify([{ oficio: 'Plomero', cantidad: 0.015 }]), precioUnitario: 12.50 },
-    { actividad: 'Agua potable PVC 3/4"', unidad: 'ml', cantidad: 1, categoria: 'HIDRAULICA', subcategoria: 'Agua Potable', materiales: JSON.stringify([{ nombre: 'Tubo PVC 3/4"', cantidad: 1.1, unidad: 'ml', precio: 8.50 }, { nombre: 'Codo PVC 3/4"', cantidad: 0.3, unidad: 'pza', precio: 4.50 }]), manoObra: JSON.stringify([{ oficio: 'Plomero', cantidad: 0.018 }]), precioUnitario: 18.00 },
-    { actividad: 'Agua potable PVC 1"', unidad: 'ml', cantidad: 1, categoria: 'HIDRAULICA', subcategoria: 'Agua Potable', materiales: JSON.stringify([{ nombre: 'Tubo PVC 1"', cantidad: 1.1, unidad: 'ml', precio: 12.00 }, { nombre: 'Codo PVC 1"', cantidad: 0.3, unidad: 'pza', precio: 6.50 }]), manoObra: JSON.stringify([{ oficio: 'Plomero', cantidad: 0.02 }]), precioUnitario: 25.00 },
-    { actividad: 'Desagüe PVC 2"', unidad: 'ml', cantidad: 1, categoria: 'HIDRAULICA', subcategoria: 'Desagüe', materiales: JSON.stringify([{ nombre: 'Tubo PVC 2"', cantidad: 1.1, unidad: 'ml', precio: 18.00 }, { nombre: 'Codo PVC 2"', cantidad: 0.2, unidad: 'pza', precio: 12.00 }]), manoObra: JSON.stringify([{ oficio: 'Plomero', cantidad: 0.02 }]), precioUnitario: 35.00 },
-    { actividad: 'Desagüe PVC 3"', unidad: 'ml', cantidad: 1, categoria: 'HIDRAULICA', subcategoria: 'Desagüe', materiales: JSON.stringify([{ nombre: 'Tubo PVC 3"', cantidad: 1.1, unidad: 'ml', precio: 28.00 }, { nombre: 'Codo PVC 3"', cantidad: 0.2, unidad: 'pza', precio: 18.00 }]), manoObra: JSON.stringify([{ oficio: 'Plomero', cantidad: 0.025 }]), precioUnitario: 52.00 },
-
-    // INSTALACIONES ELÉCTRICAS
-    { actividad: 'Instalación eléctrica 2.5mm² (iluminación)', unidad: 'ml', cantidad: 1, categoria: 'ELECTRICIDAD', subcategoria: 'Cableado', materiales: JSON.stringify([{ nombre: 'Cable THW 2.5mm²', cantidad: 1.2, unidad: 'ml', precio: 4.50 }, { nombre: 'Tubo conduit 1/2"', cantidad: 1.1, unidad: 'ml', precio: 3.50 }]), manoObra: JSON.stringify([{ oficio: 'Electricista', cantidad: 0.02 }]), precioUnitario: 15.00 },
-    { actividad: 'Instalación eléctrica 4mm² (fuerza)', unidad: 'ml', cantidad: 1, categoria: 'ELECTRICIDAD', subcategoria: 'Cableado', materiales: JSON.stringify([{ nombre: 'Cable THW 4mm²', cantidad: 1.2, unidad: 'ml', precio: 7.50 }, { nombre: 'Tubo conduit 3/4"', cantidad: 1.1, unidad: 'ml', precio: 5.50 }]), manoObra: JSON.stringify([{ oficio: 'Electricista', cantidad: 0.025 }]), precioUnitario: 22.00 },
-    { actividad: 'Instalación de tomacorriente', unidad: 'pza', cantidad: 1, categoria: 'ELECTRICIDAD', subcategoria: 'Tomas', materiales: JSON.stringify([{ nombre: 'Tomacorriente simple', cantidad: 1, unidad: 'pza', precio: 15.00 }, { nombre: 'Caja registro', cantidad: 1, unidad: 'pza', precio: 8.00 }]), manoObra: JSON.stringify([{ oficio: 'Electricista', cantidad: 0.05 }]), precioUnitario: 35.00 },
-    { actividad: 'Instalación de interruptor', unidad: 'pza', cantidad: 1, categoria: 'ELECTRICIDAD', subcategoria: 'Interruptores', materiales: JSON.stringify([{ nombre: 'Interruptor simple', cantidad: 1, unidad: 'pza', precio: 12.00 }, { nombre: 'Caja registro', cantidad: 1, unidad: 'pza', precio: 8.00 }]), manoObra: JSON.stringify([{ oficio: 'Electricista', cantidad: 0.04 }]), precioUnitario: 28.00 },
-    { actividad: 'Cuadro eléctrico completo', unidad: 'pza', cantidad: 1, categoria: 'ELECTRICIDAD', subcategoria: 'Cuadro', materiales: JSON.stringify([{ nombre: 'Cuadro empotrado 12 circuitos', cantidad: 1, unidad: 'pza', precio: 180.00 }, { nombre: 'Interruptor termomagnético', cantidad: 6, unidad: 'pza', precio: 25.00 }]), manoObra: JSON.stringify([{ oficio: 'Electricista', cantidad: 0.30 }]), precioUnitario: 450.00 },
-
-    // ACABADOS
-    { actividad: 'Piso cerámico 40x40 con adhesivo', unidad: 'm2', cantidad: 1, categoria: 'ACABADOS', subcategoria: 'Pisos', materiales: JSON.stringify([{ nombre: 'Cerámica 40x40', cantidad: 1.15, unidad: 'pza', precio: 6.50 }, { nombre: 'Adhesivo cerámico', cantidad: 5, unidad: 'kg', precio: 0.55 }, { nombre: 'Boquilla', cantidad: 0.2, unidad: 'kg', precio: 3.00 }]), manoObra: JSON.stringify([{ oficio: 'Albañil', cantidad: 0.12 }]), precioUnitario: 38.00 },
-    { actividad: 'Piso cerámico 50x50 con adhesivo', unidad: 'm2', cantidad: 1, categoria: 'ACABADOS', subcategoria: 'Pisos', materiales: JSON.stringify([{ nombre: 'Cerámica 50x50', cantidad: 1.10, unidad: 'pza', precio: 14.00 }, { nombre: 'Adhesivo cerámico', cantidad: 5, unidad: 'kg', precio: 0.55 }, { nombre: 'Boquilla', cantidad: 0.2, unidad: 'kg', precio: 3.00 }]), manoObra: JSON.stringify([{ oficio: 'Albañil', cantidad: 0.12 }]), precioUnitario: 48.00 },
-    { actividad: 'Porcelanato 60x60 con adhesivo', unidad: 'm2', cantidad: 1, categoria: 'ACABADOS', subcategoria: 'Pisos', materiales: JSON.stringify([{ nombre: 'Porcelanato 60x60', cantidad: 1.08, unidad: 'pza', precio: 30.00 }, { nombre: 'Adhesivo porcelanato', cantidad: 6, unidad: 'kg', precio: 0.88 }, { nombre: 'Boquilla', cantidad: 0.25, unidad: 'kg', precio: 3.00 }]), manoObra: JSON.stringify([{ oficio: 'Albañil', cantidad: 0.15 }]), precioUnitario: 68.00 },
-    { actividad: 'Porcelanato 80x80 con adhesivo', unidad: 'm2', cantidad: 1, categoria: 'ACABADOS', subcategoria: 'Pisos', materiales: JSON.stringify([{ nombre: 'Porcelanato 80x80', cantidad: 1.05, unidad: 'pza', precio: 90.00 }, { nombre: 'Adhesivo porcelanato', cantidad: 7, unidad: 'kg', precio: 0.88 }, { nombre: 'Boquilla', cantidad: 0.3, unidad: 'kg', precio: 3.00 }]), manoObra: JSON.stringify([{ oficio: 'Albañil', cantidad: 0.18 }]), precioUnitario: 125.00 },
-    { actividad: 'Pulido de piso cerámico', unidad: 'm2', cantidad: 1, categoria: 'ACABADOS', subcategoria: 'Pisos', materiales: JSON.stringify([]), manoObra: JSON.stringify([{ oficio: 'Albañil', cantidad: 0.05 }]), precioUnitario: 15.00 },
-
-    // PAREDES Y TECHOS
-    { actividad: 'Afinado grueso 1:4 (2cm)', unidad: 'm2', cantidad: 1, categoria: 'ACABADOS', subcategoria: 'Paredes', materiales: JSON.stringify([{ nombre: 'Cemento', cantidad: 3.6, unidad: 'kg', precio: 0.203 }, { nombre: 'Arena', cantidad: 0.008, unidad: 'm3', precio: 28.33 }]), manoObra: JSON.stringify([{ oficio: 'Albañil', cantidad: 0.04 }]), precioUnitario: 12.50 },
-    { actividad: 'Afinado fino 1:5 (1cm)', unidad: 'm2', cantidad: 1, categoria: 'ACABADOS', subcategoria: 'Paredes', materiales: JSON.stringify([{ nombre: 'Cemento', cantidad: 1.8, unidad: 'kg', precio: 0.203 }, { nombre: 'Arena', cantidad: 0.005, unidad: 'm3', precio: 28.33 }]), manoObra: JSON.stringify([{ oficio: 'Albañil', cantidad: 0.03 }]), precioUnitario: 8.50 },
-    { actividad: 'Yeso liso (impermeabilizado)', unidad: 'm2', cantidad: 1, categoria: 'ACABADOS', subcategoria: 'Paredes', materiales: JSON.stringify([{ nombre: 'Yeso', cantidad: 2.5, unidad: 'kg', precio: 0.60 }]), manoObra: JSON.stringify([{ oficio: 'Albañil', cantidad: 0.02 }]), precioUnitario: 7.50 },
-    { actividad: 'Pintura látex (2 manos)', unidad: 'm2', cantidad: 1, categoria: 'ACABADOS', subcategoria: 'Pintura', materiales: JSON.stringify([{ nombre: 'Pintura látex', cantidad: 0.15, unidad: 'gal', precio: 45.00 }]), manoObra: JSON.stringify([{ oficio: 'Pintor', cantidad: 0.02 }]), precioUnitario: 12.00 },
-    { actividad: 'Pintura esmalte (2 manos)', unidad: 'm2', cantidad: 1, categoria: 'ACABADOS', subcategoria: 'Pintura', materiales: JSON.stringify([{ nombre: 'Pintura esmalte', cantidad: 0.12, unidad: 'gal', precio: 65.00 }]), manoObra: JSON.stringify([{ oficio: 'Pintor', cantidad: 0.025 }]), precioUnitario: 14.50 },
-    { actividad: 'Techado de zincalum', unidad: 'm2', cantidad: 1, categoria: 'ACABADOS', subcategoria: 'Techo', materiales: JSON.stringify([{ nombre: 'Lámina zincalum', cantidad: 1.15, unidad: 'pza', precio: 18.50 }]), manoObra: JSON.stringify([{ oficio: 'Carpintero', cantidad: 0.03 }]), precioUnitario: 28.00 },
-    { actividad: 'Cielo falso de yeso', unidad: 'm2', cantidad: 1, categoria: 'ACABADOS', subcategoria: 'Cielo', materiales: JSON.stringify([{ nombre: 'Panel yeso 1.22x2.44', cantidad: 0.35, unidad: 'pza', precio: 45.00 }, { nombre: 'Perfil omega 3m', cantidad: 0.4, unidad: 'pza', precio: 11.00 }, { nombre: 'Tornillo', cantidad: 2, unidad: 'pza', precio: 0.025 }]), manoObra: JSON.stringify([{ oficio: 'Carpintero', cantidad: 0.08 }]), precioUnitario: 42.00 },
-    { actividad: 'Cielo falso de PVC', unidad: 'm2', cantidad: 1, categoria: 'ACABADOS', subcategoria: 'Cielo', materiales: JSON.stringify([{ nombre: 'Panel PVC 1.00x2.44', cantidad: 0.45, unidad: 'pza', precio: 35.00 }, { nombre: 'Perfil soporte 3m', cantidad: 0.3, unidad: 'pza', precio: 12.00 }]), manoObra: JSON.stringify([{ oficio: 'Carpintero', cantidad: 0.06 }]), precioUnitario: 38.00 },
-    { actividad: 'Ventana de aluminio 1.20x1.20', unidad: 'pza', cantidad: 1, categoria: 'ACABADOS', subcategoria: 'Ventanas', materiales: JSON.stringify([{ nombre: 'Ventana aluminio', cantidad: 1, unidad: 'pza', precio: 280.00 }]), manoObra: JSON.stringify([{ oficio: 'Carpintero', cantidad: 0.25 }]), precioUnitario: 320.00 },
-    { actividad: 'Puerta de madera 0.90x2.10', unidad: 'pza', cantidad: 1, categoria: 'ACABADOS', subcategoria: 'Puertas', materiales: JSON.stringify([{ nombre: 'Puerta madera', cantidad: 1, unidad: 'pza', precio: 350.00 }, { nombre: 'Chapa cerradura', cantidad: 1, unidad: 'pza', precio: 85.00 }]), manoObra: JSON.stringify([{ oficio: 'Carpintero', cantidad: 0.30 }]), precioUnitario: 480.00 },
-  ]
-
-  for (const bp of bancoPrecios) {
-    await prisma.bancoPrecioGMLP.create({
-      data: bp,
-    })
-  }
+  console.log('📦 Banco de precios GMLP: ejecutar seed-gmlp.ts por separado')
 
   console.log('✅ Seed completado exitosamente!')
 }

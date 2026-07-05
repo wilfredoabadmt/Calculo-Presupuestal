@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ArrowLeft, Calculator, Save, Box, Weight, CheckCircle, Loader2 } from "lucide-react"
 import { formatNumber, cn } from "@/lib/utils"
+import { PlanGuard } from "@/components/shared/PlanGuard"
 
 const dosificaciones = [
   { ratio: "1:2:2", cemento: 420, arena: 0.67, grava: 0.67 },
@@ -165,6 +166,7 @@ export default function VigaCalculatorPage() {
   }
 
   return (
+    <PlanGuard>
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-4">
@@ -336,5 +338,6 @@ export default function VigaCalculatorPage() {
         </Card>
       )}
     </div>
+    </PlanGuard>
   )
 }
