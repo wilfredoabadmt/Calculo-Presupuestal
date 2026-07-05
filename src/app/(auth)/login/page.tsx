@@ -35,8 +35,9 @@ function LoginForm() {
         redirect: false,
       })
 
-      if (result?.error) {
-        setFormError("Credenciales inválidas. Verifica tu email y contraseña.")
+        if (result?.error) {
+          console.error("NextAuth Error:", result.error)
+          setFormError("Credenciales inválidas. Verifica tu email y contraseña.")
       } else {
         router.push(callbackUrl)
         router.refresh()
