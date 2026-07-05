@@ -31,24 +31,6 @@ const diametros = [
 
 const PESO_BOLSA = 42.5
 
-const dosificaciones = [
-  { ratio: "1:2:2", cemento: 420, arena: 0.67, grava: 0.67 },
-  { ratio: "1:2:3", cemento: 350, arena: 0.55, grava: 0.84 },
-  { ratio: "1:2:4", cemento: 300, arena: 0.48, grava: 0.95 },
-  { ratio: "1:3:4", cemento: 260, arena: 0.63, grava: 0.83 },
-  { ratio: "1:3:5", cemento: 230, arena: 0.55, grava: 0.92 },
-  { ratio: "1:3:6", cemento: 210, arena: 0.50, grava: 1.00 },
-]
-
-const diametros = [
-  { value: "1/4", kgM: 0.395 },
-  { value: "3/8", kgM: 0.888 },
-  { value: "1/2", kgM: 1.580 },
-  { value: "5/8", kgM: 2.466 },
-  { value: "3/4", kgM: 3.556 },
-]
-
-const PESO_BOLSA = 42.5
 
 export default function VigaCalculatorPage() {
   const params = useParams()

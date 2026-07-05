@@ -1,10 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { InputWithHelp } from "@/components/ui/input-with-help"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -207,62 +208,6 @@ export default function ColumnaCalculatorPage() {
     }
   }
 
-  const calculate = () => {
-    const a = parseFloat(form.dimA)
-    const b = parseFloat(form.dimB)
-    const alto = parseFloat(form.alto)
-    const cantidad = parseInt(form.cantidad)
-    const desp = parseFloat(form.desperdicioConcreto) / 100
-
-    if (!a || !b || !alto || !cantidad) return
-
-    // Concreto
-    const volumen = a * b * alto * cantidad
-    const volDesp = volumen * (1 + desp)
-    const cementoKg = volDesp * selectedDosificacion.cemento
-    const cementoBolsas = Math.ceil(cementoKg / PESO_BOLSA)
-    const arena = volDesp * selectedDosificacion.arena
-    const grava = volDesp * selectedDosificacion.grava
-
-    // Acero longitudinal
-    const numVarillas = parseInt(form.cantidadVarillas)
-    const longTotal = parseFloat(form.longVarillas) * numVarillas * cantidad
-    const traslapes = form.traslapes === "si" ? numVarillas * parseFloat(form.largoTraslape) * cantidad : 0
-    const pesoLong = (longTotal + traslapes) * selectedDiametroLong.kgM
-
-    // Estribos
-    const perimetro = 2 * (a + b) - 8 * 0.04 + 2 * 0.12
-    const zonas = 2
-    const estConfinada = Math.ceil((alto * 0.15) / (parseFloat(form.separacionConfinada) / 100))
-    const estCentral = Math.ceil((alto * 0.7) / (parseFloat(form.separacionCentral) / 100))
-    const totalEstribos = (estConfinada + estCentral + 4) * zonas * cantidad
-    const pesoEstribos = totalEstribos * perimetro * selectedDiametroEstribo.kgM
-
-    const despAcero = parseFloat(form.despAcero) / 100
-    const totalAcero = (pesoLong + pesoEstribos) * (1 + despAcero)
-
-    const precioCemento = cementoBolsas * 8.60
-    const precioArena = arena * 28.33
-    const precioGrava = grava * 36.66
-    const precioAcero = totalAcero * 10.50
-
-    const materiales = [
-      { nombre: "Cemento CP-40", cantidad: cementoBolsas, unidad: "bolsa", precio: precioCemento },
-      { nombre: "Arena media", cantidad: arena, unidad: "m³", precio: precioArena },
-      { nombre: "Grava 3/4\"", cantidad: grava, unidad: "m³", precio: precioGrava },
-      { nombre: `Acero long. Ø${form.diametroLong}`, cantidad: totalAcero, unidad: "kg", precio: precioAcero },
-    ]
-
-    setResults({
-      concreto: { volumen, cemento: { kg: cementoKg, bolsas: cementoBolsas }, arena, grava },
-      aceroLong: pesoLong,
-      estribos: { cantidad: totalEstribos, peso: pesoEstribos },
-      totalAcero,
-      materiales,
-      total: precioCemento + precioArena + precioGrava + precioAcero,
-    })
-  }
-
   return (
     <PlanGuard>
     <div className="space-y-6">
@@ -313,15 +258,15 @@ export default function ColumnaCalculatorPage() {
             <div className="grid gap-4 md:grid-cols-3">
               <div className="space-y-2">
                 <Label>Alto (m)</Label>
-                <Input type="number" step="0.01" value={form.alto} onChange={e => setForm({...form, alto: e.target.value})} />
+                <Input type="number" step="0.01" value={form.alto} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, alto: e.target.value})} />
               </div>
               <div className="space-y-2">
                 <Label>Dimensión A (m)</Label>
-                <Input type="number" step="0.01" value={form.dimA} onChange={e => setForm({...form, dimA: e.target.value})} />
+                <Input type="number" step="0.01" value={form.dimA} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, dimA: e.target.value})} />
               </div>
               <div className="space-y-2">
                 <Label>Dimensión B (m)</Label>
-                <Input type="number" step="0.01" value={form.dimB} onChange={e => setForm({...form, dimB: e.target.value})} />
+                <Input type="number" step="0.01" value={form.dimB} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, dimB: e.target.value})} />
               </div>
             </div>
 
@@ -353,7 +298,7 @@ export default function ColumnaCalculatorPage() {
 
             <div className="space-y-2">
               <Label>Cantidad de Columnas</Label>
-              <Input type="number" min="1" value={form.cantidad} onChange={e => setForm({...form, cantidad: e.target.value})} />
+              <Input type="number" min="1" value={form.cantidad} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, cantidad: e.target.value})} />
             </div>
 
             {/* Acero Longitudinal */}
@@ -373,11 +318,11 @@ export default function ColumnaCalculatorPage() {
                 </div>
                 <div className="space-y-2">
                   <Label>Cantidad Varillas</Label>
-                  <Input type="number" min="1" value={form.cantidadVarillas} onChange={e => setForm({...form, cantidadVarillas: e.target.value})} />
+                  <Input type="number" min="1" value={form.cantidadVarillas} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, cantidadVarillas: e.target.value})} />
                 </div>
                 <div className="space-y-2">
                   <Label>Long. Varilla (m)</Label>
-                  <Input type="number" step="0.01" value={form.longVarillas} onChange={e => setForm({...form, longVarillas: e.target.value})} />
+                  <Input type="number" step="0.01" value={form.longVarillas} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, longVarillas: e.target.value})} />
                 </div>
               </div>
               <div className="grid gap-4 md:grid-cols-2">
@@ -394,7 +339,7 @@ export default function ColumnaCalculatorPage() {
                 {form.traslapes === "si" && (
                   <div className="space-y-2">
                     <Label>Long. Traslape (m)</Label>
-                    <Input type="number" step="0.01" value={form.largoTraslape} onChange={e => setForm({...form, largoTraslape: e.target.value})} />
+                    <Input type="number" step="0.01" value={form.largoTraslape} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, largoTraslape: e.target.value})} />
                   </div>
                 )}
               </div>
@@ -417,11 +362,11 @@ export default function ColumnaCalculatorPage() {
                 </div>
                 <div className="space-y-2">
                   <Label>Separación Zona Confinada (cm)</Label>
-                  <Input type="number" value={form.separacionConfinada} onChange={e => setForm({...form, separacionConfinada: e.target.value})} />
+                  <Input type="number" value={form.separacionConfinada} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, separacionConfinada: e.target.value})} />
                 </div>
                 <div className="space-y-2">
                   <Label>Separación Zona Central (cm)</Label>
-                  <Input type="number" value={form.separacionCentral} onChange={e => setForm({...form, separacionCentral: e.target.value})} />
+                  <Input type="number" value={form.separacionCentral} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, separacionCentral: e.target.value})} />
                 </div>
               </div>
               <div className="space-y-2">

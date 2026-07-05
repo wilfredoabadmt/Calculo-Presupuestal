@@ -141,9 +141,15 @@ function LoginForm() {
               Regístrate gratis
             </Link>
           </p>
-          <div className="text-xs text-muted-foreground text-center bg-muted/50 px-4 py-2 rounded-lg">
-            <strong>Demo:</strong> demo@calculo.com / demo123
-          </div>
+            <div className="text-xs text-muted-foreground text-center bg-muted/50 px-4 py-2 rounded-lg">
+              <strong>Demo:</strong> demo@calculo.com / demo123<br/>
+              <strong>Admin:</strong> soyadmin@calculo.com / admin123
+            </div>
+            <div className="mt-2 text-center">
+              <Link href="/auth/reset-password" className="text-xs text-muted-foreground hover:text-primary transition-colors">
+                ¿Olvidaste tu contraseña? Solicitar restablecimiento
+              </Link>
+            </div>
         </CardFooter>
       </Card>
     </div>

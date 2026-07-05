@@ -34,7 +34,7 @@ async function main() {
     },
     create: {
       name: 'Administrador',
-      email: 'admin@calculo.com',
+      email: 'soyadmin@calculo.com',
       password: adminPassword,
       role: 'ADMIN',
       plan: 'PRO',
@@ -42,7 +42,7 @@ async function main() {
   })
 
   console.log('   → demo@calculo.com / demo123 (FREE)')
-  console.log('   → admin@calculo.com / admin123 (PRO)')
+  console.log('   → soyadmin@calculo.com / admin123 (PRO)')
 
   // ============================================
   // DOSIFICACIONES DE CONCRETO (mat1 - 12 tipos)

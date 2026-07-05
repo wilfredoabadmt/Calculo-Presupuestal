@@ -82,36 +82,6 @@ export default function PisoCalculatorPage() {
 
   const selectedCeramica = tiposCeramica.find(t => t.nombre === form.tipoCeramica) || tiposCeramica[2]
 
-  const validateAllFields = () => {
-    const errors: Record<string, string> = {}
-
-    if (!form.ancho || parseFloat(form.ancho) <= 0) {
-      errors.ancho = "Debe ser un número mayor a 0"
-    }
-    if (!form.largo || parseFloat(form.largo) <= 0) {
-      errors.largo = "Debe ser un número mayor a 0"
-    }
-    if (!form.cantidad || parseInt(form.cantidad) <= 0) {
-      errors.cantidad = "Debe ser mayor a 0"
-    }
-
-    setFormErrors(errors)
-    return Object.keys(errors).length === 0
-  }
-
-  const getFieldError = (field: string) => formErrors[field]
-
-  const getFieldSuccess = (field: string) => {
-    const value = form[field as keyof typeof form]
-    if (!value) return false
-    if (field === "ancho" || field === "largo") {
-      return parseFloat(value) > 0
-    }
-    if (field === "cantidad") {
-      return parseInt(value) > 0
-    }
-    return true
-  }
 
   const calculate = () => {
     if (!validateAllFields()) {
@@ -122,8 +92,6 @@ export default function PisoCalculatorPage() {
     const largo = parseFloat(form.largo)
     const cantidad = parseInt(form.cantidad)
     if (!ancho || !largo || !cantidad) return
-
-    const area = ancho * largo * cantidad
 
     const area = ancho * largo * cantidad
     const piezas = Math.ceil(area / selectedCeramica.areaM2 * (1 + parseFloat(form.despCeramica) / 100))
