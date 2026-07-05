@@ -1,15 +1,15 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { InputWithHelp } from "@/components/ui/input-with-help"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ArrowLeft, Calculator, Save, Box, CheckCircle, Loader2 } from "lucide-react"
-import { formatNumber } from "@/lib/utils"
+import { formatNumber, cn } from "@/lib/utils"
 import { PlanGuard } from "@/components/shared/PlanGuard"
 
 const tiposTeja = [
@@ -28,13 +28,49 @@ export default function TechoCalculatorPage() {
   const [saved, setSaved] = useState(false)
 
   const [form, setForm] = useState({
-    ancho: "6.00",
-    largo: "10.00",
-    alto: "3.00",
+    ancho: "",
+    largo: "",
+    alto: "",
     tipoTeja: "Teja romana",
     desperdicio: "5",
-    cantidad: "1",
+    cantidad: "",
   })
+
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
+
+  const validateAllFields = () => {
+    const errors: Record<string, string> = {}
+
+    if (!form.ancho || parseFloat(form.ancho) <= 0) {
+      errors.ancho = "Debe ser un número mayor a 0"
+    }
+    if (!form.largo || parseFloat(form.largo) <= 0) {
+      errors.largo = "Debe ser un número mayor a 0"
+    }
+    if (!form.alto || parseFloat(form.alto) <= 0) {
+      errors.alto = "Debe ser un número mayor a 0"
+    }
+    if (!form.cantidad || parseInt(form.cantidad) <= 0) {
+      errors.cantidad = "Debe ser mayor a 0"
+    }
+
+    setFormErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  const getFieldError = (field: string) => formErrors[field]
+
+  const getFieldSuccess = (field: string) => {
+    const value = form[field as keyof typeof form]
+    if (!value) return false
+    if (field === "ancho" || field === "largo" || field === "alto") {
+      return parseFloat(value) > 0
+    }
+    if (field === "cantidad") {
+      return parseInt(value) > 0
+    }
+    return true
+  }
 
   const [results, setResults] = useState<{
     areaReal: number
@@ -46,6 +82,10 @@ export default function TechoCalculatorPage() {
   const selectedTeja = tiposTeja.find(t => t.nombre === form.tipoTeja) || tiposTeja[0]
 
   const calculate = () => {
+    if (!validateAllFields()) {
+      return
+    }
+
     const ancho = parseFloat(form.ancho)
     const largo = parseFloat(form.largo)
     const alto = parseFloat(form.alto)
@@ -129,28 +169,83 @@ export default function TechoCalculatorPage() {
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="space-y-2"><Label>Ancho (m)</Label><Input type="number" step="0.01" value={form.ancho} onChange={e => setForm({...form, ancho: e.target.value})} /></div>
-            <div className="space-y-2"><Label>Largo (m)</Label><Input type="number" step="0.01" value={form.largo} onChange={e => setForm({...form, largo: e.target.value})} /></div>
-            <div className="space-y-2"><Label>Alto pendiente (m)</Label><Input type="number" step="0.01" value={form.alto} onChange={e => setForm({...form, alto: e.target.value})} /></div>
+            <InputWithHelp
+              label="Ancho (m)"
+              helpText="Ancho del techo (frente a calle)"
+              example="6.00 para techo de 6 metros"
+              unit="m"
+              value={form.ancho}
+              onChange={(e) => setForm({...form, ancho: e.target.value})}
+              placeholder="6.00"
+              error={getFieldError("ancho")}
+              success={getFieldSuccess("ancho")}
+              min="0.01"
+              step="0.01"
+            />
+            <InputWithHelp
+              label="Largo (m)"
+              helpText="Largo del techo (longitud de la pendiente)"
+              example="10.00 para techo de 10 metros"
+              unit="m"
+              value={form.largo}
+              onChange={(e) => setForm({...form, largo: e.target.value})}
+              placeholder="10.00"
+              error={getFieldError("largo")}
+              success={getFieldSuccess("largo")}
+              min="0.01"
+              step="0.01"
+            />
+            <InputWithHelp
+              label="Alto pendiente (m)"
+              helpText="Altura de la cumbrera desde la viga (subida)"
+              example="3.00 para pendiente de 3 metros"
+              unit="m"
+              value={form.alto}
+              onChange={(e) => setForm({...form, alto: e.target.value})}
+              placeholder="3.00"
+              error={getFieldError("alto")}
+              success={getFieldSuccess("alto")}
+              min="0.01"
+              step="0.01"
+            />
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="space-y-2"><Label>Tipo de Teja</Label>
+            <div className="space-y-2">
+              <Label>Tipo de Teja</Label>
               <Select value={form.tipoTeja} onValueChange={v => setForm({...form, tipoTeja: v})}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{tiposTeja.map(t => <SelectItem key={t.nombre} value={t.nombre}>{t.nombre} ({t.unidadesM2} u/m²)</SelectItem>)}</SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground mt-1">Seleccione el tipo para cálculo de unidades por m²</p>
             </div>
-            <div className="space-y-2"><Label>Desperdicio (%)</Label>
-              <Select value={form.desperdicio} onValueChange={v => setForm({...form, desperdicio: v})}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].map(d => <SelectItem key={d} value={d.toString()}>{d}%</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2"><Label>Cantidad</Label><Input type="number" min="1" value={form.cantidad} onChange={e => setForm({...form, cantidad: e.target.value})} /></div>
+            <InputWithHelp
+              label="Desperdicio (%)"
+              helpText="Extra por cortes, roturas y superposición"
+              example="5% estándar en techos de teja"
+              unit="%"
+              value={form.desperdicio}
+              onChange={(e) => setForm({...form, desperdicio: e.target.value})}
+              placeholder="5"
+              min="0"
+              max="100"
+              success={parseFloat(form.desperdicio) >= 0 && parseFloat(form.desperdicio) <= 100}
+            />
+            <InputWithHelp
+              label="Cantidad"
+              helpText="Número de faldones/paños idénticos"
+              example="1 para un solo techo, 2 para dos aguas"
+              unit="uds"
+              value={form.cantidad}
+              onChange={(e) => setForm({...form, cantidad: e.target.value})}
+              placeholder="1"
+              error={getFieldError("cantidad")}
+              success={getFieldSuccess("cantidad")}
+              min="1"
+            />
           </div>
 
-          <Button onClick={calculate} className="w-full" size="lg"><Calculator className="mr-2 h-4 w-4" /> Calcular</Button>
+          <Button onClick={calculate} className="w-full" size="lg" disabled={!validateAllFields()}><Calculator className="mr-2 h-4 w-4" /> Calcular Materiales</Button>
         </CardContent>
       </Card>
 
