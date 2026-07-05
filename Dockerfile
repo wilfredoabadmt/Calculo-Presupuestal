@@ -15,7 +15,7 @@ ENV NEXTAUTH_URL=${NEXTAUTH_URL}
 ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
 ENV DATABASE_URL=${DATABASE_URL}
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV NODE_OPTIONS="--max-old-space-size=2048"
 
 # Install OpenSSL for Prisma postinstall
 RUN apk add --no-cache openssl
@@ -27,18 +27,12 @@ COPY prisma ./prisma/
 # Install dependencies (cached unless package.json changes)
 # Retry up to 3 times on network errors (ECONNRESET, ETIMEDOUT)
 RUN for i in 1 2 3; do \
-      npm ci --network-timeout 300000 --maxsockets 5 && break || \
-      echo "npm ci attempt $i failed, retrying in 10s..." && sleep 10; \
-    done
+  npm ci --network-timeout 300000 --maxsockets 5 && break || \
+  echo "npm ci attempt $i failed, retrying in 10s..." && sleep 10; \
+  done
 
 # Copy source code
 COPY . .
-
-# Generate Prisma Client (downloads engine binary - may need retry)
-RUN for i in 1 2 3; do \
-      npx prisma generate && break || \
-      echo "prisma generate attempt $i failed, retrying in 10s..." && sleep 10; \
-    done
 
 # Build application (skip lint for speed)
 RUN npm run build
