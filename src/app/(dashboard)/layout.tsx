@@ -154,8 +154,12 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>Perfil</DropdownMenuItem>
-                  <DropdownMenuItem>Configuración</DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/configuracion/cuenta">Perfil</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/configuracion">Configuración</Link>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem 
                     className="text-destructive"
