@@ -21,6 +21,7 @@ import {
 } from "lucide-react"
 import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
+import CalculatorShowcase from "@/components/shared/CalculatorShowcase"
 
 export default async function HomePage() {
   const session = await auth()
@@ -61,34 +62,34 @@ export default async function HomePage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative pt-12 pb-24 lg:pt-20 lg:pb-32 flex flex-col items-center">
+      <section className="relative pt-12 pb-20 lg:pt-20 lg:pb-28 flex flex-col items-center">
         {/* Glow Spheres */}
         <div className="absolute top-20 left-1/4 -translate-x-1/2 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-10 right-1/4 translate-x-1/2 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="container mx-auto px-6 relative z-10 text-center max-w-4xl">
+        <div className="container mx-auto px-6 relative z-10 text-center max-w-5xl">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-slate-900/80 border border-slate-800 rounded-full px-4 py-1.5 text-xs font-semibold text-cyan-400 uppercase tracking-widest mb-10 backdrop-blur-sm">
+          <div className="inline-flex items-center gap-2 bg-slate-900/80 border border-slate-800 rounded-full px-4 py-1.5 text-xs font-semibold text-cyan-400 uppercase tracking-widest mb-8 backdrop-blur-sm">
             <Sparkles className="h-3.5 w-3.5 text-cyan-400 animate-pulse" />
             Plataforma BIM-Ready · Bolivia
           </div>
 
           {/* Title */}
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight mb-8 leading-[1.1]">
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6 leading-[1.1]">
             La nueva era en{" "}
-            <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent animate-pulse">
               presupuestos de obra
             </span>
           </h1>
 
           {/* Subtitle */}
-          <p className="text-lg sm:text-xl text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-lg text-slate-400 mb-8 max-w-2xl mx-auto leading-relaxed">
             Optimiza tus licitaciones públicas y proyectos privados con nuestro motor de cálculo inteligente. 
-            <strong> 10 calculadoras paramétricas</strong>, integración de base de datos GMLP, y diagramas Gantt interactivos con curva de inversión S.
+            <strong> 14 calculadoras paramétricas</strong>, integración de base de datos GMLP, y diagramas Gantt interactivos con curva de inversión S.
           </p>
 
           {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
             <Link href="/register">
               <Button size="lg" className="w-full sm:w-auto text-base font-bold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-slate-950 px-8 py-6 rounded-xl shadow-xl shadow-cyan-500/20 transition-all duration-300">
                 Registrarse Gratis
@@ -102,10 +103,22 @@ export default async function HomePage() {
             </Link>
           </div>
 
+          {/* Live CAD simulator preview container */}
+          <div className="max-w-4xl mx-auto mb-16">
+            <div className="text-left mb-4">
+              <span className="text-xs font-bold text-cyan-400 uppercase tracking-widest flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+                SIMULADOR INTERACTIVO EN VIVO
+              </span>
+              <p className="text-xs text-slate-400 mt-1">Prueba el comportamiento paramétrico introduciendo tus dimensiones abajo:</p>
+            </div>
+            <CalculatorShowcase />
+          </div>
+
           {/* Metric Badges */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 border-t border-slate-900 pt-12 max-w-3xl mx-auto">
             {[
-              { val: "10", label: "Módulos de Cálculo", desc: "Especializados" },
+              { val: "14", label: "Módulos de Cálculo", desc: "Especializados" },
               { val: "36K+", label: "Ítems Bolivianos", desc: "Pre-cargados" },
               { val: "10x", label: "Mayor Velocidad", desc: "vs Hojas de Excel" },
               { val: "100%", label: "Curva S & Gantt", desc: "Automatizados" }
@@ -172,22 +185,26 @@ export default async function HomePage() {
       <section className="py-20 bg-slate-950/50 border-t border-slate-900">
         <div className="container mx-auto px-6 max-w-5xl">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-extrabold tracking-tight">10 Calculadoras de Obra Integradas</h2>
+            <h2 className="text-3xl font-extrabold tracking-tight">14 Calculadoras de Obra Integradas</h2>
             <p className="text-slate-400 mt-2">Acceso a cálculos paramétricos precisos en cualquier dispositivo sin instalaciones.</p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { name: "Concreto", free: true, spec: "Dosificaciones standard" },
-              { name: "Paredes", free: true, spec: "Ladrillos, mortero" },
-              { name: "Pisos", free: true, spec: "Cerámica, porcelanato" },
-              { name: "Columnas", free: false, spec: "Acero y encofrados" },
-              { name: "Vigas", free: false, spec: "Fierrería y estribos" },
-              { name: "Losas", free: false, spec: "Casetones y viguetas" },
-              { name: "Cimientos", free: false, spec: "Hormigón ciclópeo" },
-              { name: "Muros", free: false, spec: "Contención de piedra" },
-              { name: "Techos", free: false, spec: "Pendientes y tejas" },
-              { name: "Cielos", free: false, spec: "Yeso y perfiles" }
+              { name: "Concreto Standard", free: true, spec: "Dosificación cemento/arena" },
+              { name: "Paredes de Ladrillo", free: true, spec: "Cómputo piezas y mezcla" },
+              { name: "Pisos y Cerámicas", free: true, spec: "Piezas, juntas y pegamento" },
+              { name: "Columnas de Hormigón", free: false, spec: "Acero longitudinal y estribos" },
+              { name: "Vigas Estructurales", free: false, spec: "Encofrados y fierrería" },
+              { name: "Losas de Concreto", free: false, spec: "Aligeradas y macizas" },
+              { name: "Cimientos Corridos", free: false, spec: "Hormigón ciclópeo e insumos" },
+              { name: "Muros de Contención", free: false, spec: "Piedra y mortero trapezoidal" },
+              { name: "Techos y Coberturas", free: false, spec: "Tejas, listones y aleros" },
+              { name: "Cielo Raso y Yeso", free: false, spec: "Perfiles y placas drywall" },
+              { name: "Pintura y Acabados", free: false, spec: "Rendimiento y manos" },
+              { name: "Paredes Drywall", free: false, spec: "Pernos, rieles y masilla" },
+              { name: "Paredes de Concreto", free: false, spec: "Armaduras y vaciado" },
+              { name: "Zócalos de Acabado", free: false, spec: "Pegamento y piezas lineales" }
             ].map((calc, i) => (
               <div
                 key={i}
@@ -198,10 +215,10 @@ export default async function HomePage() {
                     {calc.free ? "FREE" : "PRO"}
                   </span>
                 </div>
-                <div className="font-bold text-slate-100 text-base">{calc.name}</div>
+                <div className="font-bold text-slate-100 text-sm">{calc.name}</div>
                 <div className="text-xs text-slate-500 mt-1 leading-snug">{calc.spec}</div>
                 <div className="absolute -bottom-1 -right-1 opacity-5 group-hover:opacity-10 transition-opacity duration-300">
-                  <Calculator className="h-16 w-16 text-white" />
+                  <Calculator className="h-12 w-12 text-white" />
                 </div>
               </div>
             ))}
