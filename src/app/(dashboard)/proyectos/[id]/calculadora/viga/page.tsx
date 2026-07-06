@@ -253,12 +253,42 @@ export default function VigaCalculatorPage() {
         <CardContent className="space-y-6">
           <div className="bg-muted/50 rounded-lg p-6 text-center">
             <div className="text-sm text-muted-foreground mb-2">Viga Rectangular</div>
-            <svg className="mx-auto max-w-[300px]" viewBox="0 0 300 120">
-              <rect x="20" y="30" width="260" height="60" fill="none" stroke="currentColor" strokeWidth="1.5"/>
-              <text x="150" y="20" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.6">Largo</text>
-              <text x="10" y="65" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.6" transform="rotate(-90 10 65)">a</text>
-              <text x="150" y="105" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.6">b</text>
+            <svg className="mx-auto max-w-[320px] w-full" viewBox="0 0 320 130">
+              {/* Viga body */}
+              <rect x="30" y="30" width="240" height="65" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+              {/* Largo dimension line (top) */}
+              <line x1="30" y1="18" x2="270" y2="18" stroke="#f97316" strokeWidth="1.2"/>
+              <text x="150" y="12" textAnchor="middle" fontSize="11" fill="#f97316" fontWeight="600">
+                Largo {form.largo ? `= ${form.largo} m` : "(L)"}
+              </text>
+              {/* a dimension line (left vertical) */}
+              <line x1="14" y1="30" x2="14" y2="95" stroke="#3b82f6" strokeWidth="1.2"/>
+              <text x="8" y="66" textAnchor="middle" fontSize="11" fill="#3b82f6" fontWeight="600" transform="rotate(-90,8,66)">
+                a {form.dimA ? `= ${form.dimA} m` : "(Alto)"}
+              </text>
+              {/* b dimension line (bottom) */}
+              <line x1="30" y1="112" x2="270" y2="112" stroke="#22c55e" strokeWidth="1.2"/>
+              <text x="150" y="126" textAnchor="middle" fontSize="11" fill="#22c55e" fontWeight="600">
+                b {form.dimB ? `= ${form.dimB} m` : "(Base)"}
+              </text>
             </svg>
+            <div className="flex justify-center gap-4 mt-2 flex-wrap text-xs">
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#f97316"}}/>
+                <span className="text-muted-foreground">Largo</span>
+                {form.largo && <span className="font-bold text-orange-500">{form.largo} m</span>}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#3b82f6"}}/>
+                <span className="text-muted-foreground">a = Alto</span>
+                {form.dimA && <span className="font-bold text-blue-600">{form.dimA} m</span>}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#22c55e"}}/>
+                <span className="text-muted-foreground">b = Base</span>
+                {form.dimB && <span className="font-bold text-green-600">{form.dimB} m</span>}
+              </span>
+            </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">

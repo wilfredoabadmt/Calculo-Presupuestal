@@ -131,12 +131,42 @@ export default function CimientoCalculatorPage() {
         <CardContent className="space-y-6">
           <div className="bg-muted/50 rounded-lg p-6 text-center">
             <div className="text-sm text-muted-foreground mb-2">Cimiento</div>
-            <svg className="mx-auto max-w-[250px]" viewBox="0 0 250 120">
-              <rect x="50" y="30" width="150" height="60" fill="none" stroke="currentColor" strokeWidth="1.5"/>
-              <text x="125" y="20" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.6">Largo</text>
-              <text x="30" y="65" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.6" transform="rotate(-90 30 65)">Altura</text>
-              <text x="125" y="110" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.6">Base</text>
+            <svg className="mx-auto max-w-[280px] w-full" viewBox="0 0 280 130">
+              {/* Cimiento rectangle */}
+              <rect x="40" y="30" width="180" height="65" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+              {/* Largo (top) */}
+              <line x1="40" y1="17" x2="220" y2="17" stroke="#f97316" strokeWidth="1.2"/>
+              <text x="130" y="11" textAnchor="middle" fontSize="10" fill="#f97316" fontWeight="600">
+                Largo {form.largo ? `= ${form.largo} m` : "(L)"}
+              </text>
+              {/* Altura (left vertical) */}
+              <line x1="24" y1="30" x2="24" y2="95" stroke="#3b82f6" strokeWidth="1.2"/>
+              <text x="15" y="65" textAnchor="middle" fontSize="9" fill="#3b82f6" fontWeight="600" transform="rotate(-90,15,65)">
+                H {form.altura ? `= ${form.altura} m` : "(Alt)"}
+              </text>
+              {/* Base (bottom) */}
+              <line x1="40" y1="112" x2="220" y2="112" stroke="#22c55e" strokeWidth="1.2"/>
+              <text x="130" y="126" textAnchor="middle" fontSize="10" fill="#22c55e" fontWeight="600">
+                Base {form.base ? `= ${form.base} m` : "(B)"}
+              </text>
             </svg>
+            <div className="flex justify-center gap-3 mt-1 flex-wrap text-xs">
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#f97316"}}/>
+                <span className="text-muted-foreground">Largo</span>
+                {form.largo && <span className="font-bold text-orange-500">{form.largo} m</span>}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#22c55e"}}/>
+                <span className="text-muted-foreground">Base</span>
+                {form.base && <span className="font-bold text-green-600">{form.base} m</span>}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#3b82f6"}}/>
+                <span className="text-muted-foreground">Altura</span>
+                {form.altura && <span className="font-bold text-blue-600">{form.altura} m</span>}
+              </span>
+            </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">

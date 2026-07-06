@@ -161,13 +161,60 @@ export default function TechoCalculatorPage() {
         <CardContent className="space-y-6">
           <div className="bg-muted/50 rounded-lg p-6 text-center">
             <div className="text-sm text-muted-foreground mb-2">Techo con Pendiente</div>
-            <svg className="mx-auto max-w-[300px]" viewBox="0 0 300 150">
-              <polygon points="50,120 250,120 250,40" fill="none" stroke="currentColor" strokeWidth="1.5"/>
-              <text x="150" y="140" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.6">Ancho (A)</text>
-              <text x="270" y="85" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.6">Alto (H)</text>
-              <text x="150" y="30" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.6">Largo (L)</text>
-              <line x1="50" y1="120" x2="250" y2="40" stroke="currentColor" strokeWidth="1" strokeDasharray="4,4" opacity="0.4"/>
+            <svg className="mx-auto max-w-[340px] w-full" viewBox="0 0 340 170">
+              {/* Triangle shape */}
+              <polygon points="30,140 280,140 280,40" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+              {/* Dashed hypotenuse label line */}
+              <line x1="30" y1="140" x2="280" y2="40" stroke="currentColor" strokeWidth="1" strokeDasharray="5,4" opacity="0.35"/>
+
+              {/* A — Ancho (bottom horizontal) */}
+              <line x1="30" y1="155" x2="280" y2="155" stroke="#f97316" strokeWidth="1.2" markerEnd="url(#arrowA)" markerStart="url(#arrowA2)"/>
+              <text x="155" y="168" textAnchor="middle" fontSize="11" fill="#f97316" fontWeight="600">
+                A {form.ancho ? `= ${form.ancho} m` : "(Ancho)"}
+              </text>
+
+              {/* H — Alto (right vertical) */}
+              <line x1="295" y1="140" x2="295" y2="40" stroke="#3b82f6" strokeWidth="1.2"/>
+              <text x="318" y="95" textAnchor="middle" fontSize="11" fill="#3b82f6" fontWeight="600" transform="rotate(90,318,95)">
+                H {form.alto ? `= ${form.alto} m` : "(Alto)"}
+              </text>
+
+              {/* L — Largo (hypotenuse, top label) */}
+              <text x="130" y="72" textAnchor="middle" fontSize="11" fill="#22c55e" fontWeight="600" transform="rotate(-22,130,72)">
+                L {form.largo ? `= ${form.largo} m` : "(Largo)"}
+              </text>
+
+              {/* Right angle mark */}
+              <polyline points="280,120 260,120 260,140" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.5"/>
+
+              {/* Arrow marker defs */}
+              <defs>
+                <marker id="arrowA" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                  <path d="M0,0 L6,3 L0,6 Z" fill="#f97316"/>
+                </marker>
+                <marker id="arrowA2" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto-start-reverse">
+                  <path d="M0,0 L6,3 L0,6 Z" fill="#f97316"/>
+                </marker>
+              </defs>
             </svg>
+            {/* Live legend chips */}
+            <div className="flex justify-center gap-4 mt-2 flex-wrap text-xs">
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#f97316"}}/>
+                <span className="text-muted-foreground">A = Ancho</span>
+                {form.ancho && <span className="font-bold text-orange-500">{form.ancho} m</span>}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#22c55e"}}/>
+                <span className="text-muted-foreground">L = Largo pendiente</span>
+                {form.largo && <span className="font-bold text-green-600">{form.largo} m</span>}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#3b82f6"}}/>
+                <span className="text-muted-foreground">H = Alto cumbrera</span>
+                {form.alto && <span className="font-bold text-blue-600">{form.alto} m</span>}
+              </span>
+            </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">

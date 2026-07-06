@@ -120,13 +120,36 @@ export default function CieloCalculatorPage() {
         <CardContent className="space-y-6">
           <div className="bg-muted/50 rounded-lg p-6 text-center">
             <div className="text-sm text-muted-foreground mb-2">Cielo Raso - Vista Inferior</div>
-            <svg className="mx-auto max-w-[250px]" viewBox="0 0 250 150">
-              <rect x="20" y="20" width="210" height="110" fill="none" stroke="currentColor" strokeWidth="1.5"/>
-              {[0,1,2,3,4].map(i => <line key={`v${i}`} x1={62 + i * 42} y1="20" x2={62 + i * 42} y2="130" stroke="currentColor" strokeWidth="0.5" strokeDasharray="3,3" opacity="0.3"/>)}
-              {[0,1].map(i => <line key={`h${i}`} x1="20" y1={57 + i * 36} x2="230" y2={57 + i * 36} stroke="currentColor" strokeWidth="0.5" strokeDasharray="3,3" opacity="0.3"/>)}
-              <text x="125" y="148" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.6">Viguetas horizontales</text>
-              <text x="8" y="75" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.6" transform="rotate(-90 8 75)">Omegas</text>
+            <svg className="mx-auto max-w-[270px] w-full" viewBox="0 0 270 160">
+              {/* Main panel rect */}
+              <rect x="25" y="15" width="210" height="110" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+              {/* Vigueta (horizontal) grid lines */}
+              {[0,1,2,3,4].map(i => <line key={`v${i}`} x1={68 + i * 42} y1="15" x2={68 + i * 42} y2="125" stroke="currentColor" strokeWidth="0.5" strokeDasharray="3,3" opacity="0.3"/>)}
+              {/* Omega (vertical) grid lines */}
+              {[0,1].map(i => <line key={`h${i}`} x1="25" y1={53 + i * 36} x2="235" y2={53 + i * 36} stroke="currentColor" strokeWidth="0.5" strokeDasharray="3,3" opacity="0.3"/>)}
+              {/* Ancho (bottom) */}
+              <line x1="25" y1="140" x2="235" y2="140" stroke="#f97316" strokeWidth="1.2"/>
+              <text x="130" y="154" textAnchor="middle" fontSize="10" fill="#f97316" fontWeight="600">
+                Ancho {form.ancho ? `= ${form.ancho} m` : "(A)"}
+              </text>
+              {/* Largo (right vertical) */}
+              <line x1="250" y1="15" x2="250" y2="125" stroke="#3b82f6" strokeWidth="1.2"/>
+              <text x="263" y="72" textAnchor="middle" fontSize="10" fill="#3b82f6" fontWeight="600" transform="rotate(90,263,72)">
+                Largo {form.largo ? `= ${form.largo} m` : "(L)"}
+              </text>
             </svg>
+            <div className="flex justify-center gap-4 mt-1 flex-wrap text-xs">
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#f97316"}}/>
+                <span className="text-muted-foreground">Ancho</span>
+                {form.ancho && <span className="font-bold text-orange-500">{form.ancho} m</span>}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#3b82f6"}}/>
+                <span className="text-muted-foreground">Largo</span>
+                {form.largo && <span className="font-bold text-blue-600">{form.largo} m</span>}
+              </span>
+            </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">

@@ -157,12 +157,42 @@ export default function LosaCalculatorPage() {
         <CardContent className="space-y-6">
           <div className="bg-muted/50 rounded-lg p-6 text-center">
             <div className="text-sm text-muted-foreground mb-2">Losa Maciza</div>
-            <svg className="mx-auto max-w-[250px]" viewBox="0 0 250 120">
-              <rect x="30" y="40" width="190" height="20" fill="none" stroke="currentColor" strokeWidth="1.5"/>
-              <text x="125" y="30" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.6">Largo</text>
-              <text x="10" y="55" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.6" transform="rotate(-90 10 55)">Espesor</text>
-              <text x="125" y="80" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.6">Ancho</text>
+            <svg className="mx-auto max-w-[280px] w-full" viewBox="0 0 280 130">
+              {/* Slab body — shown as 3D-ish rectangle */}
+              <rect x="30" y="45" width="200" height="25" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+              {/* Largo (top) */}
+              <line x1="30" y1="32" x2="230" y2="32" stroke="#f97316" strokeWidth="1.2"/>
+              <text x="130" y="26" textAnchor="middle" fontSize="10" fill="#f97316" fontWeight="600">
+                Largo {form.largo ? `= ${form.largo} m` : "(L)"}
+              </text>
+              {/* Espesor (left side) */}
+              <line x1="14" y1="45" x2="14" y2="70" stroke="#3b82f6" strokeWidth="1.2"/>
+              <text x="7" y="59" textAnchor="middle" fontSize="9" fill="#3b82f6" fontWeight="600" transform="rotate(-90,7,59)">
+                e {form.espesor ? `=${form.espesor}` : "(Esp)"}
+              </text>
+              {/* Ancho (bottom) */}
+              <line x1="30" y1="84" x2="230" y2="84" stroke="#22c55e" strokeWidth="1.2"/>
+              <text x="130" y="98" textAnchor="middle" fontSize="10" fill="#22c55e" fontWeight="600">
+                Ancho {form.ancho ? `= ${form.ancho} m` : "(A)"}
+              </text>
             </svg>
+            <div className="flex justify-center gap-3 mt-1 flex-wrap text-xs">
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#f97316"}}/>
+                <span className="text-muted-foreground">Largo</span>
+                {form.largo && <span className="font-bold text-orange-500">{form.largo} m</span>}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#22c55e"}}/>
+                <span className="text-muted-foreground">Ancho</span>
+                {form.ancho && <span className="font-bold text-green-600">{form.ancho} m</span>}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#3b82f6"}}/>
+                <span className="text-muted-foreground">Espesor</span>
+                {form.espesor && <span className="font-bold text-blue-600">{form.espesor} m</span>}
+              </span>
+            </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">

@@ -173,15 +173,38 @@ export default function PisoCalculatorPage() {
         <CardContent className="space-y-6">
           <div className="bg-muted/50 rounded-lg p-6 text-center">
             <div className="text-sm text-muted-foreground mb-2">Piso Cerámico</div>
-            <svg className="mx-auto max-w-[200px]" viewBox="0 0 200 120">
-              <rect x="20" y="20" width="160" height="80" fill="none" stroke="currentColor" strokeWidth="1.5"/>
-              <line x1="60" y1="20" x2="60" y2="100" stroke="currentColor" strokeWidth="0.5" strokeDasharray="3,3" opacity="0.4"/>
-              <line x1="100" y1="20" x2="100" y2="100" stroke="currentColor" strokeWidth="0.5" strokeDasharray="3,3" opacity="0.4"/>
-              <line x1="140" y1="20" x2="140" y2="100" stroke="currentColor" strokeWidth="0.5" strokeDasharray="3,3" opacity="0.4"/>
-              <line x1="20" y1="45" x2="180" y2="45" stroke="currentColor" strokeWidth="0.5" strokeDasharray="3,3" opacity="0.4"/>
-              <line x1="20" y1="75" x2="180" y2="75" stroke="currentColor" strokeWidth="0.5" strokeDasharray="3,3" opacity="0.4"/>
-              <text x="100" y="115" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.6">Ancho × Largo</text>
+            <svg className="mx-auto max-w-[240px] w-full" viewBox="0 0 240 140">
+              {/* Floor rectangle */}
+              <rect x="30" y="20" width="160" height="80" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+              {/* Tile grid lines */}
+              <line x1="70" y1="20" x2="70" y2="100" stroke="currentColor" strokeWidth="0.5" strokeDasharray="3,3" opacity="0.35"/>
+              <line x1="110" y1="20" x2="110" y2="100" stroke="currentColor" strokeWidth="0.5" strokeDasharray="3,3" opacity="0.35"/>
+              <line x1="150" y1="20" x2="150" y2="100" stroke="currentColor" strokeWidth="0.5" strokeDasharray="3,3" opacity="0.35"/>
+              <line x1="30" y1="47" x2="190" y2="47" stroke="currentColor" strokeWidth="0.5" strokeDasharray="3,3" opacity="0.35"/>
+              <line x1="30" y1="74" x2="190" y2="74" stroke="currentColor" strokeWidth="0.5" strokeDasharray="3,3" opacity="0.35"/>
+              {/* Ancho (bottom) */}
+              <line x1="30" y1="112" x2="190" y2="112" stroke="#f97316" strokeWidth="1.2"/>
+              <text x="110" y="128" textAnchor="middle" fontSize="11" fill="#f97316" fontWeight="600">
+                Ancho {form.ancho ? `= ${form.ancho} m` : "(A)"}
+              </text>
+              {/* Largo (right vertical) */}
+              <line x1="205" y1="20" x2="205" y2="100" stroke="#3b82f6" strokeWidth="1.2"/>
+              <text x="222" y="62" textAnchor="middle" fontSize="11" fill="#3b82f6" fontWeight="600" transform="rotate(90,222,62)">
+                Largo {form.largo ? `= ${form.largo} m` : "(L)"}
+              </text>
             </svg>
+            <div className="flex justify-center gap-4 mt-1 flex-wrap text-xs">
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#f97316"}}/>
+                <span className="text-muted-foreground">Ancho</span>
+                {form.ancho && <span className="font-bold text-orange-500">{form.ancho} m</span>}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#3b82f6"}}/>
+                <span className="text-muted-foreground">Largo</span>
+                {form.largo && <span className="font-bold text-blue-600">{form.largo} m</span>}
+              </span>
+            </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">

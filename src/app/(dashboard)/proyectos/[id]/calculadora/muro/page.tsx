@@ -137,12 +137,42 @@ export default function MuroCalculatorPage() {
         <CardContent className="space-y-6">
           <div className="bg-muted/50 rounded-lg p-6 text-center">
             <div className="text-sm text-muted-foreground mb-2">Muro de Piedra (sección trapezoidal)</div>
-            <svg className="mx-auto max-w-[200px]" viewBox="0 0 150 180">
-              <polygon points="30,30 120,30 140,150 10,150" fill="none" stroke="currentColor" strokeWidth="1.5"/>
-              <text x="75" y="20" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.6">Corona (C)</text>
-              <text x="75" y="175" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.6">Base (B)</text>
-              <text x="5" y="95" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.6" transform="rotate(-90 5 95)">Altura (H)</text>
+            <svg className="mx-auto max-w-[220px] w-full" viewBox="0 0 200 200">
+              {/* Trapezoidal body */}
+              <polygon points="40,30 140,30 160,160 20,160" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+              {/* Corona (top) */}
+              <line x1="40" y1="16" x2="140" y2="16" stroke="#f97316" strokeWidth="1.2"/>
+              <text x="90" y="10" textAnchor="middle" fontSize="10" fill="#f97316" fontWeight="600">
+                C {form.corona ? `= ${form.corona} m` : "(Corona)"}
+              </text>
+              {/* Base (bottom) */}
+              <line x1="20" y1="175" x2="160" y2="175" stroke="#22c55e" strokeWidth="1.2"/>
+              <text x="90" y="190" textAnchor="middle" fontSize="10" fill="#22c55e" fontWeight="600">
+                B {form.base ? `= ${form.base} m` : "(Base)"}
+              </text>
+              {/* Altura (left side) */}
+              <line x1="6" y1="30" x2="6" y2="160" stroke="#3b82f6" strokeWidth="1.2"/>
+              <text x="0" y="98" textAnchor="middle" fontSize="10" fill="#3b82f6" fontWeight="600" transform="rotate(-90,0,98)">
+                H {form.altura ? `= ${form.altura} m` : "(Altura)"}
+              </text>
             </svg>
+            <div className="flex justify-center gap-3 mt-1 flex-wrap text-xs">
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#f97316"}}/>
+                <span className="text-muted-foreground">C = Corona</span>
+                {form.corona && <span className="font-bold text-orange-500">{form.corona} m</span>}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#22c55e"}}/>
+                <span className="text-muted-foreground">B = Base</span>
+                {form.base && <span className="font-bold text-green-600">{form.base} m</span>}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#3b82f6"}}/>
+                <span className="text-muted-foreground">H = Altura</span>
+                {form.altura && <span className="font-bold text-blue-600">{form.altura} m</span>}
+              </span>
+            </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">

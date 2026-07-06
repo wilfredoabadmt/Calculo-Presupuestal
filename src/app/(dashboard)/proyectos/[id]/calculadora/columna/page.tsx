@@ -244,14 +244,45 @@ export default function ColumnaCalculatorPage() {
             {/* Esquema */}
             <div className="bg-muted/50 rounded-lg p-6 text-center">
               <div className="text-sm text-muted-foreground mb-2">Columna Rectangular</div>
-              <svg className="mx-auto max-w-[200px]" viewBox="0 0 150 250">
-                <rect x="40" y="20" width="70" height="210" fill="none" stroke="currentColor" strokeWidth="1.5"/>
-                <line x1="45" y1="30" x2="45" y2="220" stroke="currentColor" strokeWidth="0.8" strokeDasharray="3,3" opacity="0.5"/>
-                <line x1="105" y1="30" x2="105" y2="220" stroke="currentColor" strokeWidth="0.8" strokeDasharray="3,3" opacity="0.5"/>
-                <text x="75" y="15" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.6">Alto</text>
-                <text x="25" y="125" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.6" transform="rotate(-90 25 125)">a</text>
-                <text x="75" y="245" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.6">b</text>
+              <svg className="mx-auto max-w-[180px] w-full" viewBox="0 0 180 260">
+                {/* Columna body */}
+                <rect x="50" y="20" width="70" height="210" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+                {/* Rebar lines */}
+                <line x1="56" y1="30" x2="56" y2="220" stroke="currentColor" strokeWidth="0.8" strokeDasharray="3,3" opacity="0.4"/>
+                <line x1="114" y1="30" x2="114" y2="220" stroke="currentColor" strokeWidth="0.8" strokeDasharray="3,3" opacity="0.4"/>
+                {/* Alto (right side) */}
+                <line x1="132" y1="20" x2="132" y2="230" stroke="#f97316" strokeWidth="1.2"/>
+                <text x="148" y="128" textAnchor="middle" fontSize="10" fill="#f97316" fontWeight="600" transform="rotate(90,148,128)">
+                  Alto {form.alto ? `= ${form.alto} m` : "(H)"}
+                </text>
+                {/* a — left side width */}
+                <line x1="50" y1="8" x2="120" y2="8" stroke="#3b82f6" strokeWidth="1.2"/>
+                <text x="85" y="4" textAnchor="middle" fontSize="9" fill="#3b82f6" fontWeight="600">
+                  a {form.dimA ? `=${form.dimA}` : "(ancho)"}
+                </text>
+                {/* b — bottom */}
+                <line x1="50" y1="248" x2="120" y2="248" stroke="#22c55e" strokeWidth="1.2"/>
+                <text x="85" y="258" textAnchor="middle" fontSize="9" fill="#22c55e" fontWeight="600">
+                  b {form.dimB ? `=${form.dimB}` : "(prof)"}
+                </text>
               </svg>
+              <div className="flex justify-center gap-3 mt-1 flex-wrap text-xs">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#f97316"}}/>
+                  <span className="text-muted-foreground">Alto</span>
+                  {form.alto && <span className="font-bold text-orange-500">{form.alto} m</span>}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#3b82f6"}}/>
+                  <span className="text-muted-foreground">a = Ancho</span>
+                  {form.dimA && <span className="font-bold text-blue-600">{form.dimA} m</span>}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#22c55e"}}/>
+                  <span className="text-muted-foreground">b = Profundidad</span>
+                  {form.dimB && <span className="font-bold text-green-600">{form.dimB} m</span>}
+                </span>
+              </div>
             </div>
 
             {/* Dimensiones */}
