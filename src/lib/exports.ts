@@ -18,19 +18,15 @@ const coloresPorTipo: Record<string, string> = {
   OP: "#f97316",
   OG: "#3b82f6",
   OF: "#22c55e",
-  IHS: "#06b6d4",
-  IE: "#a855f7",
 }
 
 const getTipoColor = (codigo: string, itemStr: string): string => {
   const codeUpper = (codigo || "").toUpperCase().trim()
   const itemLower = (itemStr || "").toLowerCase().trim()
 
-  if (codeUpper.startsWith("IHS")) return coloresPorTipo.IHS
   if (codeUpper.startsWith("OP")) return coloresPorTipo.OP
   if (codeUpper.startsWith("OG")) return coloresPorTipo.OG
   if (codeUpper.startsWith("OF")) return coloresPorTipo.OF
-  if (codeUpper.startsWith("IE")) return coloresPorTipo.IE
 
   // Semantic fallback
   if (itemLower.includes("excavac") || itemLower.includes("preliminar") || itemLower.includes("limpieza") || itemLower.includes("trazo") || itemLower.includes("replanteo") || itemLower.includes("zanja") || itemLower.includes("demolic") || itemLower.includes("faena")) {
@@ -41,12 +37,6 @@ const getTipoColor = (codigo: string, itemStr: string): string => {
   }
   if (itemLower.includes("muro") || itemLower.includes("pared") || itemLower.includes("revoque") || itemLower.includes("yeso") || itemLower.includes("pintura") || itemLower.includes("piso") || itemLower.includes("ceramica") || itemLower.includes("acabado") || itemLower.includes("cielo") || itemLower.includes("puerta") || itemLower.includes("ventana") || itemLower.includes("revestimiento")) {
     return coloresPorTipo.OF
-  }
-  if (itemLower.includes("tuberia") || itemLower.includes("agua") || itemLower.includes("sanitari") || itemLower.includes("desague") || itemLower.includes("pluvial") || itemLower.includes("grifo") || itemLower.includes("inodoro") || itemLower.includes("lavaman") || itemLower.includes("alcantarillado")) {
-    return coloresPorTipo.IHS
-  }
-  if (itemLower.includes("electric") || itemLower.includes("cable") || itemLower.includes("toma") || itemLower.includes("interruptor") || itemLower.includes("iluminac") || itemLower.includes("luz") || itemLower.includes("tablero") || itemLower.includes("tomacorriente")) {
-    return coloresPorTipo.IE
   }
 
   return "#3b82f6" // default
@@ -518,9 +508,11 @@ export function exportarCronogramaImagen(items: any[]) {
     doc.setFontSize(9)
     doc.setFont("helvetica", "bold")
     
-    // Título de la actividad
+    // Título de la actividad con duración en días
     const nameText = `${item.codigo || ""} ${item.item || item.descripcion || ""}`
-    doc.text(nameText.length > 32 ? nameText.substring(0, 32) + "..." : nameText, 15, y + 4.5)
+    const displayName = nameText.length > 32 ? nameText.substring(0, 32) + "..." : nameText
+    const durationText = `(${item.duracion || 0}d)`
+    doc.text(`${displayName} ${durationText}`, 15, y + 4.5)
 
     // Posición y ancho de barra Gantt staggered
     const itemStart = getDiffDays(allStart, new Date(item.fechaInicio))
@@ -568,13 +560,11 @@ export function exportarCronogramaImagen(items: any[]) {
   doc.setTextColor(100, 116, 139)
   doc.text("Leyenda de Especialidades:", 15, y + 3)
 
-  let xLegend = 60
+  let xLegend = 65
   const legendItems = [
     { label: "Obras Preliminares", color: coloresPorTipo.OP },
     { label: "Obra Gruesa", color: coloresPorTipo.OG },
     { label: "Obra Fina", color: coloresPorTipo.OF },
-    { label: "Inst. Hidrosanitarias", color: coloresPorTipo.IHS },
-    { label: "Inst. Eléctricas", color: coloresPorTipo.IE },
   ]
 
   legendItems.forEach(leg => {
@@ -589,7 +579,7 @@ export function exportarCronogramaImagen(items: any[]) {
     doc.setFont("helvetica", "normal")
     doc.text(leg.label, xLegend + 6, y + 3)
     
-    xLegend += leg.label.length * 2 + 18
+    xLegend += 50
   })
 
   doc.save(`Cronograma_Gantt_${new Date().toISOString().slice(0, 10)}.pdf`)
