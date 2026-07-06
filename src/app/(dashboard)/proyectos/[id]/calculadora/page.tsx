@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -18,7 +18,8 @@ import {
   Square,
   RectangleHorizontal,
   Lock,
-  ArrowRight
+  ArrowRight,
+  Droplets
 } from "lucide-react"
 
 const calculators = [
@@ -102,10 +103,43 @@ const calculators = [
     free: false,
     formulas: ["Paneles con redondeo", "Viguetas y omegas por separación", "Ángulo perimetral"]
   },
+  { 
+    id: "pared-concreto", 
+    name: "Paredes de Concreto", 
+    icon: Building2, 
+    desc: "Paredes de concreto simple y armado con rebar",
+    free: false,
+    formulas: ["Volumen = A × L × E", "Cemento, Arena, Grava, Agua", "% de Acero por densidad"]
+  },
+  { 
+    id: "pared-drywall", 
+    name: "Paredes Drywall", 
+    icon: Layers, 
+    desc: "Paredes de panel yeso, parantes, canales y tornillos",
+    free: false,
+    formulas: ["Placas de yeso de 1.22x2.44m", "Parantes y canales metálicos", "Tornillos para estructura y panel"]
+  },
+  { 
+    id: "pintura", 
+    name: "Pintura", 
+    icon: Droplets, 
+    desc: "Pintura por área, manos, lados y rendimiento",
+    free: true,
+    formulas: ["Área total = A × Manos × Lados", "Rendimiento m²/litro", "Litros y galones necesarios"]
+  },
+  { 
+    id: "zocalo", 
+    name: "Zócalos", 
+    icon: Square, 
+    desc: "Zócalos cerámicos/rodapié por metro lineal",
+    free: false,
+    formulas: ["Tiras cortadas por pieza cerámica", "Cajas de cerámica", "Pegamento y boquilla por m²"]
+  },
 ]
 
 export default function CalculadoraSelectorPage() {
   const params = useParams()
+  const router = useRouter() // Wait, let's keep router if it's there
   const projectId = params.id as string
   const { data: session } = useSession()
   const isPro = (session?.user as any)?.plan === "PRO"
@@ -119,7 +153,7 @@ export default function CalculadoraSelectorPage() {
           </Link>
           <h1 className="text-3xl font-bold">Seleccionar Calculadora</h1>
           <p className="text-muted-foreground">
-            {isPro ? "Acceso completo a las 10 calculadoras" : "Plan Free: 3 calculadoras disponibles · Plan Pro: las 10 completas"}
+            {isPro ? "Acceso completo a las 14 calculadoras" : "Plan Free: 4 calculadoras disponibles · Plan Pro: las 14 completas"}
           </p>
         </div>
         {!isPro && (

@@ -1,0 +1,329 @@
+"use client"
+
+import { useState } from "react"
+import Link from "next/link"
+import { useParams, useRouter } from "next/navigation"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { InputWithHelp } from "@/components/ui/input-with-help"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { 
+  ArrowLeft, 
+  Calculator, 
+  Save, 
+  Droplets, 
+  CheckCircle, 
+  Loader2 
+} from "lucide-react"
+import { formatNumber } from "@/lib/utils"
+import { PlanGuard } from "@/components/shared/PlanGuard"
+
+const PRECIO_PINTURA_LT = 4.80 // por litro de pintura látex estándar
+const PRECIO_SELLADOR_LT = 3.50 // por litro de sellador acrílico
+
+export default function PinturaCalculatorPage() {
+  const params = useParams()
+  const router = useRouter()
+  const projectId = params.id as string
+
+  const [isSaving, setIsSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+
+  const [form, setForm] = useState({
+    descripcion: "",
+    area: "20.00",
+    rendimiento: "8.00",
+    manos: "2",
+    lados: "1",
+    desperdicio: "5",
+    cantidad: "1",
+    redondeo: "entero",
+  })
+
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
+
+  const [results, setResults] = useState<{
+    areaNeta: number
+    areaTotalPintar: number
+    pinturaLitros: number
+    pinturaGalones: number
+    selladorLitros: number
+    costoPintura: number
+    costoSellador: number
+    total: number
+  } | null>(null)
+
+  const validateAllFields = (shouldSetState = false) => {
+    const errors: Record<string, string> = {}
+
+    if (!form.area || parseFloat(form.area) <= 0) {
+      errors.area = "Debe ser un número mayor a 0"
+    }
+    if (!form.rendimiento || parseFloat(form.rendimiento) <= 0) {
+      errors.rendimiento = "Debe ser un número mayor a 0"
+    }
+    if (!form.cantidad || parseInt(form.cantidad) <= 0) {
+      errors.cantidad = "Debe ser mayor a 0"
+    }
+
+    if (shouldSetState) {
+      setFormErrors(errors)
+    }
+    return Object.keys(errors).length === 0
+  }
+
+  const calculate = () => {
+    if (!validateAllFields(true)) return
+
+    const area = parseFloat(form.area)
+    const rendimiento = parseFloat(form.rendimiento)
+    const manos = parseInt(form.manos)
+    const lados = parseInt(form.lados)
+    const cantidad = parseInt(form.cantidad)
+    const desperdicio = 1 + (parseFloat(form.desperdicio) / 100)
+
+    const areaNeta = area * cantidad
+    const areaTotalPintar = area * lados * manos * cantidad
+
+    // Pintura (Látex)
+    const pinturaLitrosRaw = (areaTotalPintar / rendimiento) * desperdicio
+    const pinturaLitros = form.redondeo === "entero" ? Math.ceil(pinturaLitrosRaw) : pinturaLitrosRaw
+    const pinturaGalones = pinturaLitros / 3.785
+
+    // Sellador (aprox 1 mano, rendimiento promedio 10 m²/lt)
+    const areaSellador = area * lados * cantidad
+    const selladorLitrosRaw = (areaSellador / 10.0) * desperdicio
+    const selladorLitros = form.redondeo === "entero" ? Math.ceil(selladorLitrosRaw) : selladorLitrosRaw
+
+    const costoPintura = pinturaLitros * PRECIO_PINTURA_LT
+    const costoSellador = selladorLitros * PRECIO_SELLADOR_LT
+    const total = costoPintura + costoSellador
+
+    setResults({
+      areaNeta,
+      areaTotalPintar,
+      pinturaLitros,
+      pinturaGalones,
+      selladorLitros,
+      costoPintura,
+      costoSellador,
+      total,
+    })
+  }
+
+  const handleSave = async () => {
+    if (!results) return
+    setIsSaving(true)
+
+    try {
+      const res = await fetch(`/api/proyectos/${projectId}/elementos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tipoElemento: "PINTURA",
+          descripcion: form.descripcion || `Pintura en Paredes - ${form.area} m²`,
+          cantidad: parseInt(form.cantidad),
+          dimA: parseFloat(form.area),
+          desperdicio: parseFloat(form.desperdicio),
+          materiales: JSON.stringify([
+            { nombre: "Pintura Látex Lavable", cantidad: results.pinturaLitros, unidad: "lt", precio: results.costoPintura },
+            { nombre: "Sellador Acrílico Muro", cantidad: results.selladorLitros, unidad: "lt", precio: results.costoSellador },
+          ]),
+          costoTotal: results.total,
+        }),
+      })
+
+      if (res.ok) {
+        setSaved(true)
+        setTimeout(() => router.push(`/proyectos/${projectId}/elementos`), 1500)
+      } else {
+        alert("Error al guardar en el presupuesto")
+      }
+    } catch {
+      alert("Error de conexión al guardar")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  return (
+    <PlanGuard>
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Link href={`/proyectos/${projectId}/calculadora`} className="p-2 hover:bg-accent rounded-lg">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+            <div>
+              <h1 className="text-3xl font-bold flex items-center gap-2">
+                <Droplets className="h-7 w-7 text-primary" />
+                Pintura
+              </h1>
+              <p className="text-muted-foreground">Acabados decorativos y sellado para superficies de mampostería</p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleSave} disabled={!results || isSaving || saved}>
+              {isSaving ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Guardando...</>
+              ) : saved ? (
+                <><CheckCircle className="mr-2 h-4 w-4 text-green-600" /> Guardado</>
+              ) : (
+                <><Save className="mr-2 h-4 w-4" /> Guardar en Proyecto</>
+              )}
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-[1fr_400px]">
+          <Card>
+            <CardHeader><CardTitle>Parámetros de Entrada</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>Descripción del Elemento</Label>
+                <InputWithHelp
+                  value={form.descripcion}
+                  onChange={e => setForm({ ...form, descripcion: e.target.value })}
+                  placeholder="Ej. Pintado Dormitorio Principal"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Área de Pared (m²)</Label>
+                  <InputWithHelp
+                    type="number"
+                    value={form.area}
+                    onChange={e => setForm({ ...form, area: e.target.value })}
+                    error={formErrors.area}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Rendimiento Pintura (m²/lt)</Label>
+                  <InputWithHelp
+                    type="number"
+                    value={form.rendimiento}
+                    onChange={e => setForm({ ...form, rendimiento: e.target.value })}
+                    error={formErrors.rendimiento}
+                    helpText="Rendimiento promedio: 6 a 10 m² por litro por mano"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Número de Manos (Capas)</Label>
+                  <Select value={form.manos} onValueChange={v => setForm({ ...form, manos: v })}>
+                    <SelectItem value="1">1 mano (Retoque)</SelectItem>
+                    <SelectItem value="2">2 manos (Estándar)</SelectItem>
+                    <SelectItem value="3">3 manos (Fuerte)</SelectItem>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Lados a Pintar</Label>
+                  <Select value={form.lados} onValueChange={v => setForm({ ...form, lados: v })}>
+                    <SelectItem value="1">1 lado (Solo interior)</SelectItem>
+                    <SelectItem value="2">2 lados (Interior + Exterior)</SelectItem>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Cantidad de Áreas Iguales</Label>
+                  <InputWithHelp
+                    type="number"
+                    value={form.cantidad}
+                    onChange={e => setForm({ ...form, cantidad: e.target.value })}
+                    error={formErrors.cantidad}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Desperdicio (%)</Label>
+                  <InputWithHelp
+                    type="number"
+                    value={form.desperdicio}
+                    onChange={e => setForm({ ...form, desperdicio: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Tipo Redondeo</Label>
+                <Select value={form.redondeo} onValueChange={v => setForm({ ...form, redondeo: v })}>
+                  <SelectItem value="entero">Entero superior (Lts completos)</SelectItem>
+                  <SelectItem value="decimal">Mantener decimales</SelectItem>
+                </Select>
+              </div>
+
+              <Button onClick={calculate} className="w-full" size="lg" disabled={!validateAllFields()}>
+                <Calculator className="mr-2 h-4 w-4" /> Calcular Materiales
+              </Button>
+            </CardContent>
+          </Card>
+
+          {results ? (
+            <Card className="h-fit">
+              <CardHeader><CardTitle>Resultados Obtenidos</CardTitle></CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-primary/5 p-4 rounded-lg text-center border">
+                    <div className="text-xl font-bold text-primary">{formatNumber(results.areaNeta, 1)} m²</div>
+                    <div className="text-xs text-muted-foreground">Área Neta Superficie</div>
+                  </div>
+                  <div className="bg-primary/5 p-4 rounded-lg text-center border">
+                    <div className="text-xl font-bold text-primary">{formatNumber(results.areaTotalPintar, 1)} m²</div>
+                    <div className="text-xs text-muted-foreground">Área Acumulada Capas</div>
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b text-left text-muted-foreground">
+                        <th className="pb-2 pr-4">Material / Insumo</th>
+                        <th className="pb-2 pr-4 text-right">Cant.</th>
+                        <th className="pb-2 pr-4 text-right">Unidad</th>
+                        <th className="pb-2 text-right">Subtotal</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="border-b">
+                        <td className="py-2 pr-4 font-medium">Pintura Látex Lavable</td>
+                        <td className="py-2 pr-4 text-right font-mono">{formatNumber(results.pinturaLitros, 1)}</td>
+                        <td className="py-2 pr-4 text-right">lt</td>
+                        <td className="py-2 text-right font-medium">Bs. {formatNumber(results.costoPintura, 2)}</td>
+                      </tr>
+                      <tr className="border-b">
+                        <td className="py-2 pr-4 font-medium">Sellador Acrílico</td>
+                        <td className="py-2 pr-4 text-right font-mono">{formatNumber(results.selladorLitros, 1)}</td>
+                        <td className="py-2 pr-4 text-right">lt</td>
+                        <td className="py-2 text-right font-medium">Bs. {formatNumber(results.costoSellador, 2)}</td>
+                      </tr>
+                      <tr className="border-b bg-muted/40 text-xs">
+                        <td className="py-1.5 pr-4 text-muted-foreground">Equivalencia Pintura Galones</td>
+                        <td className="py-1.5 pr-4 text-right font-mono text-muted-foreground">{formatNumber(results.pinturaGalones, 2)}</td>
+                        <td className="py-1.5 pr-4 text-right text-muted-foreground">galones</td>
+                        <td className="py-1.5 text-right text-muted-foreground">-</td>
+                      </tr>
+                      <tr className="bg-primary/5 font-bold text-base">
+                        <td className="py-3 pr-4" colSpan={3}>TOTAL COSTO</td>
+                        <td className="py-3 text-right text-primary">Bs. {formatNumber(results.total, 2)}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="text-center py-12 border-dashed flex flex-col justify-center items-center">
+              <Calculator className="h-12 w-12 text-muted-foreground/40 mb-4" />
+              <h3 className="text-sm font-medium">Ingresa los parámetros y haz clic en Calcular</h3>
+            </Card>
+          )}
+        </div>
+      </div>
+    </PlanGuard>
+  )
+}
