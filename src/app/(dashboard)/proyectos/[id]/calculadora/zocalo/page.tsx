@@ -293,8 +293,11 @@ export default function ZocaloCalculatorPage() {
               <div className="space-y-2">
                 <Label>Tipo Redondeo</Label>
                 <Select value={form.redondeo} onValueChange={v => setForm({ ...form, redondeo: v })}>
-                  <SelectItem value="entero">Entero superior (Cajas completas)</SelectItem>
-                  <SelectItem value="decimal">Mantener decimales</SelectItem>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="entero">Entero superior (Cajas completas)</SelectItem>
+                    <SelectItem value="decimal">Mantener decimales</SelectItem>
+                  </SelectContent>
                 </Select>
               </div>
 

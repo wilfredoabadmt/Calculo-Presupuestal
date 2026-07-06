@@ -215,16 +215,22 @@ export default function PinturaCalculatorPage() {
                 <div className="space-y-2">
                   <Label>Número de Manos (Capas)</Label>
                   <Select value={form.manos} onValueChange={v => setForm({ ...form, manos: v })}>
-                    <SelectItem value="1">1 mano (Retoque)</SelectItem>
-                    <SelectItem value="2">2 manos (Estándar)</SelectItem>
-                    <SelectItem value="3">3 manos (Fuerte)</SelectItem>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">1 mano (Retoque)</SelectItem>
+                      <SelectItem value="2">2 manos (Estándar)</SelectItem>
+                      <SelectItem value="3">3 manos (Fuerte)</SelectItem>
+                    </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Lados a Pintar</Label>
                   <Select value={form.lados} onValueChange={v => setForm({ ...form, lados: v })}>
-                    <SelectItem value="1">1 lado (Solo interior)</SelectItem>
-                    <SelectItem value="2">2 lados (Interior + Exterior)</SelectItem>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">1 lado (Solo interior)</SelectItem>
+                      <SelectItem value="2">2 lados (Interior + Exterior)</SelectItem>
+                    </SelectContent>
                   </Select>
                 </div>
               </div>
@@ -252,8 +258,11 @@ export default function PinturaCalculatorPage() {
               <div className="space-y-2">
                 <Label>Tipo Redondeo</Label>
                 <Select value={form.redondeo} onValueChange={v => setForm({ ...form, redondeo: v })}>
-                  <SelectItem value="entero">Entero superior (Lts completos)</SelectItem>
-                  <SelectItem value="decimal">Mantener decimales</SelectItem>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="entero">Entero superior (Lts completos)</SelectItem>
+                    <SelectItem value="decimal">Mantener decimales</SelectItem>
+                  </SelectContent>
                 </Select>
               </div>
 

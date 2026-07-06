@@ -255,16 +255,22 @@ export default function ParedDrywallCalculatorPage() {
                 <div className="space-y-2">
                   <Label>Separación de Parantes (m)</Label>
                   <Select value={form.separacionParantes} onValueChange={v => setForm({ ...form, separacionParantes: v })}>
-                    <SelectItem value="0.40">0.40 m</SelectItem>
-                    <SelectItem value="0.48">0.48 m</SelectItem>
-                    <SelectItem value="0.60">0.60 m</SelectItem>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="0.40">0.40 m</SelectItem>
+                      <SelectItem value="0.48">0.48 m</SelectItem>
+                      <SelectItem value="0.60">0.60 m</SelectItem>
+                    </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Placa Doble Cara</Label>
                   <Select value={form.panelDoble} onValueChange={v => setForm({ ...form, panelDoble: v })}>
-                    <SelectItem value="no">Una cara (Revoco simple)</SelectItem>
-                    <SelectItem value="si">Doble cara (Tabique completo)</SelectItem>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="no">Una cara (Revoco simple)</SelectItem>
+                      <SelectItem value="si">Doble cara (Tabique completo)</SelectItem>
+                    </SelectContent>
                   </Select>
                 </div>
               </div>
@@ -301,8 +307,11 @@ export default function ParedDrywallCalculatorPage() {
                 <div className="space-y-2">
                   <Label>Tipo Redondeo</Label>
                   <Select value={form.redondeo} onValueChange={v => setForm({ ...form, redondeo: v })}>
-                    <SelectItem value="entero">Entero superior</SelectItem>
-                    <SelectItem value="decimal">Mantener decimal</SelectItem>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="entero">Entero superior</SelectItem>
+                      <SelectItem value="decimal">Mantener decimal</SelectItem>
+                    </SelectContent>
                   </Select>
                 </div>
               </div>
