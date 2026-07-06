@@ -11,9 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { exportarCronogramaPDF } from "@/lib/exports"
 import { PageHeader } from "@/components/shared/PageHeader"
 import { EmptyState } from "@/components/shared/EmptyState"
-import { Calendar, Plus, Download, Loader2, Trash2, GanttChart } from "lucide-react"
+import { Calendar, Plus, Download, Loader2, Trash2, GanttChart, Boxes, ChevronDown, ChevronUp } from "lucide-react"
 import { format, addDays, differenceInCalendarDays } from "date-fns"
 import { es } from "date-fns/locale"
+import { formatCurrency } from "@/lib/utils"
 
 interface CronogramaItem {
   id: string
@@ -26,12 +27,21 @@ interface CronogramaItem {
   dependeDe: string | null
 }
 
+interface Elemento {
+  id: string
+  tipoElemento: string
+  descripcion: string
+  cantidad: number
+  costoTotal: number
+}
+
 type TipoInfo = {
   color: string
   label: string
   descripcion: string
 }
 
+// Only 3 main categories (IHS and IE removed per user request)
 const tiposPorCodigo: Record<string, TipoInfo> = {
   OP: {
     color: "#f97316",
@@ -48,22 +58,29 @@ const tiposPorCodigo: Record<string, TipoInfo> = {
     label: "Obra Fina / Acabados",
     descripcion: "Paredes Drywall, revoque, pintura, pisos, cielo raso, zócalos",
   },
-  IHS: {
-    color: "#06b6d4",
-    label: "Inst. Hidrosanitarias",
-    descripcion: "Tuberías de agua, desagüe, pluvial, aparatos sanitarios",
-  },
-  IE: {
-    color: "#a855f7",
-    label: "Inst. Eléctricas",
-    descripcion: "Cableado, tomacorrientes, iluminación, tableros eléctricos",
-  },
 }
 
-// Backward-compat map for bar color lookup
 const coloresPorTipo: Record<string, string> = Object.fromEntries(
   Object.entries(tiposPorCodigo).map(([k, v]) => [k, v.color])
 )
+
+// Map element types to Gantt category labels
+const tipoElementoACategoria: Record<string, { codigo: string; sugerencia: string }> = {
+  CIMIENTO:     { codigo: "OG", sugerencia: "Cimentación" },
+  COLUMNA:      { codigo: "OG", sugerencia: "Levantado de columnas" },
+  VIGA:         { codigo: "OG", sugerencia: "Construcción de vigas" },
+  LOSA:         { codigo: "OG", sugerencia: "Vaciado de losa" },
+  MURO:         { codigo: "OG", sugerencia: "Levantado de muros" },
+  PARED:        { codigo: "OF", sugerencia: "Revoque de paredes" },
+  PARED_CONCRETO: { codigo: "OG", sugerencia: "Pared de concreto" },
+  PARED_DRYWALL:  { codigo: "OF", sugerencia: "Tabiques Drywall" },
+  PISO:         { codigo: "OF", sugerencia: "Colocación de pisos" },
+  TECHO:        { codigo: "OG", sugerencia: "Construcción de techo" },
+  CIELO:        { codigo: "OF", sugerencia: "Cielo raso" },
+  PINTURA:      { codigo: "OF", sugerencia: "Pintado de ambientes" },
+  ZOCALO:       { codigo: "OF", sugerencia: "Instalación de zócalos" },
+  CONCRETO:     { codigo: "OG", sugerencia: "Vaciado de concreto" },
+}
 
 type ViewMode = "semana" | "mes" | "trimestre"
 
@@ -71,8 +88,10 @@ export default function CronogramaPage() {
   const params = useParams()
   const projectId = params.id as string
   const [items, setItems] = useState<CronogramaItem[]>([])
+  const [elementos, setElementos] = useState<Elemento[]>([])
   const [loading, setLoading] = useState(true)
   const [showDialog, setShowDialog] = useState(false)
+  const [showElementos, setShowElementos] = useState(true)
   const [editingItem, setEditingItem] = useState<CronogramaItem | null>(null)
   const [form, setForm] = useState({
     codigo: "",
@@ -104,7 +123,12 @@ export default function CronogramaPage() {
 
   useEffect(() => {
     fetchItems()
-  }, [fetchItems])
+    // Also fetch project elements for the summary panel
+    fetch(`/api/proyectos/${projectId}/elementos`)
+      .then(r => r.json())
+      .then(data => setElementos(Array.isArray(data) ? data : []))
+      .catch(() => {})
+  }, [fetchItems, projectId])
 
   const handleSave = async () => {
     setSaving(true)
@@ -190,6 +214,36 @@ export default function CronogramaPage() {
     exportarCronogramaPDF(items)
   }
 
+  const getTipoColor = (codigo: string, itemStr: string): string => {
+    const codeUpper = (codigo || "").toUpperCase().trim()
+    const itemLower = (itemStr || "").toLowerCase().trim()
+
+    if (codeUpper.startsWith("OP")) return coloresPorTipo.OP
+    if (codeUpper.startsWith("OG")) return coloresPorTipo.OG
+    if (codeUpper.startsWith("OF")) return coloresPorTipo.OF
+
+    // Semantic fallback
+    if (itemLower.includes("excavac") || itemLower.includes("preliminar") || itemLower.includes("limpieza") || itemLower.includes("trazo") || itemLower.includes("replanteo") || itemLower.includes("zanja") || itemLower.includes("demolic")) {
+      return coloresPorTipo.OP
+    }
+    if (itemLower.includes("pilar") || itemLower.includes("columna") || itemLower.includes("viga") || itemLower.includes("losa") || itemLower.includes("cimiento") || itemLower.includes("zapata") || itemLower.includes("concreto") || itemLower.includes("armado") || itemLower.includes("vaciado") || itemLower.includes("techo") || itemLower.includes("muro")) {
+      return coloresPorTipo.OG
+    }
+    if (itemLower.includes("pared") || itemLower.includes("revoque") || itemLower.includes("yeso") || itemLower.includes("pintura") || itemLower.includes("piso") || itemLower.includes("ceramica") || itemLower.includes("acabado") || itemLower.includes("cielo") || itemLower.includes("drywall") || itemLower.includes("zócalo") || itemLower.includes("zocalo")) {
+      return coloresPorTipo.OF
+    }
+
+    // Numeric fallback
+    const num = parseInt(codeUpper.replace(/\D/g, ""), 10)
+    if (!isNaN(num)) {
+      if (num === 1) return coloresPorTipo.OP
+      if (num >= 2 && num <= 4) return coloresPorTipo.OG
+      if (num >= 5) return coloresPorTipo.OF
+    }
+
+    return "#3b82f6" // default
+  }
+
   const totalDias = items.length > 0
     ? differenceInCalendarDays(
         new Date(Math.max(...items.map(i => new Date(i.fechaFinal).getTime()))),
@@ -222,6 +276,7 @@ export default function CronogramaPage() {
         }
       />
 
+      {/* Stats row */}
       {items.length > 0 && (
         <div className="grid gap-4 md:grid-cols-3">
           <Card>
@@ -245,6 +300,81 @@ export default function CronogramaPage() {
         </div>
       )}
 
+      {/* ─── Elements summary panel ─── */}
+      <Card>
+        <CardHeader
+          className="flex flex-row items-center justify-between cursor-pointer select-none"
+          onClick={() => setShowElementos(v => !v)}
+        >
+          <CardTitle className="flex items-center gap-2">
+            <Boxes className="h-5 w-5" />
+            Resumen de Elementos del Proyecto
+            <span className="ml-2 text-xs font-normal text-muted-foreground">
+              — usa estos datos para crear actividades en el Gantt
+            </span>
+          </CardTitle>
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={e => { e.stopPropagation(); setShowElementos(v => !v) }}>
+            {showElementos ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </Button>
+        </CardHeader>
+        {showElementos && (
+          <CardContent>
+            {elementos.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">
+                No hay elementos calculados aún. Ve a las calculadoras para agregar elementos al presupuesto.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-xs text-muted-foreground">
+                  💡 Cada elemento representa una actividad de tu obra. Úsalos como referencia para agregar actividades al diagrama de Gantt con el código y nombre correcto.
+                </p>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-2 pr-4 font-medium text-muted-foreground">Tipo</th>
+                        <th className="text-left py-2 pr-4 font-medium text-muted-foreground">Descripción</th>
+                        <th className="text-left py-2 pr-4 font-medium text-muted-foreground">Código Gantt Sugerido</th>
+                        <th className="text-left py-2 pr-4 font-medium text-muted-foreground">Nombre Actividad Sugerido</th>
+                        <th className="text-right py-2 font-medium text-muted-foreground">Costo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {elementos.map((el, idx) => {
+                        const cat = tipoElementoACategoria[el.tipoElemento] || { codigo: "OG", sugerencia: el.descripcion }
+                        const color = coloresPorTipo[cat.codigo] || "#3b82f6"
+                        return (
+                          <tr key={el.id} className={idx % 2 === 0 ? "bg-muted/30" : ""}>
+                            <td className="py-2 pr-4">
+                              <span className="inline-flex items-center gap-1.5">
+                                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
+                                {el.tipoElemento.replace(/_/g, " ")}
+                              </span>
+                            </td>
+                            <td className="py-2 pr-4 text-muted-foreground max-w-[200px] truncate">{el.descripcion}</td>
+                            <td className="py-2 pr-4">
+                              <code
+                                className="px-1.5 py-0.5 rounded text-xs font-bold text-white"
+                                style={{ backgroundColor: color }}
+                              >
+                                {cat.codigo}{String(idx + 1).padStart(2, "0")}
+                              </code>
+                            </td>
+                            <td className="py-2 pr-4 text-xs text-muted-foreground">{cat.sugerencia}</td>
+                            <td className="py-2 text-right font-medium">{formatCurrency(el.costoTotal)}</td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        )}
+      </Card>
+
+      {/* ─── Gantt chart ─── */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="flex items-center gap-2">
@@ -280,16 +410,20 @@ export default function CronogramaPage() {
             />
           ) : (
             <div className="space-y-1">
-              {/* Header con fechas */}
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-56 text-xs font-medium text-muted-foreground">Actividad</div>
-                <div className="flex-1 flex justify-between text-xs text-muted-foreground">
+              {/* Column headers */}
+              <div className="flex items-center gap-2 mb-3 border-b pb-2">
+                <div className="w-48 text-xs font-semibold text-muted-foreground">Actividad</div>
+                <div className="w-24 text-xs font-semibold text-muted-foreground">Inicio</div>
+                <div className="w-24 text-xs font-semibold text-muted-foreground">Fin</div>
+                <div className="flex-1 flex justify-between text-xs text-muted-foreground px-1">
                   <span>{format(new Date(Math.min(...items.map(i => new Date(i.fechaInicio).getTime()))), "dd MMM yyyy", { locale: es })}</span>
                   <span>{format(new Date(Math.max(...items.map(i => new Date(i.fechaFinal).getTime()))), "dd MMM yyyy", { locale: es })}</span>
                 </div>
+                <div className="w-12 text-xs font-semibold text-right text-muted-foreground">%</div>
+                <div className="w-16" />
               </div>
 
-              {/* Barras Gantt simplificadas */}
+              {/* Gantt rows */}
               {items.map(item => {
                 const allStart = new Date(Math.min(...items.map(i => new Date(i.fechaInicio).getTime())))
                 const allEnd = new Date(Math.max(...items.map(i => new Date(i.fechaFinal).getTime())))
@@ -298,52 +432,24 @@ export default function CronogramaPage() {
                 const itemStart = differenceInCalendarDays(new Date(item.fechaInicio), allStart)
                 const startPercent = (itemStart / totalRange) * 100
                 const widthPercent = (item.duracion / totalRange) * 100
-                // Determine color based on code prefix or semantic matching of activity name
-                const getTipoColor = (codigo: string, itemStr: string): string => {
-                  const codeUpper = (codigo || "").toUpperCase().trim()
-                  const itemLower = (itemStr || "").toLowerCase().trim()
-
-                  if (codeUpper.startsWith("IHS")) return coloresPorTipo.IHS
-                  if (codeUpper.startsWith("OP")) return coloresPorTipo.OP
-                  if (codeUpper.startsWith("OG")) return coloresPorTipo.OG
-                  if (codeUpper.startsWith("OF")) return coloresPorTipo.OF
-                  if (codeUpper.startsWith("IE")) return coloresPorTipo.IE
-
-                  // Semantic fallback
-                  if (itemLower.includes("excavac") || itemLower.includes("preliminar") || itemLower.includes("limpieza") || itemLower.includes("trazo") || itemLower.includes("replanteo") || itemLower.includes("zanja") || itemLower.includes("demolic") || itemLower.includes("faena")) {
-                    return coloresPorTipo.OP
-                  }
-                  if (itemLower.includes("pilar") || itemLower.includes("columna") || itemLower.includes("viga") || itemLower.includes("losa") || itemLower.includes("loza") || itemLower.includes("cimiento") || itemLower.includes("zapata") || itemLower.includes("hormigon") || itemLower.includes("concreto") || itemLower.includes("armado") || itemLower.includes("vaciado") || itemLower.includes("estructura") || itemLower.includes("sobrecimiento")) {
-                    return coloresPorTipo.OG
-                  }
-                  if (itemLower.includes("muro") || itemLower.includes("pared") || itemLower.includes("revoque") || itemLower.includes("yeso") || itemLower.includes("pintura") || itemLower.includes("piso") || itemLower.includes("ceramica") || itemLower.includes("acabado") || itemLower.includes("cielo") || itemLower.includes("puerta") || itemLower.includes("ventana") || itemLower.includes("revestimiento")) {
-                    return coloresPorTipo.OF
-                  }
-                  if (itemLower.includes("tuberia") || itemLower.includes("agua") || itemLower.includes("sanitari") || itemLower.includes("desague") || itemLower.includes("pluvial") || itemLower.includes("grifo") || itemLower.includes("inodoro") || itemLower.includes("lavaman") || itemLower.includes("alcantarillado")) {
-                    return coloresPorTipo.IHS
-                  }
-                  if (itemLower.includes("electric") || itemLower.includes("cable") || itemLower.includes("toma") || itemLower.includes("interruptor") || itemLower.includes("iluminac") || itemLower.includes("luz") || itemLower.includes("tablero") || itemLower.includes("tomacorriente")) {
-                    return coloresPorTipo.IE
-                  }
-
-                  // Numeric fallback
-                  const num = parseInt(codeUpper.replace(/\D/g, ""), 10)
-                  if (!isNaN(num)) {
-                    if (num === 1) return coloresPorTipo.OP
-                    if (num >= 2 && num <= 4) return coloresPorTipo.OG
-                    if (num >= 5 && num <= 7) return coloresPorTipo.OF
-                    if (num >= 8 && num <= 9) return coloresPorTipo.IHS
-                    if (num >= 10) return coloresPorTipo.IE
-                  }
-
-                  return "#3b82f6" // default
-                }
                 const color = getTipoColor(item.codigo, item.item)
+                const fechaInicioFmt = format(new Date(item.fechaInicio), "dd/MM/yy", { locale: es })
+                const fechaFinalFmt = format(new Date(item.fechaFinal), "dd/MM/yy", { locale: es })
 
                 return (
-                  <div key={item.id} className="flex items-center gap-2 group">
-                    <div className="w-56 text-sm truncate font-medium">{item.codigo} {item.item}</div>
+                  <div key={item.id} className="flex items-center gap-2 group py-0.5 hover:bg-muted/30 rounded transition-colors">
+                    {/* Activity name */}
+                    <div className="w-48 text-sm truncate font-medium" title={`${item.codigo} ${item.item}`}>
+                      <span className="font-bold" style={{ color }}>{item.codigo}</span>{" "}
+                      <span>{item.item}</span>
+                    </div>
+                    {/* Start date */}
+                    <div className="w-24 text-xs text-muted-foreground font-mono">{fechaInicioFmt}</div>
+                    {/* End date */}
+                    <div className="w-24 text-xs text-muted-foreground font-mono">{fechaFinalFmt}</div>
+                    {/* Bar track */}
                     <div className="flex-1 h-7 bg-muted rounded overflow-hidden relative">
+                      {/* Background bar (full duration) */}
                       <div
                         className="absolute h-full rounded transition-all"
                         style={{
@@ -352,6 +458,7 @@ export default function CronogramaPage() {
                           backgroundColor: `${color}33`,
                         }}
                       />
+                      {/* Progress bar */}
                       <div
                         className="absolute h-full rounded transition-all"
                         style={{
@@ -360,12 +467,15 @@ export default function CronogramaPage() {
                           backgroundColor: color,
                         }}
                       />
-                      <div className="absolute inset-0 flex items-center justify-center text-xs font-medium z-10">
-                        {item.codigo} - {item.duracion}d
+                      {/* Label inside bar */}
+                      <div className="absolute inset-0 flex items-center justify-center text-xs font-medium z-10 mix-blend-multiply dark:mix-blend-screen">
+                        {item.duracion}d
                       </div>
                     </div>
-                    <div className="w-16 text-right text-sm text-muted-foreground">{item.progreso ?? 0}%</div>
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {/* Progress % */}
+                    <div className="w-12 text-right text-sm text-muted-foreground">{item.progreso ?? 0}%</div>
+                    {/* Actions */}
+                    <div className="flex gap-1 w-16 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => openEdit(item)}>
                         <span className="text-xs">✏️</span>
                       </Button>
@@ -395,7 +505,6 @@ export default function CronogramaPage() {
                   const totalDays = differenceInCalendarDays(maxDate, minDate) || 1
                   const maxProgress = sorted.length * 100
 
-                  // Build cumulative points
                   const points: { date: Date; pct: number }[] = []
                   let cumulative = 0
                   for (const item of sorted) {
@@ -403,7 +512,6 @@ export default function CronogramaPage() {
                     points.push({ date: new Date(item.fechaFinal), pct: cumulative })
                   }
 
-                  // SVG dimensions (must match container)
                   const svgW = 800
                   const svgH = 128
 
@@ -414,18 +522,12 @@ export default function CronogramaPage() {
                         <span>{format(maxDate, "dd MMM yyyy", { locale: es })}</span>
                       </div>
                       <div className="relative h-32 bg-muted/30 rounded-lg overflow-hidden">
-                        {/* Grid lines */}
                         {[0, 25, 50, 75, 100].map(pct => (
                           <div key={pct} className="absolute w-full border-t border-muted" style={{ bottom: `${pct}%` }}>
                             <span className="absolute -top-4 -left-1 text-[10px] text-muted-foreground">{pct}%</span>
                           </div>
                         ))}
-                        {/* S-curve line */}
-                        <svg
-                          className="absolute inset-0 w-full h-full"
-                          viewBox={`0 0 ${svgW} ${svgH}`}
-                          preserveAspectRatio="none"
-                        >
+                        <svg className="absolute inset-0 w-full h-full" viewBox={`0 0 ${svgW} ${svgH}`} preserveAspectRatio="none">
                           <polyline
                             points={points.map((p) => {
                               const x = ((new Date(p.date).getTime() - minDate.getTime()) / (maxDate.getTime() - minDate.getTime())) * svgW
@@ -438,7 +540,6 @@ export default function CronogramaPage() {
                             vectorEffect="non-scaling-stroke"
                           />
                         </svg>
-                        {/* Progress indicator */}
                         <div className="absolute bottom-2 right-2 text-sm font-medium text-primary">
                           {maxProgress > 0 ? Math.round((cumulative / maxProgress) * 100) : 0}% completado
                         </div>
@@ -454,41 +555,34 @@ export default function CronogramaPage() {
             </CardContent>
           </Card>
 
+          {/* Legend — only show active types */}
           <Card>
             <CardHeader>
               <CardTitle>Leyenda de Actividades</CardTitle>
             </CardHeader>
             <CardContent>
-              {/* Compute which types are actually used in current items */}
               {(() => {
                 const usedTypes = new Set<string>()
                 items.forEach(item => {
                   const codeUpper = (item.codigo || "").toUpperCase().trim()
                   const itemLower = (item.item || "").toLowerCase()
-                  if (codeUpper.startsWith("IHS")) usedTypes.add("IHS")
-                  else if (codeUpper.startsWith("OP")) usedTypes.add("OP")
+                  if (codeUpper.startsWith("OP")) usedTypes.add("OP")
                   else if (codeUpper.startsWith("OG")) usedTypes.add("OG")
                   else if (codeUpper.startsWith("OF")) usedTypes.add("OF")
-                  else if (codeUpper.startsWith("IE")) usedTypes.add("IE")
                   else if (itemLower.includes("excavac") || itemLower.includes("preliminar") || itemLower.includes("limpieza") || itemLower.includes("trazo") || itemLower.includes("zanja")) usedTypes.add("OP")
-                  else if (itemLower.includes("pilar") || itemLower.includes("columna") || itemLower.includes("viga") || itemLower.includes("losa") || itemLower.includes("cimiento") || itemLower.includes("concreto") || itemLower.includes("vaciado") || itemLower.includes("armado")) usedTypes.add("OG")
-                  else if (itemLower.includes("muro") || itemLower.includes("pared") || itemLower.includes("pintura") || itemLower.includes("piso") || itemLower.includes("cielo") || itemLower.includes("zócalo") || itemLower.includes("drywall") || itemLower.includes("acabado") || itemLower.includes("revoque")) usedTypes.add("OF")
-                  else if (itemLower.includes("tuberia") || itemLower.includes("agua") || itemLower.includes("sanitari") || itemLower.includes("desague") || itemLower.includes("grifo")) usedTypes.add("IHS")
-                  else if (itemLower.includes("electric") || itemLower.includes("cable") || itemLower.includes("tomacorriente") || itemLower.includes("iluminac") || itemLower.includes("tablero")) usedTypes.add("IE")
-                  else usedTypes.add("OG") // default fallback
+                  else if (itemLower.includes("pilar") || itemLower.includes("columna") || itemLower.includes("viga") || itemLower.includes("losa") || itemLower.includes("cimiento") || itemLower.includes("concreto") || itemLower.includes("vaciado") || itemLower.includes("armado") || itemLower.includes("muro") || itemLower.includes("techo")) usedTypes.add("OG")
+                  else if (itemLower.includes("pared") || itemLower.includes("pintura") || itemLower.includes("piso") || itemLower.includes("cielo") || itemLower.includes("drywall") || itemLower.includes("acabado") || itemLower.includes("revoque") || itemLower.includes("zócalo")) usedTypes.add("OF")
+                  else usedTypes.add("OG")
                 })
 
-                const tiposOrdenados = ["OP", "OG", "OF", "IHS", "IE"].filter(t => usedTypes.has(t))
+                const tiposOrdenados = ["OP", "OG", "OF"].filter(t => usedTypes.has(t))
 
                 return (
                   <div className="space-y-4">
-                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid gap-3 sm:grid-cols-3">
                       {tiposOrdenados.map(tipo => {
                         const info = tiposPorCodigo[tipo]
-                        const count = items.filter(item => {
-                          const cu = (item.codigo || "").toUpperCase().trim()
-                          return cu.startsWith(tipo)
-                        }).length
+                        const count = items.filter(item => (item.codigo || "").toUpperCase().trim().startsWith(tipo)).length
                         return (
                           <div
                             key={tipo}
@@ -513,9 +607,9 @@ export default function CronogramaPage() {
                         )
                       })}
                     </div>
-                    {tiposOrdenados.length < Object.keys(tiposPorCodigo).length && (
+                    {tiposOrdenados.length < 3 && (
                       <p className="text-xs text-muted-foreground">
-                        💡 Usa prefijos <strong>OP</strong>, <strong>OG</strong>, <strong>OF</strong>, <strong>IHS</strong> o <strong>IE</strong> en el código de cada actividad para clasificarla automáticamente.
+                        💡 Usa prefijos <strong>OP</strong> (Preliminares), <strong>OG</strong> (Obra Gruesa) u <strong>OF</strong> (Obra Fina) en el código de cada actividad para clasificarla.
                       </p>
                     )}
                   </div>
@@ -526,8 +620,9 @@ export default function CronogramaPage() {
         </>
       )}
 
+      {/* ─── Add/Edit dialog ─── */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>{editingItem ? "Editar Actividad" : "Nueva Actividad"}</DialogTitle>
           </DialogHeader>
@@ -537,7 +632,9 @@ export default function CronogramaPage() {
                 <Label>Código</Label>
                 <Input value={form.codigo} onChange={e => setForm({ ...form, codigo: e.target.value })} placeholder="OG01" />
                 <p className="text-xs text-muted-foreground">
-                  Prefijo: <span className="font-medium" style={{ color: "#f97316" }}>OP</span> Prelim. · <span className="font-medium" style={{ color: "#3b82f6" }}>OG</span> Gruesa · <span className="font-medium" style={{ color: "#22c55e" }}>OF</span> Fina · <span className="font-medium" style={{ color: "#06b6d4" }}>IHS</span> Hidrosanitaria · <span className="font-medium" style={{ color: "#a855f7" }}>IE</span> Eléctrica
+                  <span className="font-semibold" style={{ color: "#f97316" }}>OP</span> Preliminares ·{" "}
+                  <span className="font-semibold" style={{ color: "#3b82f6" }}>OG</span> Obra Gruesa ·{" "}
+                  <span className="font-semibold" style={{ color: "#22c55e" }}>OF</span> Obra Fina
                 </p>
               </div>
               <div className="space-y-2">
