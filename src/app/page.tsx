@@ -44,9 +44,9 @@ export default async function HomePage() {
       <header className="sticky top-0 z-50 backdrop-blur-md bg-slate-950/70 border-b border-slate-800/60">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-all duration-300">
-              <HardHat className="h-5 w-5 text-slate-950 font-bold" />
-              <div className="absolute inset-0 rounded-lg bg-cyan-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+            <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-slate-950/60 border border-slate-800 shadow-lg shadow-cyan-500/10 group-hover:scale-105 transition-all duration-300 overflow-hidden shrink-0">
+              <img src="/logo.webp" alt="Logo" className="h-full w-full object-contain filter brightness-95 contrast-105 saturate-90" />
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/25 to-blue-600/30 mix-blend-color pointer-events-none" />
             </div>
             <span className="text-lg font-bold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
               CÁLCULO PRESUPUESTAL
