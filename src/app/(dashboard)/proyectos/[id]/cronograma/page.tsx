@@ -26,13 +26,44 @@ interface CronogramaItem {
   dependeDe: string | null
 }
 
-const coloresPorTipo: Record<string, string> = {
-  OP: "#f97316",
-  OG: "#3b82f6",
-  OF: "#22c55e",
-  IHS: "#06b6d4",
-  IE: "#a855f7",
+type TipoInfo = {
+  color: string
+  label: string
+  descripcion: string
 }
+
+const tiposPorCodigo: Record<string, TipoInfo> = {
+  OP: {
+    color: "#f97316",
+    label: "Obras Preliminares",
+    descripcion: "Limpieza, excavación, demolición, trazado y replanteo",
+  },
+  OG: {
+    color: "#3b82f6",
+    label: "Obra Gruesa",
+    descripcion: "Cimientos, columnas, vigas, losas, muros de concreto, zapatas",
+  },
+  OF: {
+    color: "#22c55e",
+    label: "Obra Fina / Acabados",
+    descripcion: "Paredes Drywall, revoque, pintura, pisos, cielo raso, zócalos",
+  },
+  IHS: {
+    color: "#06b6d4",
+    label: "Inst. Hidrosanitarias",
+    descripcion: "Tuberías de agua, desagüe, pluvial, aparatos sanitarios",
+  },
+  IE: {
+    color: "#a855f7",
+    label: "Inst. Eléctricas",
+    descripcion: "Cableado, tomacorrientes, iluminación, tableros eléctricos",
+  },
+}
+
+// Backward-compat map for bar color lookup
+const coloresPorTipo: Record<string, string> = Object.fromEntries(
+  Object.entries(tiposPorCodigo).map(([k, v]) => [k, v.color])
+)
 
 type ViewMode = "semana" | "mes" | "trimestre"
 
@@ -424,20 +455,72 @@ export default function CronogramaPage() {
           </Card>
 
           <Card>
-            <CardHeader><CardTitle>Leyenda</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle>Leyenda de Actividades</CardTitle>
+            </CardHeader>
             <CardContent>
-              <div className="flex flex-wrap gap-4 text-sm">
-                {Object.entries(coloresPorTipo).map(([tipo, color]) => (
-                  <div key={tipo} className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded" style={{ backgroundColor: color }} />
-                    {tipo === "OP" && "Obras Preliminares"}
-                    {tipo === "OG" && "Obra Gruesa"}
-                    {tipo === "OF" && "Obra Fina"}
-                    {tipo === "IHS" && "Inst. Hidrosanitarias"}
-                    {tipo === "IE" && "Inst. Eléctricas"}
+              {/* Compute which types are actually used in current items */}
+              {(() => {
+                const usedTypes = new Set<string>()
+                items.forEach(item => {
+                  const codeUpper = (item.codigo || "").toUpperCase().trim()
+                  const itemLower = (item.item || "").toLowerCase()
+                  if (codeUpper.startsWith("IHS")) usedTypes.add("IHS")
+                  else if (codeUpper.startsWith("OP")) usedTypes.add("OP")
+                  else if (codeUpper.startsWith("OG")) usedTypes.add("OG")
+                  else if (codeUpper.startsWith("OF")) usedTypes.add("OF")
+                  else if (codeUpper.startsWith("IE")) usedTypes.add("IE")
+                  else if (itemLower.includes("excavac") || itemLower.includes("preliminar") || itemLower.includes("limpieza") || itemLower.includes("trazo") || itemLower.includes("zanja")) usedTypes.add("OP")
+                  else if (itemLower.includes("pilar") || itemLower.includes("columna") || itemLower.includes("viga") || itemLower.includes("losa") || itemLower.includes("cimiento") || itemLower.includes("concreto") || itemLower.includes("vaciado") || itemLower.includes("armado")) usedTypes.add("OG")
+                  else if (itemLower.includes("muro") || itemLower.includes("pared") || itemLower.includes("pintura") || itemLower.includes("piso") || itemLower.includes("cielo") || itemLower.includes("zócalo") || itemLower.includes("drywall") || itemLower.includes("acabado") || itemLower.includes("revoque")) usedTypes.add("OF")
+                  else if (itemLower.includes("tuberia") || itemLower.includes("agua") || itemLower.includes("sanitari") || itemLower.includes("desague") || itemLower.includes("grifo")) usedTypes.add("IHS")
+                  else if (itemLower.includes("electric") || itemLower.includes("cable") || itemLower.includes("tomacorriente") || itemLower.includes("iluminac") || itemLower.includes("tablero")) usedTypes.add("IE")
+                  else usedTypes.add("OG") // default fallback
+                })
+
+                const tiposOrdenados = ["OP", "OG", "OF", "IHS", "IE"].filter(t => usedTypes.has(t))
+
+                return (
+                  <div className="space-y-4">
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      {tiposOrdenados.map(tipo => {
+                        const info = tiposPorCodigo[tipo]
+                        const count = items.filter(item => {
+                          const cu = (item.codigo || "").toUpperCase().trim()
+                          return cu.startsWith(tipo)
+                        }).length
+                        return (
+                          <div
+                            key={tipo}
+                            className="flex items-start gap-3 p-3 rounded-lg border"
+                            style={{ borderLeftColor: info.color, borderLeftWidth: 4 }}
+                          >
+                            <div className="flex-shrink-0 mt-0.5">
+                              <div className="w-8 h-8 rounded flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: info.color }}>
+                                {tipo}
+                              </div>
+                            </div>
+                            <div className="min-w-0">
+                              <div className="font-semibold text-sm">{info.label}</div>
+                              <div className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{info.descripcion}</div>
+                              {count > 0 && (
+                                <div className="mt-1.5 text-xs font-medium" style={{ color: info.color }}>
+                                  {count} {count === 1 ? "actividad" : "actividades"} en este cronograma
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                    {tiposOrdenados.length < Object.keys(tiposPorCodigo).length && (
+                      <p className="text-xs text-muted-foreground">
+                        💡 Usa prefijos <strong>OP</strong>, <strong>OG</strong>, <strong>OF</strong>, <strong>IHS</strong> o <strong>IE</strong> en el código de cada actividad para clasificarla automáticamente.
+                      </p>
+                    )}
                   </div>
-                ))}
-              </div>
+                )
+              })()}
             </CardContent>
           </Card>
         </>
@@ -453,6 +536,9 @@ export default function CronogramaPage() {
               <div className="space-y-2">
                 <Label>Código</Label>
                 <Input value={form.codigo} onChange={e => setForm({ ...form, codigo: e.target.value })} placeholder="OG01" />
+                <p className="text-xs text-muted-foreground">
+                  Prefijo: <span className="font-medium" style={{ color: "#f97316" }}>OP</span> Prelim. · <span className="font-medium" style={{ color: "#3b82f6" }}>OG</span> Gruesa · <span className="font-medium" style={{ color: "#22c55e" }}>OF</span> Fina · <span className="font-medium" style={{ color: "#06b6d4" }}>IHS</span> Hidrosanitaria · <span className="font-medium" style={{ color: "#a855f7" }}>IE</span> Eléctrica
+                </p>
               </div>
               <div className="space-y-2">
                 <Label>Duración (días)</Label>
