@@ -191,34 +191,230 @@ export default async function HomePage() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { name: "Concreto Standard", free: true, spec: "Dosificación cemento/arena" },
-              { name: "Paredes de Ladrillo", free: true, spec: "Cómputo piezas y mezcla" },
-              { name: "Pisos y Cerámicas", free: true, spec: "Piezas, juntas y pegamento" },
-              { name: "Columnas de Hormigón", free: false, spec: "Acero longitudinal y estribos" },
-              { name: "Vigas Estructurales", free: false, spec: "Encofrados y fierrería" },
-              { name: "Losas de Concreto", free: false, spec: "Aligeradas y macizas" },
-              { name: "Cimientos Corridos", free: false, spec: "Hormigón ciclópeo e insumos" },
-              { name: "Muros de Contención", free: false, spec: "Piedra y mortero trapezoidal" },
-              { name: "Techos y Coberturas", free: false, spec: "Tejas, listones y aleros" },
-              { name: "Cielo Raso y Yeso", free: false, spec: "Perfiles y placas drywall" },
-              { name: "Pintura y Acabados", free: false, spec: "Rendimiento y manos" },
-              { name: "Paredes Drywall", free: false, spec: "Pernos, rieles y masilla" },
-              { name: "Paredes de Concreto", free: false, spec: "Armaduras y vaciado" },
-              { name: "Zócalos de Acabado", free: false, spec: "Pegamento y piezas lineales" }
+              {
+                name: "Concreto Standard",
+                free: true,
+                spec: "Dosificación cemento/arena",
+                renderSvg: () => (
+                  <svg className="w-16 h-16 text-cyan-500/20 group-hover:text-cyan-400/40 transition-colors" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="1.2">
+                    <rect x="10" y="20" width="30" height="30" />
+                    <line x1="10" y1="20" x2="25" y2="10" />
+                    <line x1="40" y1="20" x2="50" y2="10" />
+                    <line x1="40" y1="50" x2="50" y2="40" />
+                    <rect x="20" y="10" width="30" height="30" strokeDasharray="2,2" />
+                    <line x1="10" y1="50" x2="20" y2="40" strokeDasharray="2,2" />
+                  </svg>
+                )
+              },
+              {
+                name: "Paredes de Ladrillo",
+                free: true,
+                spec: "Cómputo piezas y mezcla",
+                renderSvg: () => (
+                  <svg className="w-16 h-16 text-orange-500/20 group-hover:text-orange-400/40 transition-colors" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="1.2">
+                    <rect x="5" y="10" width="50" height="40" rx="2" />
+                    <line x1="5" y1="23" x2="55" y2="23" />
+                    <line x1="5" y1="36" x2="55" y2="36" />
+                    <line x1="20" y1="10" x2="20" y2="23" />
+                    <line x1="40" y1="10" x2="40" y2="23" />
+                    <line x1="10" y1="23" x2="10" y2="36" />
+                    <line x1="30" y1="23" x2="30" y2="36" />
+                    <line x1="50" y1="23" x2="50" y2="36" />
+                    <line x1="20" y1="36" x2="20" y2="50" />
+                    <line x1="40" y1="36" x2="40" y2="50" />
+                  </svg>
+                )
+              },
+              {
+                name: "Pisos y Cerámicas",
+                free: true,
+                spec: "Piezas, juntas y pegamento",
+                renderSvg: () => (
+                  <svg className="w-16 h-16 text-emerald-500/20 group-hover:text-emerald-400/40 transition-colors" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="1.2">
+                    <rect x="8" y="8" width="44" height="44" rx="1" />
+                    <line x1="8" y1="22" x2="52" y2="22" />
+                    <line x1="8" y1="37" x2="52" y2="37" />
+                    <line x1="22" y1="8" x2="22" y2="52" />
+                    <line x1="37" y1="8" x2="37" y2="52" />
+                  </svg>
+                )
+              },
+              {
+                name: "Columnas de Hormigón",
+                free: false,
+                spec: "Acero longitudinal y estribos",
+                renderSvg: () => (
+                  <svg className="w-16 h-16 text-cyan-500/20 group-hover:text-cyan-400/40 transition-colors" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="1.2">
+                    <rect x="20" y="5" width="20" height="50" />
+                    <line x1="24" y1="5" x2="24" y2="55" strokeWidth="0.8" strokeDasharray="2,1" />
+                    <line x1="36" y1="5" x2="36" y2="55" strokeWidth="0.8" strokeDasharray="2,1" />
+                    <rect x="20" y="15" width="20" height="4" strokeWidth="0.8" />
+                    <rect x="20" y="27" width="20" height="4" strokeWidth="0.8" />
+                    <rect x="20" y="39" width="20" height="4" strokeWidth="0.8" />
+                  </svg>
+                )
+              },
+              {
+                name: "Vigas Estructurales",
+                free: false,
+                spec: "Encofrados y fierrería",
+                renderSvg: () => (
+                  <svg className="w-16 h-16 text-cyan-500/20 group-hover:text-cyan-400/40 transition-colors" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="1.2">
+                    <rect x="5" y="20" width="50" height="20" />
+                    <line x1="5" y1="24" x2="55" y2="24" strokeWidth="0.8" strokeDasharray="2,1" />
+                    <line x1="5" y1="36" x2="55" y2="36" strokeWidth="0.8" strokeDasharray="2,1" />
+                    <line x1="15" y1="20" x2="15" y2="40" strokeWidth="0.8" />
+                    <line x1="30" y1="20" x2="30" y2="40" strokeWidth="0.8" />
+                    <line x1="45" y1="20" x2="45" y2="40" strokeWidth="0.8" />
+                  </svg>
+                )
+              },
+              {
+                name: "Losas de Concreto",
+                free: false,
+                spec: "Aligeradas y macizas",
+                renderSvg: () => (
+                  <svg className="w-16 h-16 text-cyan-500/20 group-hover:text-cyan-400/40 transition-colors" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="1.2">
+                    <rect x="5" y="25" width="50" height="15" />
+                    <line x1="5" y1="25" x2="15" y2="15" />
+                    <line x1="55" y1="25" x2="45" y2="15" />
+                    <line x1="15" y1="15" x2="45" y2="15" />
+                    <rect x="12" y="29" width="8" height="8" strokeWidth="0.8" />
+                    <rect x="26" y="29" width="8" height="8" strokeWidth="0.8" />
+                    <rect x="40" y="29" width="8" height="8" strokeWidth="0.8" />
+                  </svg>
+                )
+              },
+              {
+                name: "Cimientos Corridos",
+                free: false,
+                spec: "Hormigón ciclópeo e insumos",
+                renderSvg: () => (
+                  <svg className="w-16 h-16 text-cyan-500/20 group-hover:text-cyan-400/40 transition-colors" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="1.2">
+                    <rect x="15" y="30" width="30" height="25" />
+                    <line x1="5" y1="30" x2="15" y2="30" />
+                    <line x1="45" y1="30" x2="55" y2="30" />
+                    <line x1="15" y1="40" x2="45" y2="40" strokeDasharray="2,2" />
+                    <circle cx="23" cy="46" r="2.5" fill="currentColor" opacity="0.3" />
+                    <circle cx="35" cy="38" r="3.5" fill="currentColor" opacity="0.3" />
+                    <circle cx="28" cy="50" r="1.5" fill="currentColor" opacity="0.3" />
+                  </svg>
+                )
+              },
+              {
+                name: "Muros de Contención",
+                free: false,
+                spec: "Piedra y mortero trapezoidal",
+                renderSvg: () => (
+                  <svg className="w-16 h-16 text-cyan-500/20 group-hover:text-cyan-400/40 transition-colors" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="1.2">
+                    <polygon points="20,10 40,10 50,50 10,50" />
+                    <circle cx="20" cy="40" r="4" fill="currentColor" opacity="0.3" />
+                    <circle cx="30" cy="25" r="3" fill="currentColor" opacity="0.3" />
+                    <circle cx="40" cy="42" r="5" fill="currentColor" opacity="0.3" />
+                    <circle cx="30" cy="45" r="3" fill="currentColor" opacity="0.3" />
+                  </svg>
+                )
+              },
+              {
+                name: "Techos y Coberturas",
+                free: false,
+                spec: "Tejas, listones y aleros",
+                renderSvg: () => (
+                  <svg className="w-16 h-16 text-cyan-500/20 group-hover:text-cyan-400/40 transition-colors" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="1.2">
+                    <polygon points="10,45 50,45 50,20" />
+                    <line x1="10" y1="45" x2="50" y2="20" strokeWidth="1.5" strokeDasharray="3,2" />
+                  </svg>
+                )
+              },
+              {
+                name: "Cielo Raso y Yeso",
+                free: false,
+                spec: "Perfiles y placas drywall",
+                renderSvg: () => (
+                  <svg className="w-16 h-16 text-cyan-500/20 group-hover:text-cyan-400/40 transition-colors" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="1.2">
+                    <rect x="5" y="15" width="50" height="30" rx="1" />
+                    <line x1="5" y1="25" x2="55" y2="25" strokeDasharray="3,3" />
+                    <line x1="5" y1="35" x2="55" y2="35" strokeDasharray="3,3" />
+                    <line x1="17" y1="15" x2="17" y2="45" strokeDasharray="3,3" />
+                    <line x1="30" y1="15" x2="30" y2="45" strokeDasharray="3,3" />
+                    <line x1="43" y1="15" x2="43" y2="45" strokeDasharray="3,3" />
+                  </svg>
+                )
+              },
+              {
+                name: "Pintura y Acabados",
+                free: false,
+                spec: "Rendimiento y manos",
+                renderSvg: () => (
+                  <svg className="w-16 h-16 text-cyan-500/20 group-hover:text-cyan-400/40 transition-colors" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="1.2">
+                    <rect x="15" y="10" width="30" height="40" rx="2" />
+                    <path d="M15,25 Q30,30 45,25" />
+                    <path d="M15,35 Q30,40 45,35" />
+                    <path d="M22,10 L22,50" strokeWidth="0.8" strokeDasharray="1,2" />
+                    <path d="M38,10 L38,50" strokeWidth="0.8" strokeDasharray="1,2" />
+                  </svg>
+                )
+              },
+              {
+                name: "Paredes Drywall",
+                free: false,
+                spec: "Pernos, rieles y masilla",
+                renderSvg: () => (
+                  <svg className="w-16 h-16 text-cyan-500/20 group-hover:text-cyan-400/40 transition-colors" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="1.2">
+                    <rect x="10" y="10" width="40" height="40" rx="1" />
+                    <line x1="20" y1="10" x2="20" y2="50" />
+                    <line x1="30" y1="10" x2="30" y2="50" />
+                    <line x1="40" y1="10" x2="40" y2="50" />
+                    <line x1="10" y1="25" x2="50" y2="25" strokeDasharray="3,3" />
+                  </svg>
+                )
+              },
+              {
+                name: "Paredes de Concreto",
+                free: false,
+                spec: "Armaduras y vaciado",
+                renderSvg: () => (
+                  <svg className="w-16 h-16 text-cyan-500/20 group-hover:text-cyan-400/40 transition-colors" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="1.2">
+                    <rect x="10" y="10" width="40" height="40" />
+                    <line x1="18" y1="10" x2="18" y2="50" strokeWidth="0.8" strokeDasharray="2,2" />
+                    <line x1="30" y1="10" x2="30" y2="50" strokeWidth="0.8" strokeDasharray="2,2" />
+                    <line x1="42" y1="10" x2="42" y2="50" strokeWidth="0.8" strokeDasharray="2,2" />
+                    <line x1="10" y1="18" x2="50" y2="18" strokeWidth="0.8" strokeDasharray="2,2" />
+                    <line x1="10" y1="30" x2="50" y2="30" strokeWidth="0.8" strokeDasharray="2,2" />
+                    <line x1="10" y1="42" x2="50" y2="42" strokeWidth="0.8" strokeDasharray="2,2" />
+                  </svg>
+                )
+              },
+              {
+                name: "Zócalos de Acabado",
+                free: false,
+                spec: "Pegamento y piezas lineales",
+                renderSvg: () => (
+                  <svg className="w-16 h-16 text-cyan-500/20 group-hover:text-cyan-400/40 transition-colors" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="1.2">
+                    <path d="M10,10 L10,45 L50,45" />
+                    <path d="M10,40 L50,40" stroke="#f97316" strokeWidth="1.5" />
+                    <line x1="20" y1="40" x2="20" y2="45" />
+                    <line x1="30" y1="40" x2="30" y2="45" />
+                    <line x1="40" y1="40" x2="40" y2="45" />
+                  </svg>
+                )
+              }
             ].map((calc, i) => (
               <div
                 key={i}
-                className="relative p-5 rounded-xl border border-slate-900 bg-slate-950 hover:border-slate-800 hover:-translate-y-1 transition-all duration-300 group overflow-hidden"
+                className="relative p-5 rounded-xl border border-slate-900 bg-slate-950 hover:border-slate-800 hover:-translate-y-1 transition-all duration-300 group overflow-hidden flex flex-col justify-between min-h-[170px]"
               >
-                <div className="flex justify-between items-start mb-3">
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${calc.free ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"}`}>
-                    {calc.free ? "FREE" : "PRO"}
-                  </span>
+                <div>
+                  <div className="flex justify-between items-start mb-2">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${calc.free ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"}`}>
+                      {calc.free ? "FREE" : "PRO"}
+                    </span>
+                  </div>
+                  <div className="font-bold text-slate-100 text-sm leading-tight">{calc.name}</div>
+                  <div className="text-xs text-slate-500 mt-1 leading-snug">{calc.spec}</div>
                 </div>
-                <div className="font-bold text-slate-100 text-sm">{calc.name}</div>
-                <div className="text-xs text-slate-500 mt-1 leading-snug">{calc.spec}</div>
-                <div className="absolute -bottom-1 -right-1 opacity-5 group-hover:opacity-10 transition-opacity duration-300">
-                  <Calculator className="h-12 w-12 text-white" />
+                <div className="mt-4 flex justify-end">
+                  {calc.renderSvg()}
                 </div>
               </div>
             ))}
