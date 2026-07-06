@@ -207,35 +207,31 @@ export default function ZocaloCalculatorPage() {
           <Card>
             <CardHeader><CardTitle>Parámetros de Entrada</CardTitle></CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>Descripción del Elemento</Label>
-                <InputWithHelp
-                  value={form.descripcion}
-                  onChange={e => setForm({ ...form, descripcion: e.target.value })}
-                  placeholder="Ej. Rodapié Cerámico Sala Estar"
-                />
-              </div>
+              <InputWithHelp
+                label="Descripción del Elemento"
+                value={form.descripcion}
+                onChange={e => setForm({ ...form, descripcion: e.target.value })}
+                placeholder="Ej. Rodapié Cerámico Sala Estar"
+              />
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Longitud Lineal (m)</Label>
-                  <InputWithHelp
-                    type="number"
-                    value={form.longitud}
-                    onChange={e => setForm({ ...form, longitud: e.target.value })}
-                    error={formErrors.longitud}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Altura del Zócalo (m)</Label>
-                  <InputWithHelp
-                    type="number"
-                    value={form.alturaZocalo}
-                    onChange={e => setForm({ ...form, alturaZocalo: e.target.value })}
-                    error={formErrors.alturaZocalo}
-                    helpText="Ej. 0.07 para 7 cm"
-                  />
-                </div>
+                <InputWithHelp
+                  label="Longitud Lineal"
+                  unit="m"
+                  type="number"
+                  value={form.longitud}
+                  onChange={e => setForm({ ...form, longitud: e.target.value })}
+                  error={formErrors.longitud}
+                />
+                <InputWithHelp
+                  label="Altura del Zócalo"
+                  unit="m"
+                  type="number"
+                  value={form.alturaZocalo}
+                  onChange={e => setForm({ ...form, alturaZocalo: e.target.value })}
+                  error={formErrors.alturaZocalo}
+                  helpText="Ej. 0.07 para 7 cm"
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -252,42 +248,37 @@ export default function ZocaloCalculatorPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label>Cantidad Elementos Iguales</Label>
-                  <InputWithHelp
-                    type="number"
-                    value={form.cantidad}
-                    onChange={e => setForm({ ...form, cantidad: e.target.value })}
-                    error={formErrors.cantidad}
-                  />
-                </div>
+                <InputWithHelp
+                  label="Cantidad Elementos Iguales"
+                  type="number"
+                  value={form.cantidad}
+                  onChange={e => setForm({ ...form, cantidad: e.target.value })}
+                  error={formErrors.cantidad}
+                />
               </div>
 
               <div className="grid grid-cols-3 gap-2">
-                <div className="space-y-2">
-                  <Label>Desp. Cerámica (%)</Label>
-                  <InputWithHelp
-                    type="number"
-                    value={form.despCeramica}
-                    onChange={e => setForm({ ...form, despCeramica: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Desp. Pegamento (%)</Label>
-                  <InputWithHelp
-                    type="number"
-                    value={form.despAdhesivo}
-                    onChange={e => setForm({ ...form, despAdhesivo: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Desp. Boquilla (%)</Label>
-                  <InputWithHelp
-                    type="number"
-                    value={form.despBoquilla}
-                    onChange={e => setForm({ ...form, despBoquilla: e.target.value })}
-                  />
-                </div>
+                <InputWithHelp
+                  label="Desp. Cerámica"
+                  unit="%"
+                  type="number"
+                  value={form.despCeramica}
+                  onChange={e => setForm({ ...form, despCeramica: e.target.value })}
+                />
+                <InputWithHelp
+                  label="Desp. Pegamento"
+                  unit="%"
+                  type="number"
+                  value={form.despAdhesivo}
+                  onChange={e => setForm({ ...form, despAdhesivo: e.target.value })}
+                />
+                <InputWithHelp
+                  label="Desp. Boquilla"
+                  unit="%"
+                  type="number"
+                  value={form.despBoquilla}
+                  onChange={e => setForm({ ...form, despBoquilla: e.target.value })}
+                />
               </div>
 
               <div className="space-y-2">

@@ -180,35 +180,31 @@ export default function PinturaCalculatorPage() {
           <Card>
             <CardHeader><CardTitle>Parámetros de Entrada</CardTitle></CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>Descripción del Elemento</Label>
-                <InputWithHelp
-                  value={form.descripcion}
-                  onChange={e => setForm({ ...form, descripcion: e.target.value })}
-                  placeholder="Ej. Pintado Dormitorio Principal"
-                />
-              </div>
+              <InputWithHelp
+                label="Descripción del Elemento"
+                value={form.descripcion}
+                onChange={e => setForm({ ...form, descripcion: e.target.value })}
+                placeholder="Ej. Pintado Dormitorio Principal"
+              />
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Área de Pared (m²)</Label>
-                  <InputWithHelp
-                    type="number"
-                    value={form.area}
-                    onChange={e => setForm({ ...form, area: e.target.value })}
-                    error={formErrors.area}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Rendimiento Pintura (m²/lt)</Label>
-                  <InputWithHelp
-                    type="number"
-                    value={form.rendimiento}
-                    onChange={e => setForm({ ...form, rendimiento: e.target.value })}
-                    error={formErrors.rendimiento}
-                    helpText="Rendimiento promedio: 6 a 10 m² por litro por mano"
-                  />
-                </div>
+                <InputWithHelp
+                  label="Área de Pared"
+                  unit="m²"
+                  type="number"
+                  value={form.area}
+                  onChange={e => setForm({ ...form, area: e.target.value })}
+                  error={formErrors.area}
+                />
+                <InputWithHelp
+                  label="Rendimiento Pintura"
+                  unit="m²/lt"
+                  type="number"
+                  value={form.rendimiento}
+                  onChange={e => setForm({ ...form, rendimiento: e.target.value })}
+                  error={formErrors.rendimiento}
+                  helpText="Rendimiento promedio: 6 a 10 m² por litro por mano"
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -236,23 +232,20 @@ export default function PinturaCalculatorPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Cantidad de Áreas Iguales</Label>
-                  <InputWithHelp
-                    type="number"
-                    value={form.cantidad}
-                    onChange={e => setForm({ ...form, cantidad: e.target.value })}
-                    error={formErrors.cantidad}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Desperdicio (%)</Label>
-                  <InputWithHelp
-                    type="number"
-                    value={form.desperdicio}
-                    onChange={e => setForm({ ...form, desperdicio: e.target.value })}
-                  />
-                </div>
+                <InputWithHelp
+                  label="Cantidad de Áreas Iguales"
+                  type="number"
+                  value={form.cantidad}
+                  onChange={e => setForm({ ...form, cantidad: e.target.value })}
+                  error={formErrors.cantidad}
+                />
+                <InputWithHelp
+                  label="Desperdicio"
+                  unit="%"
+                  type="number"
+                  value={form.desperdicio}
+                  onChange={e => setForm({ ...form, desperdicio: e.target.value })}
+                />
               </div>
 
               <div className="space-y-2">

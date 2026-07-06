@@ -221,34 +221,30 @@ export default function ParedDrywallCalculatorPage() {
           <Card>
             <CardHeader><CardTitle>Parámetros de Entrada</CardTitle></CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>Descripción del Elemento</Label>
-                <InputWithHelp
-                  value={form.descripcion}
-                  onChange={e => setForm({ ...form, descripcion: e.target.value })}
-                  placeholder="Ej. Tabique divisorio Dormitorio"
-                />
-              </div>
+              <InputWithHelp
+                label="Descripción del Elemento"
+                value={form.descripcion}
+                onChange={e => setForm({ ...form, descripcion: e.target.value })}
+                placeholder="Ej. Tabique divisorio Dormitorio"
+              />
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Alto (m)</Label>
-                  <InputWithHelp
-                    type="number"
-                    value={form.alto}
-                    onChange={e => setForm({ ...form, alto: e.target.value })}
-                    error={formErrors.alto}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Largo (m)</Label>
-                  <InputWithHelp
-                    type="number"
-                    value={form.largo}
-                    onChange={e => setForm({ ...form, largo: e.target.value })}
-                    error={formErrors.largo}
-                  />
-                </div>
+                <InputWithHelp
+                  label="Alto"
+                  unit="m"
+                  type="number"
+                  value={form.alto}
+                  onChange={e => setForm({ ...form, alto: e.target.value })}
+                  error={formErrors.alto}
+                />
+                <InputWithHelp
+                  label="Largo"
+                  unit="m"
+                  type="number"
+                  value={form.largo}
+                  onChange={e => setForm({ ...form, largo: e.target.value })}
+                  error={formErrors.largo}
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -276,34 +272,30 @@ export default function ParedDrywallCalculatorPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Desperdicio Placas (%)</Label>
-                  <InputWithHelp
-                    type="number"
-                    value={form.desperdicioPanel}
-                    onChange={e => setForm({ ...form, desperdicioPanel: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Desperdicio Perfiles (%)</Label>
-                  <InputWithHelp
-                    type="number"
-                    value={form.desperdicioOtros}
-                    onChange={e => setForm({ ...form, desperdicioOtros: e.target.value })}
-                  />
-                </div>
+                <InputWithHelp
+                  label="Desperdicio Placas"
+                  unit="%"
+                  type="number"
+                  value={form.desperdicioPanel}
+                  onChange={e => setForm({ ...form, desperdicioPanel: e.target.value })}
+                />
+                <InputWithHelp
+                  label="Desperdicio Perfiles"
+                  unit="%"
+                  type="number"
+                  value={form.desperdicioOtros}
+                  onChange={e => setForm({ ...form, desperdicioOtros: e.target.value })}
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Cantidad de Divisiones</Label>
-                  <InputWithHelp
-                    type="number"
-                    value={form.cantidad}
-                    onChange={e => setForm({ ...form, cantidad: e.target.value })}
-                    error={formErrors.cantidad}
-                  />
-                </div>
+                <InputWithHelp
+                  label="Cantidad de Divisiones"
+                  type="number"
+                  value={form.cantidad}
+                  onChange={e => setForm({ ...form, cantidad: e.target.value })}
+                  error={formErrors.cantidad}
+                />
                 <div className="space-y-2">
                   <Label>Tipo Redondeo</Label>
                   <Select value={form.redondeo} onValueChange={v => setForm({ ...form, redondeo: v })}>

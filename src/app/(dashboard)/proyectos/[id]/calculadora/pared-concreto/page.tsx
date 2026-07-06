@@ -212,43 +212,38 @@ export default function ParedConcretoCalculatorPage() {
           <Card>
             <CardHeader><CardTitle>Parámetros de Entrada</CardTitle></CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>Descripción del Elemento</Label>
-                <InputWithHelp
-                  value={form.descripcion}
-                  onChange={e => setForm({ ...form, descripcion: e.target.value })}
-                  placeholder="Ej. Pared de Contención Sótano"
-                />
-              </div>
+              <InputWithHelp
+                label="Descripción del Elemento"
+                value={form.descripcion}
+                onChange={e => setForm({ ...form, descripcion: e.target.value })}
+                placeholder="Ej. Pared de Contención Sótano"
+              />
 
               <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label>Alto (m)</Label>
-                  <InputWithHelp
-                    type="number"
-                    value={form.alto}
-                    onChange={e => setForm({ ...form, alto: e.target.value })}
-                    error={formErrors.alto}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Largo (m)</Label>
-                  <InputWithHelp
-                    type="number"
-                    value={form.largo}
-                    onChange={e => setForm({ ...form, largo: e.target.value })}
-                    error={formErrors.largo}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Espesor (m)</Label>
-                  <InputWithHelp
-                    type="number"
-                    value={form.espesor}
-                    onChange={e => setForm({ ...form, espesor: e.target.value })}
-                    error={formErrors.espesor}
-                  />
-                </div>
+                <InputWithHelp
+                  label="Alto"
+                  unit="m"
+                  type="number"
+                  value={form.alto}
+                  onChange={e => setForm({ ...form, alto: e.target.value })}
+                  error={formErrors.alto}
+                />
+                <InputWithHelp
+                  label="Largo"
+                  unit="m"
+                  type="number"
+                  value={form.largo}
+                  onChange={e => setForm({ ...form, largo: e.target.value })}
+                  error={formErrors.largo}
+                />
+                <InputWithHelp
+                  label="Espesor"
+                  unit="m"
+                  type="number"
+                  value={form.espesor}
+                  onChange={e => setForm({ ...form, espesor: e.target.value })}
+                  error={formErrors.espesor}
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -265,47 +260,42 @@ export default function ParedConcretoCalculatorPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label>Acero de Refuerzo (%)</Label>
-                  <InputWithHelp
-                    type="number"
-                    step="0.1"
-                    value={form.proporcionAcero}
-                    onChange={e => setForm({ ...form, proporcionAcero: e.target.value })}
-                    helpText="Porcentaje de volumen de acero en el concreto (1% es común)"
-                  />
-                </div>
+                <InputWithHelp
+                  label="Acero de Refuerzo"
+                  unit="%"
+                  type="number"
+                  step="0.1"
+                  value={form.proporcionAcero}
+                  onChange={e => setForm({ ...form, proporcionAcero: e.target.value })}
+                  helpText="Porcentaje de volumen de acero en el concreto (1% es común)"
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Desperdicio Concreto (%)</Label>
-                  <InputWithHelp
-                    type="number"
-                    value={form.desperdicioConcreto}
-                    onChange={e => setForm({ ...form, desperdicioConcreto: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Desperdicio Acero (%)</Label>
-                  <InputWithHelp
-                    type="number"
-                    value={form.desperdicioAcero}
-                    onChange={e => setForm({ ...form, desperdicioAcero: e.target.value })}
-                  />
-                </div>
+                <InputWithHelp
+                  label="Desperdicio Concreto"
+                  unit="%"
+                  type="number"
+                  value={form.desperdicioConcreto}
+                  onChange={e => setForm({ ...form, desperdicioConcreto: e.target.value })}
+                />
+                <InputWithHelp
+                  label="Desperdicio Acero"
+                  unit="%"
+                  type="number"
+                  value={form.desperdicioAcero}
+                  onChange={e => setForm({ ...form, desperdicioAcero: e.target.value })}
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Cantidad de Elementos</Label>
-                  <InputWithHelp
-                    type="number"
-                    value={form.cantidad}
-                    onChange={e => setForm({ ...form, cantidad: e.target.value })}
-                    error={formErrors.cantidad}
-                  />
-                </div>
+                <InputWithHelp
+                  label="Cantidad de Elementos"
+                  type="number"
+                  value={form.cantidad}
+                  onChange={e => setForm({ ...form, cantidad: e.target.value })}
+                  error={formErrors.cantidad}
+                />
                 <div className="space-y-2">
                   <Label>Redondeo de Bolsas</Label>
                   <Select value={form.redondeo} onValueChange={v => setForm({ ...form, redondeo: v })}>
