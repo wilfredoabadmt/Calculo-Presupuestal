@@ -286,8 +286,47 @@ export default function CronogramaPage() {
                 const itemStart = differenceInCalendarDays(new Date(item.fechaInicio), allStart)
                 const startPercent = (itemStart / totalRange) * 100
                 const widthPercent = (item.duracion / totalRange) * 100
-                const tipo = item.codigo.substring(0, 2)
-                const color = coloresPorTipo[tipo] || "#3b82f6"
+                // Determine color based on code prefix or semantic matching of activity name
+                const getTipoColor = (codigo: string, itemStr: string): string => {
+                  const codeUpper = (codigo || "").toUpperCase().trim()
+                  const itemLower = (itemStr || "").toLowerCase().trim()
+
+                  if (codeUpper.startsWith("IHS")) return coloresPorTipo.IHS
+                  if (codeUpper.startsWith("OP")) return coloresPorTipo.OP
+                  if (codeUpper.startsWith("OG")) return coloresPorTipo.OG
+                  if (codeUpper.startsWith("OF")) return coloresPorTipo.OF
+                  if (codeUpper.startsWith("IE")) return coloresPorTipo.IE
+
+                  // Semantic fallback
+                  if (itemLower.includes("excavac") || itemLower.includes("preliminar") || itemLower.includes("limpieza") || itemLower.includes("trazo") || itemLower.includes("replanteo") || itemLower.includes("zanja") || itemLower.includes("demolic") || itemLower.includes("faena")) {
+                    return coloresPorTipo.OP
+                  }
+                  if (itemLower.includes("pilar") || itemLower.includes("columna") || itemLower.includes("viga") || itemLower.includes("losa") || itemLower.includes("loza") || itemLower.includes("cimiento") || itemLower.includes("zapata") || itemLower.includes("hormigon") || itemLower.includes("concreto") || itemLower.includes("armado") || itemLower.includes("vaciado") || itemLower.includes("estructura") || itemLower.includes("sobrecimiento")) {
+                    return coloresPorTipo.OG
+                  }
+                  if (itemLower.includes("muro") || itemLower.includes("pared") || itemLower.includes("revoque") || itemLower.includes("yeso") || itemLower.includes("pintura") || itemLower.includes("piso") || itemLower.includes("ceramica") || itemLower.includes("acabado") || itemLower.includes("cielo") || itemLower.includes("puerta") || itemLower.includes("ventana") || itemLower.includes("revestimiento")) {
+                    return coloresPorTipo.OF
+                  }
+                  if (itemLower.includes("tuberia") || itemLower.includes("agua") || itemLower.includes("sanitari") || itemLower.includes("desague") || itemLower.includes("pluvial") || itemLower.includes("grifo") || itemLower.includes("inodoro") || itemLower.includes("lavaman") || itemLower.includes("alcantarillado")) {
+                    return coloresPorTipo.IHS
+                  }
+                  if (itemLower.includes("electric") || itemLower.includes("cable") || itemLower.includes("toma") || itemLower.includes("interruptor") || itemLower.includes("iluminac") || itemLower.includes("luz") || itemLower.includes("tablero") || itemLower.includes("tomacorriente")) {
+                    return coloresPorTipo.IE
+                  }
+
+                  // Numeric fallback
+                  const num = parseInt(codeUpper.replace(/\D/g, ""), 10)
+                  if (!isNaN(num)) {
+                    if (num === 1) return coloresPorTipo.OP
+                    if (num >= 2 && num <= 4) return coloresPorTipo.OG
+                    if (num >= 5 && num <= 7) return coloresPorTipo.OF
+                    if (num >= 8 && num <= 9) return coloresPorTipo.IHS
+                    if (num >= 10) return coloresPorTipo.IE
+                  }
+
+                  return "#3b82f6" // default
+                }
+                const color = getTipoColor(item.codigo, item.item)
 
                 return (
                   <div key={item.id} className="flex items-center gap-2 group">
