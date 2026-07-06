@@ -14,6 +14,44 @@ interface ExportItem {
   costoTotal: number
 }
 
+const coloresPorTipo: Record<string, string> = {
+  OP: "#f97316",
+  OG: "#3b82f6",
+  OF: "#22c55e",
+  IHS: "#06b6d4",
+  IE: "#a855f7",
+}
+
+const getTipoColor = (codigo: string, itemStr: string): string => {
+  const codeUpper = (codigo || "").toUpperCase().trim()
+  const itemLower = (itemStr || "").toLowerCase().trim()
+
+  if (codeUpper.startsWith("IHS")) return coloresPorTipo.IHS
+  if (codeUpper.startsWith("OP")) return coloresPorTipo.OP
+  if (codeUpper.startsWith("OG")) return coloresPorTipo.OG
+  if (codeUpper.startsWith("OF")) return coloresPorTipo.OF
+  if (codeUpper.startsWith("IE")) return coloresPorTipo.IE
+
+  // Semantic fallback
+  if (itemLower.includes("excavac") || itemLower.includes("preliminar") || itemLower.includes("limpieza") || itemLower.includes("trazo") || itemLower.includes("replanteo") || itemLower.includes("zanja") || itemLower.includes("demolic") || itemLower.includes("faena")) {
+    return coloresPorTipo.OP
+  }
+  if (itemLower.includes("pilar") || itemLower.includes("columna") || itemLower.includes("viga") || itemLower.includes("losa") || itemLower.includes("loza") || itemLower.includes("cimiento") || itemLower.includes("zapata") || itemLower.includes("hormigon") || itemLower.includes("concreto") || itemLower.includes("armado") || itemLower.includes("vaciado") || itemLower.includes("estructura") || itemLower.includes("sobrecimiento")) {
+    return coloresPorTipo.OG
+  }
+  if (itemLower.includes("muro") || itemLower.includes("pared") || itemLower.includes("revoque") || itemLower.includes("yeso") || itemLower.includes("pintura") || itemLower.includes("piso") || itemLower.includes("ceramica") || itemLower.includes("acabado") || itemLower.includes("cielo") || itemLower.includes("puerta") || itemLower.includes("ventana") || itemLower.includes("revestimiento")) {
+    return coloresPorTipo.OF
+  }
+  if (itemLower.includes("tuberia") || itemLower.includes("agua") || itemLower.includes("sanitari") || itemLower.includes("desague") || itemLower.includes("pluvial") || itemLower.includes("grifo") || itemLower.includes("inodoro") || itemLower.includes("lavaman") || itemLower.includes("alcantarillado")) {
+    return coloresPorTipo.IHS
+  }
+  if (itemLower.includes("electric") || itemLower.includes("cable") || itemLower.includes("toma") || itemLower.includes("interruptor") || itemLower.includes("iluminac") || itemLower.includes("luz") || itemLower.includes("tablero") || itemLower.includes("tomacorriente")) {
+    return coloresPorTipo.IE
+  }
+
+  return "#3b82f6" // default
+}
+
 // 1. Exportar Presupuesto General (PDF)
 export function exportarPDF(items: ExportItem[], titulo: string, resumen: Record<string, number>) {
   const doc = new jsPDF()
@@ -372,36 +410,9 @@ export function exportarEjecutivoPDF(elementos: any[], resumen: Record<string, n
   doc.save(`Reporte_Ejecutivo_${new Date().toISOString().slice(0, 10)}.pdf`)
 }
 
-// 8. Exportar Cronograma (PDF)
+// 8. Exportar Cronograma (PDF) - Renderizado como Diagrama de Gantt Gráfico Completo
 export function exportarCronogramaPDF(items: any[]) {
-  const doc = new jsPDF()
-
-  doc.setFontSize(18)
-  doc.setFont("helvetica", "bold")
-  doc.text("Cronograma de Obra", 14, 22)
-  doc.setFontSize(10)
-  doc.setFont("helvetica", "normal")
-  doc.text(`Fecha: ${new Date().toLocaleDateString("es-BO")}`, 14, 30)
-
-  const tableData = items.map((item, idx) => [
-    (idx + 1).toString(),
-    item.codigo || "-",
-    item.item || item.descripcion || "-",
-    item.fechaInicio ? new Date(item.fechaInicio).toLocaleDateString("es-BO") : "-",
-    item.duracion ? `${item.duracion} días` : "-",
-    item.fechaFinal ? new Date(item.fechaFinal).toLocaleDateString("es-BO") : "-",
-    `${item.progreso ?? 0}%`,
-  ])
-
-  autoTable(doc, {
-    startY: 35,
-    head: [["#", "Código", "Actividad / Item", "Fecha Inicio", "Duración", "Fecha Fin", "Progreso"]],
-    body: tableData,
-    styles: { fontSize: 8 },
-    headStyles: { fillColor: [6, 182, 212] },
-  })
-
-  doc.save(`Cronograma_${new Date().toISOString().slice(0, 10)}.pdf`)
+  exportarCronogramaImagen(items) // Usar la misma lógica visual de alta fidelidad para ambos botones
 }
 
 // 9. Exportar Cronograma (Excel)
@@ -412,7 +423,7 @@ export function exportarCronogramaExcel(items: any[]) {
     "Item": item.item || item.descripcion || "",
     "Fecha Inicio": item.fechaInicio ? new Date(item.fechaInicio).toLocaleDateString("es-BO") : "",
     "Duración (días)": item.duracion || "",
-    "Fecha Fin": item.fechaFinal ? new Date(item.fechaFinal).toLocaleDateString("es-BO") : "",
+    "Fecha Fin": item.fechaFinal || item.fechaFin ? new Date(item.fechaFinal || item.fechaFin).toLocaleDateString("es-BO") : "",
     "Progreso (%)": item.progreso ?? 0,
   }))
 
@@ -433,7 +444,7 @@ export function exportarCronogramaExcel(items: any[]) {
   XLSX.writeFile(wb, `Cronograma_${new Date().toISOString().slice(0, 10)}.xlsx`)
 }
 
-// 10. Exportar Cronograma (Imagen - Representada como PDF Horizontal de Línea de Tiempo)
+// 10. Exportar Cronograma (Imagen - Representada como PDF Horizontal de Línea de Tiempo Gantt Completo)
 export function exportarCronogramaImagen(items: any[]) {
   const doc = new jsPDF({
     orientation: "landscape",
@@ -441,36 +452,145 @@ export function exportarCronogramaImagen(items: any[]) {
     format: "a4",
   })
 
+  // Cabecera Oscura Premium
+  doc.setFillColor(15, 23, 42)
+  doc.rect(0, 0, 297, 25, "F")
+  
+  doc.setTextColor(255, 255, 255)
   doc.setFontSize(16)
   doc.setFont("helvetica", "bold")
-  doc.text("Línea de Tiempo del Cronograma", 15, 20)
-
+  doc.text("Cronograma de Obra - Diagrama de Gantt", 15, 12)
+  
   doc.setFontSize(9)
   doc.setFont("helvetica", "normal")
-  doc.text(`Fecha: ${new Date().toLocaleDateString("es-BO")} | Total Actividades: ${items.length}`, 15, 26)
+  doc.text(`Fecha de exportación: ${new Date().toLocaleDateString("es-BO")} | Total de Actividades: ${items.length}`, 15, 18)
 
-  // Draw a timeline mockup
-  let y = 40
+  if (items.length === 0) {
+    doc.setTextColor(100, 116, 139)
+    doc.text("Sin actividades en el cronograma.", 15, 40)
+    doc.save(`Cronograma_Gantt_${new Date().toISOString().slice(0, 10)}.pdf`)
+    return
+  }
+
+  // Rango global de fechas
+  const dates = items.map(i => new Date(i.fechaInicio).getTime()).concat(items.map(i => new Date(i.fechaFinal || i.fechaFin || i.fechaFinal).getTime()))
+  const minTime = Math.min(...dates)
+  const maxTime = Math.max(...dates)
+  const allStart = new Date(minTime)
+  const allEnd = new Date(maxTime)
+  
+  const getDiffDays = (d1: Date, d2: Date) => {
+    const t1 = new Date(d1.getFullYear(), d1.getMonth(), d1.getDate()).getTime()
+    const t2 = new Date(d2.getFullYear(), d2.getMonth(), d2.getDate()).getTime()
+    return Math.round((t2 - t1) / (1000 * 60 * 60 * 24))
+  }
+
+  const totalRange = getDiffDays(allStart, allEnd) || 1
+
+  // Rótulos de Línea de Tiempo
+  doc.setTextColor(100, 116, 139)
+  doc.setFontSize(8)
+  doc.setFont("helvetica", "bold")
+  doc.text(`Inicio: ${allStart.toLocaleDateString("es-BO")}`, 85, 32)
+  doc.text(`Fin: ${allEnd.toLocaleDateString("es-BO")}`, 235, 32)
+
+  // Línea guía de tiempo
+  doc.setDrawColor(226, 232, 240)
+  doc.setLineWidth(0.5)
+  doc.line(85, 34, 265, 34)
+
+  let y = 42
+  const barStartX = 85
+  const barMaxWidth = 170 // Ancho máximo del espacio de Gantt
+
   items.forEach((item, idx) => {
-    if (y > 180) return // Limit to one page for the timeline visual
+    if (y > 180) {
+      doc.addPage()
+      doc.setFillColor(15, 23, 42)
+      doc.rect(0, 0, 297, 15, "F")
+      doc.setTextColor(255, 255, 255)
+      doc.setFontSize(10)
+      doc.text("Cronograma de Obra - Diagrama de Gantt (Cont.)", 15, 9)
+      y = 28
+    }
+
+    doc.setTextColor(15, 23, 42)
     doc.setFontSize(9)
     doc.setFont("helvetica", "bold")
-    doc.text(`${item.codigo || ""} - ${item.item || item.descripcion || ""}`, 15, y)
+    
+    // Título de la actividad
+    const nameText = `${item.codigo || ""} ${item.item || item.descripcion || ""}`
+    doc.text(nameText.length > 32 ? nameText.substring(0, 32) + "..." : nameText, 15, y + 4.5)
 
-    // Draw bar background
-    doc.setFillColor(240, 240, 240)
-    doc.rect(80, y - 4, 150, 6, "F")
+    // Posición y ancho de barra Gantt staggered
+    const itemStart = getDiffDays(allStart, new Date(item.fechaInicio))
+    const startPercent = itemStart / totalRange
+    const widthPercent = (item.duracion || 1) / totalRange
 
-    // Draw progress bar
-    doc.setFillColor(59, 130, 246)
-    doc.rect(80, y - 4, 150 * ((item.progreso ?? 0) / 100), 6, "F")
+    const xPos = barStartX + (startPercent * barMaxWidth)
+    const barWidth = Math.max(widthPercent * barMaxWidth, 4) // Mínimo 4mm de ancho
 
+    // Determinar color de la leyenda
+    const colorHex = getTipoColor(item.codigo, item.item || item.descripcion)
+    
+    const r = parseInt(colorHex.substring(1, 3), 16)
+    const g = parseInt(colorHex.substring(3, 5), 16)
+    const b = parseInt(colorHex.substring(5, 7), 16)
+
+    // Dibujar fondo de barra (30% opaco / color suave)
+    doc.setFillColor(Math.round(255 - (255 - r) * 0.18), Math.round(255 - (255 - g) * 0.18), Math.round(255 - (255 - b) * 0.18))
+    doc.rect(xPos, y, barWidth, 6, "F")
+
+    // Dibujar barra de progreso sólida
+    doc.setFillColor(r, g, b)
+    const progressWidth = barWidth * ((item.progreso ?? 0) / 100)
+    if (progressWidth > 0.5) {
+      doc.rect(xPos, y, progressWidth, 6, "F")
+    }
+
+    // Porcentaje de progreso a la derecha
+    doc.setTextColor(100, 116, 139)
     doc.setFontSize(8)
     doc.setFont("helvetica", "normal")
-    doc.text(`${item.progreso ?? 0}% (duración: ${item.duracion}d)`, 235, y)
+    doc.text(`${item.progreso ?? 0}%`, xPos + barWidth + 2, y + 4.5)
 
-    y += 12
+    y += 10
   })
 
-  doc.save(`Cronograma_Visual_${new Date().toISOString().slice(0, 10)}.pdf`)
+  // Agregar la Leyenda al final de la página
+  y = Math.min(y + 8, 185)
+  doc.setDrawColor(226, 232, 240)
+  doc.line(15, y, 282, y)
+  y += 6
+
+  doc.setFontSize(8)
+  doc.setFont("helvetica", "bold")
+  doc.setTextColor(100, 116, 139)
+  doc.text("Leyenda de Especialidades:", 15, y + 3)
+
+  let xLegend = 60
+  const legendItems = [
+    { label: "Obras Preliminares", color: coloresPorTipo.OP },
+    { label: "Obra Gruesa", color: coloresPorTipo.OG },
+    { label: "Obra Fina", color: coloresPorTipo.OF },
+    { label: "Inst. Hidrosanitarias", color: coloresPorTipo.IHS },
+    { label: "Inst. Eléctricas", color: coloresPorTipo.IE },
+  ]
+
+  legendItems.forEach(leg => {
+    const rx = parseInt(leg.color.substring(1, 3), 16)
+    const gx = parseInt(leg.color.substring(3, 5), 16)
+    const bx = parseInt(leg.color.substring(5, 7), 16)
+
+    doc.setFillColor(rx, gx, bx)
+    doc.rect(xLegend, y, 4, 4, "F")
+    
+    doc.setTextColor(15, 23, 42)
+    doc.setFont("helvetica", "normal")
+    doc.text(leg.label, xLegend + 6, y + 3)
+    
+    xLegend += leg.label.length * 2 + 18
+  })
+
+  doc.save(`Cronograma_Gantt_${new Date().toISOString().slice(0, 10)}.pdf`)
 }

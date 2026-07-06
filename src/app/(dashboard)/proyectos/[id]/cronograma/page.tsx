@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { exportarCronogramaPDF } from "@/lib/exports"
 import { PageHeader } from "@/components/shared/PageHeader"
 import { EmptyState } from "@/components/shared/EmptyState"
 import { Calendar, Plus, Download, Loader2, Trash2, GanttChart } from "lucide-react"
@@ -155,27 +156,7 @@ export default function CronogramaPage() {
   }
 
   const handleExport = () => {
-    const header = "Código,Actividad,Fecha Inicio,Duración (días),Fecha Fin,Progreso (%),Depende De\n"
-    const rows = items.map(i =>
-      [
-        i.codigo,
-        `"${i.item}"`,
-        format(new Date(i.fechaInicio), "yyyy-MM-dd"),
-        i.duracion,
-        format(new Date(i.fechaFinal), "yyyy-MM-dd"),
-        i.progreso ?? 0,
-        i.dependeDe || "",
-      ].join(",")
-    ).join("\n")
-
-    const csv = header + rows
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = `cronograma-${format(new Date(), "yyyy-MM-dd")}.csv`
-    a.click()
-    URL.revokeObjectURL(url)
+    exportarCronogramaPDF(items)
   }
 
   const totalDias = items.length > 0
