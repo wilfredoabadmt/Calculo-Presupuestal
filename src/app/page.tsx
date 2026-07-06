@@ -407,19 +407,25 @@ export default async function HomePage() {
             ].map((calc, i) => (
               <div
                 key={i}
-                className="relative p-5 rounded-xl border border-slate-900 bg-slate-950 hover:border-slate-800 hover:-translate-y-1 transition-all duration-300 group overflow-hidden flex flex-col justify-between min-h-[170px]"
+                className="relative p-0.5 rounded-xl overflow-hidden group hover:-translate-y-0.5 transition-all duration-300 min-h-[170px] flex flex-col justify-between"
               >
-                <div>
-                  <div className="flex justify-between items-start mb-2">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${calc.free ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"}`}>
-                      {calc.free ? "FREE" : "PRO"}
-                    </span>
+                {/* Rotating Saber Border Light */}
+                <div className="absolute inset-[-1000%] bg-[conic-gradient(from_0deg,transparent_40%,rgba(34,211,238,0.12)_50%,transparent_60%)] animate-[spin_10s_linear_infinite] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+                {/* Glassmorphic Inner Container */}
+                <div className="relative flex-1 p-5 rounded-[10px] bg-slate-950/40 backdrop-blur-md border border-slate-900/60 group-hover:border-slate-800/30 transition-all duration-300 flex flex-col justify-between z-10">
+                  <div>
+                    <div className="flex justify-between items-start mb-2">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${calc.free ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"}`}>
+                        {calc.free ? "FREE" : "PRO"}
+                      </span>
+                    </div>
+                    <div className="font-bold text-slate-100 text-sm leading-tight">{calc.name}</div>
+                    <div className="text-xs text-slate-500 mt-1 leading-snug">{calc.spec}</div>
                   </div>
-                  <div className="font-bold text-slate-100 text-sm leading-tight">{calc.name}</div>
-                  <div className="text-xs text-slate-500 mt-1 leading-snug">{calc.spec}</div>
-                </div>
-                <div className="mt-4 flex justify-end">
-                  {calc.renderSvg()}
+                  <div className="mt-4 flex justify-end">
+                    {calc.renderSvg()}
+                  </div>
                 </div>
               </div>
             ))}
