@@ -477,21 +477,53 @@ export function exportarCronogramaImagen(items: any[]) {
 
   const totalRange = getDiffDays(allStart, allEnd) || 1
 
-  // Rótulos de Línea de Tiempo
-  doc.setTextColor(100, 116, 139)
-  doc.setFontSize(8)
-  doc.setFont("helvetica", "bold")
-  doc.text(`Inicio: ${allStart.toLocaleDateString("es-BO")}`, 85, 32)
-  doc.text(`Fin: ${allEnd.toLocaleDateString("es-BO")}`, 235, 32)
-
-  // Línea guía de tiempo
-  doc.setDrawColor(226, 232, 240)
-  doc.setLineWidth(0.5)
-  doc.line(85, 34, 265, 34)
-
-  let y = 42
+  // Grid de fechas y días
   const barStartX = 85
   const barMaxWidth = 170 // Ancho máximo del espacio de Gantt
+  const gridEndY = 42 + items.length * 10 - 4
+  const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+  
+  // Selección del intervalo de días para la cuadrícula
+  let stepDays = 1
+  if (totalRange > 180) stepDays = 30
+  else if (totalRange > 90) stepDays = 15
+  else if (totalRange > 45) stepDays = 7
+  else if (totalRange > 20) stepDays = 5
+  else if (totalRange > 10) stepDays = 2
+  else stepDays = 1
+
+  // Dibujar líneas verticales y cabeceras de fecha
+  for (let i = 0; i <= totalRange; i += stepDays) {
+    const x = barStartX + (i / totalRange) * barMaxWidth
+    const currentDate = new Date(minTime + i * 24 * 60 * 60 * 1000)
+    
+    // Línea de cuadrícula vertical
+    doc.setDrawColor(226, 232, 240)
+    doc.setLineWidth(0.35)
+    doc.line(x, 35, x, gridEndY)
+    
+    // Rótulos de días y meses
+    doc.setTextColor(100, 116, 139)
+    doc.setFontSize(8)
+    doc.setFont("helvetica", "normal")
+    const dayStr = currentDate.getDate().toString()
+    doc.text(dayStr, x, 34, { align: "center" })
+
+    // Mostrar el mes si cambia o si es el primer tick
+    if (i === 0 || currentDate.getDate() === 1 || (i > 0 && new Date(minTime + (i - stepDays) * 24 * 60 * 60 * 1000).getMonth() !== currentDate.getMonth())) {
+      doc.setFont("helvetica", "bold")
+      doc.setFontSize(8.5)
+      doc.text(meses[currentDate.getMonth()], x, 29, { align: "center" })
+    }
+  }
+
+  // Líneas límites horizontales de la cuadrícula
+  doc.setDrawColor(203, 213, 225)
+  doc.setLineWidth(0.7)
+  doc.line(barStartX, 35, barStartX + barMaxWidth, 35)
+  doc.line(barStartX, gridEndY, barStartX + barMaxWidth, gridEndY)
+
+  let y = 42
 
   items.forEach((item, idx) => {
     if (y > 180) {
