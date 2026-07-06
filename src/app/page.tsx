@@ -729,10 +729,19 @@ export default async function HomePage() {
             </div>
             <div>
               <h4 className="font-bold text-xs text-slate-200 uppercase tracking-widest mb-4">Contacto</h4>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                soporte@calculopresupuestal.com<br />
-                La Paz, Bolivia
-              </p>
+              <ul className="space-y-2 text-xs text-slate-500">
+                <li>
+                  <a href="https://wa.me/59171523780" target="_blank" rel="noopener noreferrer" className="hover:text-cyan-400 transition-colors block">
+                    WhatsApp: +591 71523780
+                  </a>
+                </li>
+                <li>
+                  <a href="https://wa.me/59171572401" target="_blank" rel="noopener noreferrer" className="hover:text-cyan-400 transition-colors block">
+                    WhatsApp: +591 71572401
+                  </a>
+                </li>
+                <li className="text-slate-600 mt-1">La Paz, Bolivia</li>
+              </ul>
             </div>
           </div>
           <div className="pt-8 border-t border-slate-900 text-center text-[10px] text-slate-600">
