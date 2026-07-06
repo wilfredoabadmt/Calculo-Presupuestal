@@ -695,9 +695,9 @@ export default async function HomePage() {
         <div className="container mx-auto px-6 max-w-5xl">
           <div className="grid md:grid-cols-4 gap-8 mb-12">
             <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-6 h-6 rounded bg-cyan-500 flex items-center justify-center text-slate-950 font-black text-xs">C</div>
-                <span className="font-bold text-sm tracking-widest text-slate-100">CÁLCULO PRESUPUESTAL</span>
+              <div className="relative flex h-10 w-10 items-center justify-center rounded-lg bg-slate-950/60 border border-slate-800 shadow-lg shadow-cyan-500/10 overflow-hidden shrink-0 mb-4">
+                <img src="/logo.webp" alt="Logo" className="h-full w-full object-contain filter brightness-95 contrast-105 saturate-90" />
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/25 to-blue-600/30 mix-blend-color pointer-events-none" />
               </div>
               <p className="text-xs text-slate-500 leading-relaxed">
                 Plataforma web avanzada para ingenieros civiles, arquitectos y constructoras en Bolivia.
