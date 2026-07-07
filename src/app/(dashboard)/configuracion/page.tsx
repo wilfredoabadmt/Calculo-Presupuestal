@@ -114,7 +114,7 @@ export default function ConfiguracionPage() {
               <Button variant="outline" className="w-full justify-start">Mi Cuenta</Button>
             </Link>
             <Link href="/materiales/precios">
-              <Button variant="outline" className="w-full justify-start">Banco de Precios GMLP</Button>
+              <Button variant="outline" className="w-full justify-start">Banco de Precios Referenciales</Button>
             </Link>
           </CardContent>
         </Card>

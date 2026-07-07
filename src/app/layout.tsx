@@ -88,7 +88,7 @@ export default function RootLayout({
       "10 Calculadoras de construcción",
       "Presupuestos con AIU",
       "Cronograma Gantt con Curva S",
-      "Banco de precios GMLP 2007",
+      "Banco de precios de referencia",
       "Exportación PDF y Excel",
     ],
     screenshot: "https://calculo-presupuestal.clientify.click/og-image.png",

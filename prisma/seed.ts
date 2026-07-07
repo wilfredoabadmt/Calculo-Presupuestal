@@ -435,10 +435,10 @@ async function main() {
   }
 
   // ============================================
-  // BANCO DE PRECIOS GMLP
-  // Nota: Ejecutar `npx tsx prisma/seed-gmlp.ts` para importar los 946 ítems completos
+  // BANCO DE PRECIOS REFERENCIALES
+  // Nota: Ejecutar `npx tsx prisma/seed-banco-precios.ts` para importar los ítems completos
   // ============================================
-  console.log('📦 Banco de precios GMLP: ejecutar seed-gmlp.ts por separado')
+  console.log('📦 Banco de precios: ejecutar seed-banco-precios.ts por separado')
 
   console.log('✅ Seed completado exitosamente!')
 }

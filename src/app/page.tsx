@@ -104,7 +104,7 @@ export default async function HomePage() {
           {/* Subtitle */}
           <p className="text-lg sm:text-xl text-slate-400 mb-12 max-w-3xl mx-auto leading-relaxed">
             Optimiza tus licitaciones públicas y proyectos privados con precisión milimétrica. 
-            Calcula materiales con <strong>14 calculadoras avanzadas</strong>, accede a la base GMLP y visualiza rutas críticas en Gantt dinámicos.
+            Calcula materiales con <strong>14 calculadoras avanzadas</strong>, accede a la base de precios referenciales y visualiza rutas críticas en Gantt dinámicos.
           </p>
 
           {/* CTAs */}
@@ -483,7 +483,7 @@ export default async function HomePage() {
                   <span className="text-cyan-400 mt-0.5">✓</span> Fórmulas estandarizadas y validadas con precisión ingenieril.
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-cyan-400 mt-0.5">✓</span> Base GMLP integrada para precios referenciales oficiales al instante.
+                  <span className="text-cyan-400 mt-0.5">✓</span> Base de precios de referencia integrada para estimaciones rápidas y reales.
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-cyan-400 mt-0.5">✓</span> Cronograma Gantt y Curva S sincronizados en base al presupuesto.

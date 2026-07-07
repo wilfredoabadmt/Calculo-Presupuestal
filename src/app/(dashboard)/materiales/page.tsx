@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -144,7 +145,12 @@ export default function MaterialesPage() {
         description="Gestión de materiales y precios de referencia"
         icon={<Box className="h-7 w-7 text-primary" />}
         actions={
-          <Button onClick={openCreate}><Plus className="mr-2 h-4 w-4" /> Nuevo Material</Button>
+          <div className="flex items-center gap-2">
+            <Link href="/materiales/precios">
+              <Button variant="outline">Ver Banco de Precios</Button>
+            </Link>
+            <Button onClick={openCreate}><Plus className="mr-2 h-4 w-4" /> Nuevo Material</Button>
+          </div>
         }
       />
 

@@ -327,7 +327,7 @@ model CronogramaItem {
 
 model AnalisisPrecioUnitario {
   id              String   @id @default(cuid())
-  codigo          String   @unique
+  codigo          String
   descripcion     String
   unidad          String
   proyectoId      String?
@@ -351,11 +351,12 @@ model AnalisisPrecioUnitario {
 }
 
 // ============================================
-// BANCO DE PRECIOS GMLP
+// BANCO DE PRECIOS REFERENCIALES
 // ============================================
 
-model BancoPrecioGMLP {
+model BancoPrecio {
   id          String   @id @default(cuid())
+  codigo      String?
   actividad   String
   unidad      String
   cantidad    Float
@@ -376,5 +377,5 @@ model BancoPrecioGMLP {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  @@map("banco_precios_gmlp")
+  @@map("banco_precios")
 }

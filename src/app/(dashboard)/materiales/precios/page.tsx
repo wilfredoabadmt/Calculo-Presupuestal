@@ -12,6 +12,7 @@ import { formatCurrency } from "@/lib/utils"
 
 interface BancoPrecio {
   id: string
+  codigo: string | null
   actividad: string
   unidad: string
   categoria: string
@@ -54,8 +55,8 @@ export default function BancoPreciosPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Banco de Precios GMLP"
-        description="Base de precios unitarios GMLP 2007"
+        title="Banco de Precios Referenciales"
+        description="Base de precios unitarios de referencia"
         icon={<DollarSign className="h-7 w-7 text-primary" />}
         actions={
           <>
@@ -87,13 +88,14 @@ export default function BancoPreciosPage() {
             <EmptyState
               icon={<DollarSign className="h-12 w-12" />}
               title="Banco de precios vacío"
-              description="Importa la base GMLP 2007 desde un archivo Excel"
+              description="Importa la base de precios desde un archivo Excel"
             />
           ) : (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Código</TableHead>
                     <TableHead>Actividad</TableHead>
                     <TableHead>Unidad</TableHead>
                     <TableHead>Categoría</TableHead>
@@ -105,6 +107,7 @@ export default function BancoPreciosPage() {
                 <TableBody>
                   {filtered.map(item => (
                     <TableRow key={item.id}>
+                      <TableCell className="font-mono text-xs">{item.codigo || "-"}</TableCell>
                       <TableCell className="font-medium">{item.actividad}</TableCell>
                       <TableCell>{item.unidad}</TableCell>
                       <TableCell><span className="px-2 py-1 rounded-full text-xs bg-muted">{item.categoria}</span></TableCell>

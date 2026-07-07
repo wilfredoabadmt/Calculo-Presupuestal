@@ -81,7 +81,7 @@ export default function PricingPage() {
                 "Las 10 calculadoras completas",
                 "Proyectos ilimitados",
                 "Export PDF y Excel ilimitado",
-                "946 ítems GMLP integrados",
+                "946 ítems referenciales integrados",
                 "Cronograma Gantt + Curva S",
                 "Reportes ejecutivos",
                 "Soporte prioritario",
@@ -115,8 +115,8 @@ export default function PricingPage() {
                 a: "Sí. Puedes actualizar o cancelar tu plan cuando quieras. Los cambios se aplican inmediatamente.",
               },
               {
-                q: "¿Qué moneda utilizan los precios GMLP?",
-                a: "Todos los precios están en Bolivianos (Bs.), basados en la Guía de Materiales y Mano de Obra (GMLP) 2007 oficial de Bolivia.",
+                q: "¿Qué moneda utilizan los precios de referencia?",
+                a: "Todos los precios están en Bolivianos (Bs.), basados en la base de datos de precios referenciales para la construcción en Bolivia.",
               },
               {
                 q: "¿Necesito instalar algo?",

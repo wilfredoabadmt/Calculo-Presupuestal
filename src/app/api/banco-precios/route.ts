@@ -14,17 +14,17 @@ export async function GET(request: Request) {
     where.categoria = categoria
   }
 
-  const items = await prisma.bancoPrecioGMLP.findMany({
+  const items = await prisma.bancoPrecio.findMany({
     where,
     orderBy: { actividad: "asc" },
     take: 100,
   })
 
-  const total = await prisma.bancoPrecioGMLP.count({ where })
+  const total = await prisma.bancoPrecio.count({ where })
 
   const mapped = items.map(i => ({
     id: i.id,
-    codigo: i.id.slice(0, 8).toUpperCase(),
+    codigo: i.codigo || i.id.slice(0, 8).toUpperCase(),
     actividad: i.actividad,
     descripcion: i.actividad,
     unidad: i.unidad,
