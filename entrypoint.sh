@@ -25,5 +25,13 @@ else
   echo "  → WARNING: Seed failed (may already exist)"
 fi
 
+# Seed banco de precios (Excel import)
+echo "[2.5/3] Importing Banco de Precios from Excel..."
+if npx tsx prisma/seed-banco-precios.ts 2>&1; then
+  echo "  → Banco de Precios OK"
+else
+  echo "  → WARNING: Banco de Precios import failed"
+fi
+
 echo "[3/3] Starting Next.js server..."
 exec node server.js
