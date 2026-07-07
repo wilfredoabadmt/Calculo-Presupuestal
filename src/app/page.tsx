@@ -25,6 +25,7 @@ import {
 import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import CalculatorShowcase from "@/components/shared/CalculatorShowcase"
+import AnimatedHero from "@/components/home/AnimatedHero"
 
 export default async function HomePage() {
   const session = await auth()
@@ -34,15 +35,9 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-cyan-500 selection:text-slate-950 font-sans overflow-x-hidden">
-      {/* Background Neon Grid & Cinematic Ambient Glows */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
-      
-      {/* Floating Animated Grid Line Beam */}
-      <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-cyan-500/10 via-transparent to-transparent pointer-events-none opacity-40 animate-pulse" />
-
-      {/* Top Header / Navigation Bar */}
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-slate-950/70 border-b border-slate-800/60">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+      {/* Floating Navbar Header */}
+      <div className="fixed top-0 left-0 right-0 z-50 px-6 md:px-12 lg:px-16 pt-6">
+        <header className="liquid-glass rounded-xl px-6 py-3 flex items-center justify-between border border-white/10">
           <Link href="/" className="flex items-center gap-2 group">
             <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-slate-950/60 border border-slate-800 shadow-lg shadow-cyan-500/10 group-hover:scale-105 transition-all duration-300 overflow-hidden shrink-0">
               <img src="/logo.webp" alt="Logo" className="h-full w-full object-contain filter brightness-95 contrast-105 saturate-90" />
@@ -64,78 +59,13 @@ export default async function HomePage() {
               </Button>
             </Link>
           </div>
-        </div>
-      </header>
+        </header>
+      </div>
 
-      {/* Hero Cinematográfico */}
-      <section className="relative pt-16 pb-24 lg:pt-28 lg:pb-36 flex flex-col items-center overflow-hidden">
-        {/* Glow Spheres */}
-        <div className="absolute top-20 left-1/4 -translate-x-1/2 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-10 right-1/4 translate-x-1/2 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
-
-        {/* Isometric Wireframe SVG Background representing a digital city grid */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-[0.04] pointer-events-none select-none">
-          <svg className="w-full max-w-6xl h-full min-h-[600px]" viewBox="0 0 1000 600" fill="none" stroke="currentColor">
-            <path d="M100 500 L500 100 L900 500 Z" strokeWidth="1" />
-            <path d="M100 500 L500 300 L900 500 Z" strokeWidth="0.5" strokeDasharray="5,5" />
-            <path d="M500 100 L500 600" strokeWidth="1" />
-            <path d="M50 400 L950 400" strokeWidth="0.5" />
-            <circle cx="500" cy="100" r="8" fill="currentColor" className="animate-ping" />
-            <circle cx="100" cy="500" r="6" fill="currentColor" />
-            <circle cx="900" cy="500" r="6" fill="currentColor" />
-          </svg>
-        </div>
-
-        <div className="container mx-auto px-6 relative z-10 text-center max-w-5xl">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-slate-900/80 border border-slate-800/80 rounded-full px-4 py-1.5 text-xs font-semibold text-cyan-400 uppercase tracking-widest mb-10 backdrop-blur-sm shadow-inner shadow-white/5">
-            <Sparkles className="h-3.5 w-3.5 text-cyan-400 animate-pulse" />
-            Tecnología Paramétrica · Edición 2026
-          </div>
-
-          {/* Title */}
-          <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black tracking-tight mb-8 leading-[1.05] drop-shadow-lg">
-            La ingeniería del futuro,<br />
-            <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">
-              presupuestada hoy
-            </span>
-          </h1>
-
-          {/* Subtitle */}
-          <p className="text-lg sm:text-xl text-slate-400 mb-12 max-w-3xl mx-auto leading-relaxed">
-            Optimiza tus licitaciones públicas y proyectos privados con precisión milimétrica. 
-            Calcula materiales con <strong>14 calculadoras avanzadas</strong>, accede a la base de precios referenciales y visualiza rutas críticas en Gantt dinámicos.
-          </p>
-
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-20">
-            <Link href="/register" className="w-full sm:w-auto">
-              <Button size="lg" className="w-full sm:w-auto text-base font-bold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-slate-950 px-8 py-6 rounded-xl shadow-xl shadow-cyan-500/25 transition-all duration-300 hover:scale-[1.02]">
-                Registrarse Gratis
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-            <Link href="/login" className="w-full sm:w-auto">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto text-base font-bold border-slate-800 bg-slate-900/40 text-slate-200 hover:bg-slate-900 hover:text-white px-8 py-6 rounded-xl transition-all duration-300">
-                Iniciar Sesión
-              </Button>
-            </Link>
-          </div>
-
-          {/* Live CAD simulator preview container */}
-          <div className="max-w-4xl mx-auto mb-16 relative">
-            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-cyan-500/20 to-blue-500/20 blur-xl opacity-30 pointer-events-none" />
-            <div className="text-left mb-4 flex justify-between items-center">
-              <span className="text-xs font-bold text-cyan-400 uppercase tracking-widest flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
-                SIMULADOR CAD INTERACTIVO EN VIVO
-              </span>
-              <p className="text-[10px] text-slate-500 hidden sm:block">Fórmulas automatizadas según dosificación oficial</p>
-            </div>
-            <CalculatorShowcase />
-          </div>
-        </div>
-      </section>
+      {/* Animated Video Background & Hero Content */}
+      <AnimatedHero>
+        <CalculatorShowcase />
+      </AnimatedHero>
 
       {/* Sección de Experiencia */}
       <section className="py-24 bg-slate-950 relative border-t border-slate-900">
