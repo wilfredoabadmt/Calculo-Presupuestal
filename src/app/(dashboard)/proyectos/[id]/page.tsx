@@ -158,7 +158,7 @@ export default function ProyectoDetailPage() {
         setEditForm({
           descripcion: el.descripcion || "",
           cantidad: el.cantidad?.toString() || "1",
-          costoTotal: el.costoTotal?.toString() || "0",
+          costoTotal: Math.round((el.costoTotal || 0) * 100 / 100).toString(),
           dimA: el.dimA?.toString() || "",
           dimB: el.dimB?.toString() || "",
           dimH: el.dimH?.toString() || "",
@@ -185,7 +185,7 @@ export default function ProyectoDetailPage() {
         body: JSON.stringify({
           descripcion: editForm.descripcion,
           cantidad: parseInt(editForm.cantidad) || 1,
-          costoTotal: parseFloat(editForm.costoTotal) || 0,
+          costoTotal: Math.round((parseFloat(editForm.costoTotal) || 0) * 100) / 100,
           dimA: editForm.dimA ? parseFloat(editForm.dimA) : null,
           dimB: editForm.dimB ? parseFloat(editForm.dimB) : null,
           dimH: editForm.dimH ? parseFloat(editForm.dimH) : null,
