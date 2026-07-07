@@ -61,10 +61,13 @@ export default function DatosPage() {
   const [selectedCapFilter, setSelectedCapFilter] = useState<string>("ALL")
   const tableRef = useRef<HTMLDivElement>(null)
 
-  // Initialize rows from existing mediciones
+  // Initialize rows: existing mediciones + auto-populate partidas without mediciones
   const initialized = useRef(false)
-  if (!initialized.current && mediciones.length > 0 && rows.length === 0) {
-    const mapped = mediciones.map(m => ({
+  if (!initialized.current && capitulos.length > 0 && !loading) {
+    const existingPartidaIds = new Set(mediciones.map(m => m.partidaId))
+
+    // Map existing mediciones to rows
+    const mapped: MedicionFormRow[] = mediciones.map(m => ({
       id: m.id,
       capituloId: m.partida?.capitulo ? capitulos.find(c => c.codigo === m.partida!.capitulo!.codigo)?.id || "" : "",
       partidaId: m.partidaId,
@@ -75,6 +78,25 @@ export default function DatosPage() {
       precioUnitario: m.precioUnitario.toString(),
       calculadoraUsada: m.calculadoraUsada,
     }))
+
+    // Auto-add rows for partidas that don't have mediciones yet
+    for (const cap of capitulos) {
+      for (const part of cap.partidas) {
+        if (!existingPartidaIds.has(part.id)) {
+          mapped.push({
+            capituloId: cap.id,
+            partidaId: part.id,
+            veces: "1",
+            largo: "",
+            ancho: "",
+            alto: "",
+            precioUnitario: part.precioBase.toString(),
+            calculadoraUsada: null,
+          })
+        }
+      }
+    }
+
     setRows(mapped)
     initialized.current = true
   }
@@ -224,7 +246,7 @@ export default function DatosPage() {
         <div>
           <h2 className="text-xl font-semibold">Matriz de Mediciones</h2>
           <p className="text-sm text-muted-foreground">
-            {mediciones.length} mediciones registradas
+            {rows.length} partidas en la matriz
           </p>
         </div>
         <div className="flex gap-2">
@@ -276,7 +298,7 @@ export default function DatosPage() {
                 {rows.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
-                      No hay mediciones. Haz clic en "Agregar Fila" para comenzar.
+                      No hay partidas. Agrega partidas en la pestaña "Altas".
                     </TableCell>
                   </TableRow>
                 ) : (
