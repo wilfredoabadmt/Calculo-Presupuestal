@@ -15,7 +15,7 @@ ENV NEXTAUTH_URL=${NEXTAUTH_URL}
 ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
 ENV DATABASE_URL=${DATABASE_URL}
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV NODE_OPTIONS="--max-old-space-size=1024"
+ENV NODE_OPTIONS="--max-old-space-size=2048"
 
 # Install OpenSSL and CA Certificates for Prisma/node SSL requests
 RUN apk add --no-cache openssl ca-certificates
