@@ -3,7 +3,6 @@ node_modules
 .agents
 .github
 docs
-guia
 *.log
 .env
 .env.*
