@@ -163,7 +163,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem 
                     className="text-destructive"
-                    onClick={() => signOut({ redirect: true })}
+                    onClick={() => signOut({ callbackUrl: "/" })}
                   >
                     <LogOut className="mr-2 h-4 w-4" />
                     Cerrar Sesión

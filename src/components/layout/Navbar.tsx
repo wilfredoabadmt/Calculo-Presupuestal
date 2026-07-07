@@ -38,7 +38,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
               <DropdownMenuItem>Perfil</DropdownMenuItem>
               <DropdownMenuItem>Configuración</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive" onClick={() => signOut({ redirect: true })}>
+              <DropdownMenuItem className="text-destructive" onClick={() => signOut({ callbackUrl: "/" })}>
                 <LogOut className="mr-2 h-4 w-4" /> Cerrar Sesión
               </DropdownMenuItem>
             </DropdownMenuContent>
