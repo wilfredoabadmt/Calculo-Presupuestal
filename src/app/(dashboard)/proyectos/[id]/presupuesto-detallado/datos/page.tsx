@@ -122,7 +122,11 @@ export default function DatosPage() {
     const l = parseFloat(row.largo) || 0
     const a = parseFloat(row.ancho) || 0
     const h = parseFloat(row.alto) || 0
-    return v * l * a * h
+
+    const lVal = l > 0 ? l : 1
+    const aVal = a > 0 ? a : 1
+    const hVal = h > 0 ? h : 1
+    return v * lVal * aVal * hVal
   }
 
   const calcularTotal = (row: MedicionFormRow) => {

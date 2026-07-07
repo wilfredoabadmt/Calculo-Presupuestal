@@ -64,9 +64,9 @@ export function calcularCostoMedicion(
   precioUnitario: number
 ): { parcial: number; costoTotal: number } {
   const v = new Decimal(veces)
-  const l = new Decimal(largo)
-  const a = new Decimal(ancho)
-  const h = new Decimal(alto)
+  const l = largo > 0 ? new Decimal(largo) : new Decimal(1)
+  const a = ancho > 0 ? new Decimal(ancho) : new Decimal(1)
+  const h = alto > 0 ? new Decimal(alto) : new Decimal(1)
   const p = new Decimal(precioUnitario)
 
   const parcial = v.times(l).times(a).times(h)

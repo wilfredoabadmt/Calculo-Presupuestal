@@ -32,7 +32,14 @@ export default function ResumenPage() {
         const subtotal = cap.partidas.reduce((sumPart, part) =>
           sumPart + mediciones
             .filter(m => m.partidaId === part.id)
-            .reduce((sumMed, med) => sumMed + (med.costoTotal || 0), 0)
+            .reduce((sumMed, med) => {
+              const l = med.largo > 0 ? med.largo : 1
+              const a = med.ancho > 0 ? med.ancho : 1
+              const h = med.alto > 0 ? med.alto : 1
+              const parcial = med.veces * l * a * h
+              const costoTotal = parcial * med.precioUnitario
+              return sumMed + (costoTotal || 0)
+            }, 0)
         , 0)
         return {
           codigo: cap.codigo,
@@ -227,7 +234,7 @@ export default function ResumenPage() {
             <div className="flex items-center justify-between py-4 px-4 bg-primary/10 border-2 border-primary rounded-b">
               <div className="flex items-center gap-3">
                 <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">5</span>
-                <span className="font-bold text-lg">TOTAL PRESUPUESTO DE CONTRATA</span>
+                <span className="font-bold text-lg">TOTAL PRESUPUESTO CONTRATADO</span>
               </div>
               <span className="font-bold text-2xl text-primary">{formatCurrency(totales.totalGeneral)}</span>
             </div>

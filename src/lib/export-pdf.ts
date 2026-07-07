@@ -244,7 +244,7 @@ export function generarPDFPresupuesto(data: PresupuestoData): jsPDF {
   doc.setFont('helvetica', 'bold')
   doc.setFillColor(240, 240, 240)
   doc.rect(margin, y - 4, contentWidth, 8, 'F')
-  doc.text('TOTAL PRESUPUESTO DE CONTRATA:', margin + 2, y + 1)
+  doc.text('TOTAL PRESUPUESTO CONTRATADO:', margin + 2, y + 1)
   doc.text(formatCurrency(data.totalPresupuesto), pageWidth - margin, y + 1, { align: 'right' })
 
   return doc

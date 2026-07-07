@@ -98,15 +98,22 @@ export default function InformePage() {
           precioBase: part.precioBase,
           mediciones: mediciones
             .filter(m => m.partidaId === part.id)
-            .map(m => ({
-              veces: m.veces,
-              largo: m.largo,
-              ancho: m.ancho,
-              alto: m.alto,
-              parcial: m.parcial,
-              precioUnitario: m.precioUnitario,
-              costoTotal: m.costoTotal,
-            })),
+            .map(m => {
+              const l = m.largo > 0 ? m.largo : 1
+              const a = m.ancho > 0 ? m.ancho : 1
+              const h = m.alto > 0 ? m.alto : 1
+              const parcial = m.veces * l * a * h
+              const costoTotal = parcial * m.precioUnitario
+              return {
+                veces: m.veces,
+                largo: m.largo,
+                ancho: m.ancho,
+                alto: m.alto,
+                parcial,
+                precioUnitario: m.precioUnitario,
+                costoTotal,
+              }
+            }),
         })),
     }))
 
@@ -431,7 +438,7 @@ export default function InformePage() {
               <span>{formatCurrency(totales.iva)}</span>
             </div>
             <div className="flex justify-between text-base font-bold border-t-2 pt-2 mt-2">
-              <span>TOTAL PRESUPUESTO DE CONTRATA</span>
+              <span>TOTAL PRESUPUESTO CONTRATADO</span>
               <span>{formatCurrency(totales.totalGeneral)}</span>
             </div>
           </div>

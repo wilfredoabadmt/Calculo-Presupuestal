@@ -99,7 +99,7 @@ export function generarExcelPresupuesto(data: PresupuestoData): XLSX.WorkBook {
   informeData.push(['', '', 'I.V.A.', '', '', '', '', '', '', ''])
   const ivaRow = currentRow
   currentRow++
-  informeData.push(['', '', 'TOTAL PRESUPUESTO DE CONTRATA', '', '', '', '', '', '', ''])
+  informeData.push(['', '', 'TOTAL PRESUPUESTO CONTRATADO', '', '', '', '', '', '', ''])
   const totalFinalRow = currentRow
 
   // --- HOJA RESUMEN ---
@@ -135,7 +135,7 @@ export function generarExcelPresupuesto(data: PresupuestoData): XLSX.WorkBook {
   resumenData.push(['', 'I.V.A.', '', '', '', ''])
   const resumenIVARow = resumenRow
   resumenRow++
-  resumenData.push(['', 'TOTAL PRESUPUESTO DE CONTRATA', '', '', '', ''])
+  resumenData.push(['', 'TOTAL PRESUPUESTO CONTRATADO', '', '', '', ''])
   const resumenTotalRow = resumenRow
 
   // ===== PASO 2: Crear hojas =====
