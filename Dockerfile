@@ -18,7 +18,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_OPTIONS="--max-old-space-size=2048"
 
 # Install OpenSSL and CA Certificates for Prisma/node SSL requests
-RUN apk add --no-cache openssl ca-certificates
+RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.23/main/ --repository http://dl-cdn.alpinelinux.org/alpine/v3.23/community/ openssl ca-certificates
 
 # Copy package files FIRST for layer caching
 COPY package*.json ./
@@ -62,7 +62,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 # Install OpenSSL for Prisma and curl for healthcheck
-RUN apk add --no-cache openssl curl && \
+RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.23/main/ --repository http://dl-cdn.alpinelinux.org/alpine/v3.23/community/ openssl curl && \
     addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
