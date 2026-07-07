@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { usePresupuesto } from "@/components/presupuesto/PresupuestoContext"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -84,6 +84,16 @@ export default function InformePage() {
       sumPart + part.mediciones.reduce((sumMed, med) => sumMed + med.costoTotal, 0)
     , 0)
   , 0)
+
+  // Calcular totales con precisión decimal para la UI
+  const totales = useMemo(() => {
+    const { calcularCascadaFinanciera } = require("@/lib/financial-calc")
+    return calcularCascadaFinanciera(
+      subtotalMaterial,
+      presupuesto?.porcentajeBI || 10,
+      presupuesto?.porcentajeIVA || 21
+    )
+  }, [subtotalMaterial, presupuesto?.porcentajeBI, presupuesto?.porcentajeIVA])
 
   const exportExcel = async () => {
     setExporting(true)
@@ -310,27 +320,23 @@ export default function InformePage() {
           <div className="border-t-2 pt-4 mt-8 space-y-2">
             <div className="flex justify-between text-sm">
               <span className="font-semibold">TOTAL PRESUPUESTO EJECUCION MATERIAL</span>
-              <span className="font-bold">{formatCurrency(subtotalMaterial)}</span>
+              <span className="font-bold">{formatCurrency(totales.costoDirecto)}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span>Gastos Generales y Beneficio Industrial ({presupuesto?.porcentajeBI || 10}%)</span>
-              <span>{formatCurrency(subtotalMaterial * ((presupuesto?.porcentajeBI || 10) / 100))}</span>
+              <span>{formatCurrency(totales.beneficioIndustrial)}</span>
             </div>
             <div className="flex justify-between text-sm border-t pt-2">
               <span className="font-semibold">TOTAL PRESUPUESTO EJECUCION CONTRATA</span>
-              <span className="font-bold">{formatCurrency(subtotalMaterial * (1 + (presupuesto?.porcentajeBI || 10) / 100))}</span>
+              <span className="font-bold">{formatCurrency(totales.baseImponible)}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span>I.V.A. ({presupuesto?.porcentajeIVA || 21}%)</span>
-              <span>{formatCurrency(subtotalMaterial * (1 + (presupuesto?.porcentajeBI || 10) / 100) * ((presupuesto?.porcentajeIVA || 21) / 100))}</span>
+              <span>{formatCurrency(totales.iva)}</span>
             </div>
             <div className="flex justify-between text-base font-bold border-t-2 pt-2 mt-2">
               <span>TOTAL PRESUPUESTO DE CONTRATA</span>
-              <span>
-                {formatCurrency(
-                  subtotalMaterial * (1 + (presupuesto?.porcentajeBI || 10) / 100) * (1 + (presupuesto?.porcentajeIVA || 21) / 100)
-                )}
-              </span>
+              <span>{formatCurrency(totales.totalGeneral)}</span>
             </div>
           </div>
         </CardContent>
