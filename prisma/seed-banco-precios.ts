@@ -223,6 +223,42 @@ function normalizeKey(str: string): string {
   return str.toLowerCase().replace(/\s+/g, ' ').trim()
 }
 
+const groupPrefixes: Record<string, string> = {
+  CEMENTO: 'CEM',
+  AGREGADOS: 'AGR',
+  ACERO: 'ACE',
+  BLOQUE: 'BLO',
+  CERAMICA: 'CER',
+  TEJA: 'TEJ',
+  MADERA: 'MAD',
+  PINTURA: 'PIN',
+  ADHESIVO: 'ADH',
+  BOQUILLA: 'BOQ',
+  BOVEDILLA: 'BOV',
+  AGUA: 'AGU',
+  DRYWALL: 'DRY',
+  OTROS: 'MAT'
+}
+
+function determineMaterialGroup(name: string): string {
+  const n = name.toLowerCase()
+  if (n.includes('cemento') || n.includes('yeso') || n.includes('cal')) return 'CEMENTO'
+  if (n.includes('arena') || n.includes('grava') || n.includes('piedra') || n.includes('tierra') || n.includes('cascote') || n.includes('arcilla')) return 'AGREGADOS'
+  if (n.includes('fierro') || n.includes('acero') || n.includes('alambre') || n.includes('malla') || n.includes('clavo') || n.includes('perfil') || n.includes('vigueta') || n.includes('omega') || n.includes('canal') || n.includes('parante') || n.includes('angulo')) return 'ACERO'
+  if (n.includes('bloque') || n.includes('ladrillo') || n.includes('adobe')) return 'BLOQUE'
+  if (n.includes('ceramica') || n.includes('porcelanato') || n.includes('azulejo') || n.includes('mosaico') || n.includes('piso')) return 'CERAMICA'
+  if (n.includes('teja') || n.includes('calamina') || n.includes('chapa') || n.includes('lamina')) return 'TEJA'
+  if (n.includes('madera') || n.includes('pino') || n.includes('tablon') || n.includes('mara') || n.includes('venesta') || n.includes('puntal')) return 'MADERA'
+  if (n.includes('pintura') || n.includes('esmalte') || n.includes('latex') || n.includes('barniz') || n.includes('tinercito') || n.includes('tiner')) return 'PINTURA'
+  if (n.includes('adhesivo') || n.includes('clefa') || n.includes('cola') || n.includes('pegamento')) return 'ADHESIVO'
+  if (n.includes('boquilla')) return 'BOQUILLA'
+  if (n.includes('bovedilla')) return 'BOVEDILLA'
+  if (n.includes('agua')) return 'AGUA'
+  if (n.includes('drywall') || n.includes('placa')) return 'DRYWALL'
+  return 'OTROS'
+}
+
+
 async function main() {
   console.log('🏗️  Importando base de precios referenciales 2007...')
 
@@ -319,9 +355,106 @@ async function main() {
 
   console.log(`🧹 Filtrados ${allItems.length - uniqueItems.length} duplicados exactos. Ítems únicos a insertar: ${uniqueItems.length}`)
 
+  // Extract and seed unique materials from detailed APUs
+  console.log('📦 Extrayendo materiales únicos de los análisis de precios...')
+  const uniqueExcelMaterials = new Map<string, { nombre: string; unidad: string; precio: number }>()
+  
+  for (const detail of detailedData.values()) {
+    for (const mat of detail.materiales) {
+      const name = mat.nombre.trim()
+      const unit = mat.unidad.trim()
+      const price = mat.precioUnitario
+      
+      if (name && unit && !isNaN(price)) {
+        const key = `${name.toLowerCase()}::${unit.toLowerCase()}`
+        if (!uniqueExcelMaterials.has(key)) {
+          uniqueExcelMaterials.set(key, { nombre: name, unidad: unit, precio: price })
+        } else {
+          // Keep the highest price for the same material
+          const existing = uniqueExcelMaterials.get(key)!
+          if (price > existing.precio) {
+            existing.precio = price
+          }
+        }
+      }
+    }
+  }
+  
+  console.log(`📊 ${uniqueExcelMaterials.size} materiales únicos encontrados en el Excel.`)
+
+  // Load existing materials in DB to prevent duplicates
+  const existingMaterials = await prisma.material.findMany()
+  const existingNames = new Set(existingMaterials.map(m => m.nombre.toLowerCase().trim()))
+  const existingCodes = new Set(existingMaterials.map(m => m.codigo.toLowerCase().trim()))
+
+  // Suffix counter for prefixes
+  const prefixCounters = new Map<string, number>()
+  for (const m of existingMaterials) {
+    const match = m.codigo.match(/^([A-Z]+)-(\d+)$/)
+    if (match) {
+      const prefix = match[1]
+      const num = parseInt(match[2], 10)
+      const currentMax = prefixCounters.get(prefix) || 0
+      if (num > currentMax) {
+        prefixCounters.set(prefix, num)
+      }
+    }
+  }
+
+  const newMaterialsToInsert: any[] = []
+  
+  for (const mat of uniqueExcelMaterials.values()) {
+    const nameNorm = mat.nombre.toLowerCase().trim()
+    if (!existingNames.has(nameNorm)) {
+      const grupo = determineMaterialGroup(mat.nombre)
+      const prefix = groupPrefixes[grupo] || 'MAT'
+      
+      const nextNum = (prefixCounters.get(prefix) || 0) + 1
+      prefixCounters.set(prefix, nextNum)
+      
+      let finalCode = `${prefix}-${String(nextNum).padStart(3, '0')}`
+      let offset = 0
+      while (existingCodes.has(finalCode.toLowerCase())) {
+        offset++
+        finalCode = `${prefix}-${String(nextNum + offset).padStart(3, '0')}`
+      }
+      if (offset > 0) {
+        prefixCounters.set(prefix, nextNum + offset)
+      }
+      existingCodes.add(finalCode.toLowerCase())
+      
+      newMaterialsToInsert.push({
+        codigo: finalCode,
+        nombre: mat.nombre,
+        unidad: mat.unidad,
+        precio: mat.precio,
+        grupo: grupo,
+        proveedor: 'Banco de Precios 2007',
+        activo: true,
+        descripcion: `Material importado desde APU - Banco de Precios 2007`
+      })
+      
+      // Add to existingNames to prevent duplicates within this loop
+      existingNames.add(nameNorm)
+    }
+  }
+
+  if (newMaterialsToInsert.length > 0) {
+    console.log(`💾 Insertando ${newMaterialsToInsert.length} nuevos materiales en el catálogo...`)
+    const matBatchSize = 100
+    for (let i = 0; i < newMaterialsToInsert.length; i += matBatchSize) {
+      const batch = newMaterialsToInsert.slice(i, i + matBatchSize)
+      await prisma.material.createMany({ data: batch })
+    }
+    console.log(`✅ ${newMaterialsToInsert.length} nuevos materiales insertados exitosamente.`)
+  } else {
+    console.log('ℹ️ No hay nuevos materiales para agregar al catálogo.')
+  }
+
   // Clear existing and re-seed
   console.log('🗑️  Limpiando banco de precios existente...')
   await prisma.bancoPrecio.deleteMany()
+
 
   console.log(`💾 Insertando ${uniqueItems.length} items en banco de precios...`)
 
