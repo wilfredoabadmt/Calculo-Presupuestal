@@ -18,7 +18,8 @@ import {
   Eye,
   Edit,
   Loader2,
-  Ruler
+  Ruler,
+  Layers
 } from "lucide-react"
 import { formatCurrency, formatNumber } from "@/lib/utils"
 import { format } from "date-fns"
@@ -132,10 +133,11 @@ export default function ProyectoDetailPage() {
       </div>
 
       <Tabs defaultValue="dashboard" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="dashboard">Resumen</TabsTrigger>
           <TabsTrigger value="elementos">Elementos</TabsTrigger>
           <TabsTrigger value="presupuesto">Presupuesto</TabsTrigger>
+          <TabsTrigger value="detallado">Detallado</TabsTrigger>
           <TabsTrigger value="cronograma">Cronograma</TabsTrigger>
           <TabsTrigger value="reportes">Reportes</TabsTrigger>
         </TabsList>
@@ -350,6 +352,50 @@ export default function ProyectoDetailPage() {
                   </div>
                 </>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="detallado">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Layers className="h-5 w-5" />
+                Presupuesto Detallado por Capítulos
+              </CardTitle>
+              <Button variant="outline" size="sm" asChild>
+                <Link href={`/proyectos/${projectId}/presupuesto-detallado`}>
+                  <Layers className="mr-2 h-4 w-4" /> Abrir Módulo
+                </Link>
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8">
+                <Layers className="h-12 w-12 mx-auto text-muted-foreground/30 mb-3" />
+                <h3 className="font-semibold mb-1">Cómputos Métricos y Presupuesto</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Sistema completo de presupuesto por capítulos con 4 módulos:
+                </p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-2xl mx-auto mb-4">
+                  {[
+                    { name: "Altas", desc: "Capítulos y partidas" },
+                    { name: "Datos", desc: "Matriz de mediciones" },
+                    { name: "Informe", desc: "Vista previa" },
+                    { name: "Resumen", desc: "Cierre económico" },
+                  ].map(mod => (
+                    <div key={mod.name} className="p-3 rounded-lg border bg-muted/30">
+                      <p className="font-medium text-sm">{mod.name}</p>
+                      <p className="text-xs text-muted-foreground">{mod.desc}</p>
+                    </div>
+                  ))}
+                </div>
+                <Button size="sm" className="gap-2" asChild>
+                  <Link href={`/proyectos/${projectId}/presupuesto-detallado`}>
+                    <Layers className="h-4 w-4" />
+                    Abrir Presupuesto Detallado
+                  </Link>
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
