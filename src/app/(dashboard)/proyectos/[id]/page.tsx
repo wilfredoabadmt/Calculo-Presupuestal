@@ -130,7 +130,13 @@ export default function ProyectoDetailPage() {
     if (!json) return []
     try {
       const data = JSON.parse(json)
-      return Array.isArray(data) ? data : []
+      if (!Array.isArray(data)) return []
+      return data.map((m: any) => ({
+        nombre: m.nombre || "",
+        cantidad: m.cantidad || 0,
+        unidad: m.unidad || "",
+        costo: m.costo ?? m.precio ?? m.precioUnitario ?? 0,
+      }))
     } catch {
       return []
     }
