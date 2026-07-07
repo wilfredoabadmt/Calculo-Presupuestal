@@ -25,10 +25,12 @@ interface PresupuestoData {
   empresaNombre?: string
   empresaDireccion?: string
   empresaCif?: string
+  empresaLogo?: string
   clienteNombre?: string
   clienteDireccion?: string
   clientePoblacion?: string
   clienteCif?: string
+  clienteLogo?: string
   proyectoNombre?: string
   fechaEmision?: string
   codigoPresupuesto?: string
@@ -57,16 +59,30 @@ export function generarPDFPresupuesto(data: PresupuestoData): jsPDF {
   let y = margin
 
   // ===== ENCABEZADO EMPRESA =====
+  let logoY = y
+  let infoX = margin
+  
+  if (data.empresaLogo) {
+    try {
+      doc.addImage(data.empresaLogo, 'PNG', margin, y, 16, 16)
+      infoX = margin + 20
+      logoY = y + 18
+    } catch (e) {
+      console.error("Error adding empresa logo to PDF", e)
+    }
+  }
+
   doc.setFontSize(10)
   doc.setFont('helvetica', 'bold')
-  doc.text(data.empresaNombre || '', margin, y)
+  doc.text(data.empresaNombre || '', infoX, y)
   y += 5
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(8)
-  doc.text(data.empresaDireccion || '', margin, y)
+  doc.text(data.empresaDireccion || '', infoX, y)
   y += 4
-  doc.text(data.empresaCif || '', margin, y)
-  y += 8
+  doc.text(data.empresaCif || '', infoX, y)
+  
+  y = Math.max(y + 8, logoY)
 
   // ===== DATOS CLIENTE =====
   doc.setFontSize(9)
@@ -94,6 +110,15 @@ export function generarPDFPresupuesto(data: PresupuestoData): jsPDF {
   doc.text('C.I.F.:', margin, y)
   doc.setFont('helvetica', 'normal')
   doc.text(data.clienteCif || '', margin + 25, y)
+
+  if (data.clienteLogo) {
+    try {
+      doc.addImage(data.clienteLogo, 'PNG', pageWidth - margin - 20, y - 12, 16, 16)
+    } catch (e) {
+      console.error("Error adding cliente logo to PDF", e)
+    }
+  }
+  
   y += 8
 
   // ===== TÍTULO =====

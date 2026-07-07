@@ -38,6 +38,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       clienteDireccion,
       clientePoblacion,
       clienteCif,
+      clienteLogo,
       proyectoNombre,
       fechaEmision,
       codigoPresupuesto,
@@ -65,6 +66,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     if (clienteDireccion !== undefined) updateData.clienteDireccion = clienteDireccion
     if (clientePoblacion !== undefined) updateData.clientePoblacion = clientePoblacion
     if (clienteCif !== undefined) updateData.clienteCif = clienteCif
+    if (clienteLogo !== undefined) updateData.clienteLogo = clienteLogo
     if (proyectoNombre !== undefined) updateData.proyectoNombre = proyectoNombre
     if (fechaEmision !== undefined) updateData.fechaEmision = new Date(fechaEmision)
     if (codigoPresupuesto !== undefined) updateData.codigoPresupuesto = codigoPresupuesto

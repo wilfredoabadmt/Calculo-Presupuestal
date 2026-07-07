@@ -472,6 +472,7 @@ model PresupuestoDetallado {
   clienteDireccion  String?
   clientePoblacion  String?
   clienteCif        String?
+  clienteLogo       String? // URL o base64 del logotipo del cliente
   proyectoNombre    String?
   fechaEmision      DateTime @default(now())
   codigoPresupuesto String?

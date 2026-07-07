@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { usePresupuesto } from "@/components/presupuesto/PresupuestoContext"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -34,13 +34,47 @@ export default function InformePage() {
     empresaNombre: presupuesto?.empresaNombre || "",
     empresaDireccion: presupuesto?.empresaDireccion || "",
     empresaCif: presupuesto?.empresaCif || "",
+    empresaLogo: presupuesto?.empresaLogo || "",
     clienteNombre: presupuesto?.clienteNombre || "",
     clienteDireccion: presupuesto?.clienteDireccion || "",
     clientePoblacion: presupuesto?.clientePoblacion || "",
     clienteCif: presupuesto?.clienteCif || "",
+    clienteLogo: (presupuesto as any)?.clienteLogo || "",
     proyectoNombre: presupuesto?.proyectoNombre || "",
     fechaEmision: presupuesto?.fechaEmision || new Date().toISOString().split("T")[0],
   })
+
+  useEffect(() => {
+    if (presupuesto) {
+      setHeaderForm({
+        empresaNombre: presupuesto.empresaNombre || "",
+        empresaDireccion: presupuesto.empresaDireccion || "",
+        empresaCif: presupuesto.empresaCif || "",
+        empresaLogo: presupuesto.empresaLogo || "",
+        clienteNombre: presupuesto.clienteNombre || "",
+        clienteDireccion: presupuesto.clienteDireccion || "",
+        clientePoblacion: presupuesto.clientePoblacion || "",
+        clienteCif: presupuesto.clienteCif || "",
+        clienteLogo: (presupuesto as any).clienteLogo || "",
+        proyectoNombre: presupuesto.proyectoNombre || "",
+        fechaEmision: presupuesto.fechaEmision ? new Date(presupuesto.fechaEmision).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+      })
+    }
+  }, [presupuesto])
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'empresaLogo' | 'clienteLogo') => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setHeaderForm(prev => ({
+        ...prev,
+        [field]: reader.result as string
+      }))
+    }
+    reader.readAsDataURL(file)
+  }
 
   const handleSaveHeader = async () => {
     await actualizarDatosEmpresa(headerForm)
@@ -133,10 +167,12 @@ export default function InformePage() {
         empresaNombre: headerForm.empresaNombre,
         empresaDireccion: headerForm.empresaDireccion,
         empresaCif: headerForm.empresaCif,
+        empresaLogo: headerForm.empresaLogo,
         clienteNombre: headerForm.clienteNombre,
         clienteDireccion: headerForm.clienteDireccion,
         clientePoblacion: headerForm.clientePoblacion,
         clienteCif: headerForm.clienteCif,
+        clienteLogo: headerForm.clienteLogo,
         proyectoNombre: headerForm.proyectoNombre,
         fechaEmision: headerForm.fechaEmision,
         porcentajeBI: presupuesto?.porcentajeBI || 10,
@@ -236,6 +272,60 @@ export default function InformePage() {
                   <Label className="text-xs">Fecha de Emision</Label>
                   <Input type="date" value={headerForm.fechaEmision} onChange={e => setHeaderForm({...headerForm, fechaEmision: e.target.value})} />
                 </div>
+
+                {/* Upload Logos */}
+                <div className="space-y-2 col-span-2 border-t pt-4 grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-semibold">Logotipo de la Empresa</Label>
+                    <div className="flex items-center gap-4">
+                      {headerForm.empresaLogo && (
+                        <img src={headerForm.empresaLogo} alt="Logo Empresa" className="h-12 w-auto object-contain border rounded p-1 bg-white" />
+                      )}
+                      <Input 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={e => handleFileChange(e, 'empresaLogo')} 
+                        className="text-xs cursor-pointer"
+                      />
+                      {headerForm.empresaLogo && (
+                        <Button 
+                          type="button" 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-destructive text-xs h-8 px-2"
+                          onClick={() => setHeaderForm(prev => ({ ...prev, empresaLogo: "" }))}
+                        >
+                          Eliminar
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-semibold">Logotipo del Cliente</Label>
+                    <div className="flex items-center gap-4">
+                      {headerForm.clienteLogo && (
+                        <img src={headerForm.clienteLogo} alt="Logo Cliente" className="h-12 w-auto object-contain border rounded p-1 bg-white" />
+                      )}
+                      <Input 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={e => handleFileChange(e, 'clienteLogo')} 
+                        className="text-xs cursor-pointer"
+                      />
+                      {headerForm.clienteLogo && (
+                        <Button 
+                          type="button" 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-destructive text-xs h-8 px-2"
+                          onClick={() => setHeaderForm(prev => ({ ...prev, clienteLogo: "" }))}
+                        >
+                          Eliminar
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
               <Button onClick={handleSaveHeader} size="sm">
                 <Check className="mr-2 h-4 w-4" />
@@ -245,15 +335,25 @@ export default function InformePage() {
           ) : (
             <div className="mb-8 border-b pb-6">
               <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="font-semibold text-lg">{headerForm.empresaNombre || "Empresa Constructora"}</p>
-                  <p className="text-muted-foreground">{headerForm.empresaDireccion}</p>
-                  <p className="text-muted-foreground">{headerForm.empresaCif}</p>
+                <div className="flex gap-4 items-start">
+                  {headerForm.empresaLogo && (
+                    <img src={headerForm.empresaLogo} alt="Logo Empresa" className="h-16 w-auto object-contain border rounded p-1 bg-white shrink-0" />
+                  )}
+                  <div>
+                    <p className="font-semibold text-lg">{headerForm.empresaNombre || "Empresa Constructora"}</p>
+                    <p className="text-muted-foreground">{headerForm.empresaDireccion}</p>
+                    <p className="text-muted-foreground">{headerForm.empresaCif}</p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-muted-foreground">CLIENTE: <span className="font-medium text-foreground">{headerForm.clienteNombre || "-"}</span></p>
-                  <p className="text-muted-foreground">OBRA: <span className="font-medium text-foreground">{headerForm.proyectoNombre || "-"}</span></p>
-                  <p className="text-muted-foreground">FECHA: <span className="font-medium text-foreground">{headerForm.fechaEmision || "-"}</span></p>
+                <div className="flex gap-4 items-start justify-end text-right">
+                  <div>
+                    <p className="text-muted-foreground">CLIENTE: <span className="font-medium text-foreground">{headerForm.clienteNombre || "-"}</span></p>
+                    <p className="text-muted-foreground">OBRA: <span className="font-medium text-foreground">{headerForm.proyectoNombre || "-"}</span></p>
+                    <p className="text-muted-foreground">FECHA: <span className="font-medium text-foreground">{headerForm.fechaEmision || "-"}</span></p>
+                  </div>
+                  {headerForm.clienteLogo && (
+                    <img src={headerForm.clienteLogo} alt="Logo Cliente" className="h-16 w-auto object-contain border rounded p-1 bg-white shrink-0" />
+                  )}
                 </div>
               </div>
             </div>
