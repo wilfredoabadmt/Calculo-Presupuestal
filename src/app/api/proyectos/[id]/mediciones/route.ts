@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { calcularCostoMedicion, calcularCascadaFinanciera } from "@/lib/financial-calc"
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -50,27 +51,28 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     )
   }
 
-  const v = parseFloat(veces) || 1
-  const l = parseFloat(largo) || 0
-  const a = parseFloat(ancho) || 0
-  const h = parseFloat(alto) || 0
-  const parcial = v * l * a * h
-  const precio = parseFloat(precioUnitario) || 0
-  const costoTotal = parcial * precio
+  // Usar precisión decimal para cálculos
+  const { parcial, costoTotal } = calcularCostoMedicion(
+    parseFloat(veces) || 1,
+    parseFloat(largo) || 0,
+    parseFloat(ancho) || 0,
+    parseFloat(alto) || 0,
+    parseFloat(precioUnitario) || 0
+  )
 
   const medicion = await prisma.medicionPartida.create({
     data: {
       partidaId,
       presupuestoId,
-      veces: v,
-      largo: l,
-      ancho: a,
-      alto: h,
+      veces: parseFloat(veces) || 1,
+      largo: parseFloat(largo) || 0,
+      ancho: parseFloat(ancho) || 0,
+      alto: parseFloat(alto) || 0,
       parcial,
-      precioUnitario: precio,
+      precioUnitario: parseFloat(precioUnitario) || 0,
       costoTotal,
       calculadoraUsada,
-      calculadoraDatos,
+      calculadoraDatos: calculadoraDatos || undefined,
     },
     include: { partida: true },
   })
@@ -99,8 +101,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   const a = ancho !== undefined ? parseFloat(ancho) : existing.ancho
   const h = alto !== undefined ? parseFloat(alto) : existing.alto
   const precio = precioUnitario !== undefined ? parseFloat(precioUnitario) : existing.precioUnitario
-  const parcial = v * l * a * h
-  const costoTotal = parcial * precio
+
+  // Usar precisión decimal para cálculos
+  const { parcial, costoTotal } = calcularCostoMedicion(v, l, a, h, precio)
 
   const medicion = await prisma.medicionPartida.update({
     where: { id: medicionId },
@@ -156,19 +159,22 @@ async function recalcularPresupuesto(presupuestoId: string) {
   })
 
   const subtotalMaterial = result._sum.costoTotal || 0
-  const beneficioIndustrial = subtotalMaterial * (presupuesto.porcentajeBI / 100)
-  const baseImponible = subtotalMaterial + beneficioIndustrial
-  const montoIVA = baseImponible * (presupuesto.porcentajeIVA / 100)
-  const totalPresupuesto = baseImponible + montoIVA
+
+  // Usar precisión decimal para la cascada financiera
+  const totales = calcularCascadaFinanciera(
+    subtotalMaterial,
+    presupuesto.porcentajeBI,
+    presupuesto.porcentajeIVA
+  )
 
   await prisma.presupuestoDetallado.update({
     where: { id: presupuestoId },
     data: {
-      subtotalMaterial,
-      beneficioIndustrial,
-      baseImponible,
-      montoIVA,
-      totalPresupuesto,
+      subtotalMaterial: totales.costoDirecto,
+      beneficioIndustrial: totales.beneficioIndustrial,
+      baseImponible: totales.baseImponible,
+      montoIVA: totales.iva,
+      totalPresupuesto: totales.totalGeneral,
     },
   })
 }

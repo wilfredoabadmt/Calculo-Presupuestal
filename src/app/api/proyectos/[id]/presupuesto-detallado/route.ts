@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { calcularCascadaFinanciera } from "@/lib/financial-calc"
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -88,19 +89,22 @@ async function recalcularTotales(presupuestoId: string) {
   })
 
   const subtotalMaterial = result._sum.costoTotal || 0
-  const beneficioIndustrial = subtotalMaterial * (presupuesto.porcentajeBI / 100)
-  const baseImponible = subtotalMaterial + beneficioIndustrial
-  const montoIVA = baseImponible * (presupuesto.porcentajeIVA / 100)
-  const totalPresupuesto = baseImponible + montoIVA
+
+  // Usar precisión decimal para la cascada financiera
+  const totales = calcularCascadaFinanciera(
+    subtotalMaterial,
+    presupuesto.porcentajeBI,
+    presupuesto.porcentajeIVA
+  )
 
   await prisma.presupuestoDetallado.update({
     where: { id: presupuestoId },
     data: {
-      subtotalMaterial,
-      beneficioIndustrial,
-      baseImponible,
-      montoIVA,
-      totalPresupuesto,
+      subtotalMaterial: totales.costoDirecto,
+      beneficioIndustrial: totales.beneficioIndustrial,
+      baseImponible: totales.baseImponible,
+      montoIVA: totales.iva,
+      totalPresupuesto: totales.totalGeneral,
     },
   })
 }

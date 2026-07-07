@@ -1,10 +1,12 @@
 "use client"
 
+import { useMemo } from "react"
 import { usePresupuesto } from "@/components/presupuesto/PresupuestoContext"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { EmptyState } from "@/components/shared/EmptyState"
 import { formatCurrency } from "@/lib/utils"
+import { calcularCascadaFinanciera, sumarCostos } from "@/lib/financial-calc"
 import {
   BarChart3,
   TrendingUp,
@@ -22,34 +24,47 @@ export default function ResumenPage() {
     loading,
   } = usePresupuesto()
 
-  // Build chapter summaries
-  const chapterSummaries = capitulos
-    .filter(cap => cap.partidas.length > 0)
-    .map(cap => {
-      const subtotal = cap.partidas.reduce((sumPart, part) =>
-        sumPart + mediciones
-          .filter(m => m.partidaId === part.id)
-          .reduce((sumMed, med) => sumMed + med.costoTotal, 0)
-      , 0)
-      return {
-        codigo: cap.codigo,
-        nombre: cap.nombre,
-        subtotal,
-        partidasCount: cap.partidas.length,
-        medicionesCount: mediciones.filter(m =>
-          cap.partidas.some(p => p.id === m.partidaId)
-        ).length,
-      }
-    })
-    .filter(ch => ch.subtotal > 0)
+  // Build chapter summaries with decimal precision
+  const chapterSummaries = useMemo(() => {
+    return capitulos
+      .filter(cap => cap.partidas.length > 0)
+      .map(cap => {
+        const costosPartidas = cap.partidas.map(part =>
+          sumarCostos(
+            mediciones
+              .filter(m => m.partidaId === part.id)
+              .map(m => m.costoTotal)
+          )
+        )
+        const subtotal = sumarCostos(costosPartidas)
+        return {
+          codigo: cap.codigo,
+          nombre: cap.nombre,
+          subtotal,
+          partidasCount: cap.partidas.length,
+          medicionesCount: mediciones.filter(m =>
+            cap.partidas.some(p => p.id === m.partidaId)
+          ).length,
+        }
+      })
+      .filter(ch => ch.subtotal > 0)
+  }, [capitulos, mediciones])
 
-  const subtotalMaterial = chapterSummaries.reduce((sum, ch) => sum + ch.subtotal, 0)
+  const subtotalMaterial = useMemo(() => {
+    return sumarCostos(chapterSummaries.map(ch => ch.subtotal))
+  }, [chapterSummaries])
+
+  // Usar precisión decimal para la cascada financiera
+  const totales = useMemo(() => {
+    return calcularCascadaFinanciera(
+      subtotalMaterial,
+      presupuesto?.porcentajeBI || 10,
+      presupuesto?.porcentajeIVA || 21
+    )
+  }, [subtotalMaterial, presupuesto?.porcentajeBI, presupuesto?.porcentajeIVA])
+
   const bi = presupuesto?.porcentajeBI || 10
   const iva = presupuesto?.porcentajeIVA || 21
-  const beneficioIndustrial = subtotalMaterial * (bi / 100)
-  const baseImponible = subtotalMaterial + beneficioIndustrial
-  const montoIVA = baseImponible * (iva / 100)
-  const totalPresupuesto = baseImponible + montoIVA
 
   if (loading) {
     return (
@@ -96,7 +111,7 @@ export default function ResumenPage() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(beneficioIndustrial)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(totales.beneficioIndustrial)}</div>
           </CardContent>
         </Card>
         <Card>
@@ -105,7 +120,7 @@ export default function ResumenPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(montoIVA)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(totales.iva)}</div>
           </CardContent>
         </Card>
         <Card className="border-primary">
@@ -114,7 +129,7 @@ export default function ResumenPage() {
             <BarChart3 className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-primary">{formatCurrency(totalPresupuesto)}</div>
+            <div className="text-2xl font-bold text-primary">{formatCurrency(totales.totalGeneral)}</div>
           </CardContent>
         </Card>
       </div>
@@ -180,7 +195,7 @@ export default function ResumenPage() {
                 <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">2</span>
                 <span className="font-medium">Beneficio Industrial ({bi}%)</span>
               </div>
-              <span className="font-medium">{formatCurrency(beneficioIndustrial)}</span>
+              <span className="font-medium">{formatCurrency(totales.beneficioIndustrial)}</span>
             </div>
 
             <div className="flex justify-center py-1">
@@ -193,7 +208,7 @@ export default function ResumenPage() {
                 <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">3</span>
                 <span className="font-medium">Base Imponible (Costos + BI)</span>
               </div>
-              <span className="font-bold">{formatCurrency(baseImponible)}</span>
+              <span className="font-bold">{formatCurrency(totales.baseImponible)}</span>
             </div>
 
             <div className="flex justify-center py-1">
@@ -206,7 +221,7 @@ export default function ResumenPage() {
                 <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">4</span>
                 <span className="font-medium">I.V.A. ({iva}%)</span>
               </div>
-              <span className="font-medium">{formatCurrency(montoIVA)}</span>
+              <span className="font-medium">{formatCurrency(totales.iva)}</span>
             </div>
 
             <div className="flex justify-center py-1">
@@ -219,15 +234,15 @@ export default function ResumenPage() {
                 <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">5</span>
                 <span className="font-bold text-lg">TOTAL PRESUPUESTO DE CONTRATA</span>
               </div>
-              <span className="font-bold text-2xl text-primary">{formatCurrency(totalPresupuesto)}</span>
+              <span className="font-bold text-2xl text-primary">{formatCurrency(totales.totalGeneral)}</span>
             </div>
           </div>
 
           {/* Fórmula de verificación */}
           <div className="mt-6 p-4 bg-muted/30 rounded text-sm text-muted-foreground">
-            <p className="font-medium mb-1">Fórmula de cálculo:</p>
+            <p className="font-medium mb-1">Fórmula de cálculo (precisión decimal):</p>
             <p className="font-mono text-xs">
-              Total = Subtotal × (1 + {bi}% BI) × (1 + {iva}% IVA) = {subtotalMaterial.toFixed(2)} × {(1 + bi/100).toFixed(4)} × {(1 + iva/100).toFixed(4)} = {totalPresupuesto.toFixed(2)}
+              Total = CD + BI + IVA = {totales.costoDirecto.toFixed(2)} + {totales.beneficioIndustrial.toFixed(2)} + {totales.iva.toFixed(2)} = {totales.totalGeneral.toFixed(2)}
             </p>
           </div>
         </CardContent>

@@ -110,12 +110,12 @@ export default function InformePage() {
   const exportPDF = async () => {
     setExporting(true)
     try {
-      const bi = presupuesto?.porcentajeBI || 10
-      const iva = presupuesto?.porcentajeIVA || 21
-      const beneficioIndustrial = subtotalMaterial * (bi / 100)
-      const baseImponible = subtotalMaterial + beneficioIndustrial
-      const montoIVA = baseImponible * (iva / 100)
-      const totalPresupuesto = baseImponible + montoIVA
+      const { calcularCascadaFinanciera } = await import("@/lib/financial-calc")
+      const totales = calcularCascadaFinanciera(
+        subtotalMaterial,
+        presupuesto?.porcentajeBI || 10,
+        presupuesto?.porcentajeIVA || 21
+      )
 
       const doc = generarPDFPresupuesto({
         empresaNombre: headerForm.empresaNombre,
@@ -127,13 +127,13 @@ export default function InformePage() {
         clienteCif: headerForm.clienteCif,
         proyectoNombre: headerForm.proyectoNombre,
         fechaEmision: headerForm.fechaEmision,
-        porcentajeBI: bi,
-        porcentajeIVA: iva,
-        subtotalMaterial,
-        beneficioIndustrial,
-        baseImponible,
-        montoIVA,
-        totalPresupuesto,
+        porcentajeBI: presupuesto?.porcentajeBI || 10,
+        porcentajeIVA: presupuesto?.porcentajeIVA || 21,
+        subtotalMaterial: totales.costoDirecto,
+        beneficioIndustrial: totales.beneficioIndustrial,
+        baseImponible: totales.baseImponible,
+        montoIVA: totales.iva,
+        totalPresupuesto: totales.totalGeneral,
         capitulos: capituloData,
       })
       descargarPDF(doc, `Presupuesto_${headerForm.proyectoNombre || "obra"}.pdf`)

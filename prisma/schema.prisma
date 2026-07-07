@@ -414,6 +414,7 @@ model PartidaPresupuesto {
   descripcion String // Descripción detallada de la partida
   unidad      String // m2, m3, ml, ud, kg, etc.
   precioBase  Float               @default(0) // Precio unitario base en Bs.
+  orderIndex  Int                 @default(0) // Para drag-and-drop dentro del capítulo
   activo      Boolean             @default(true)
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
@@ -446,7 +447,7 @@ model MedicionPartida {
 
   // Referencia a calculadora (opcional)
   calculadoraUsada String? // Nombre de la calculadora usada
-  calculadoraDatos String? // JSON con datos de la calculadora
+  calculadoraDatos Json?   // JSON con datos/memoria de cálculo de la calculadora
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
