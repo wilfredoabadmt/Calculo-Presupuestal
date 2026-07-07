@@ -5,6 +5,8 @@ import Link from "next/link"
 import { useParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { 
@@ -20,7 +22,9 @@ import {
   Edit,
   Loader2,
   Ruler,
-  Layers
+  Layers,
+  Check,
+  X
 } from "lucide-react"
 import { formatCurrency, formatNumber } from "@/lib/utils"
 import { format } from "date-fns"
@@ -70,6 +74,9 @@ export default function ProyectoDetailPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [detailElement, setDetailElement] = useState<ElementoDetalle | null>(null)
   const [detailLoading, setDetailLoading] = useState(false)
+  const [editElement, setEditElement] = useState<ElementoDetalle | null>(null)
+  const [editForm, setEditForm] = useState({ descripcion: "", cantidad: "", costoTotal: "" })
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     fetch(`/api/proyectos/${projectId}`)
@@ -133,6 +140,59 @@ export default function ProyectoDetailPage() {
     } catch {
       return []
     }
+  }
+
+  const handleEditElemento = async (elementoId: string) => {
+    setDetailLoading(true)
+    setEditElement(null)
+    try {
+      const res = await fetch(`/api/proyectos/${projectId}/elementos`)
+      const elementos = await res.json()
+      const el = elementos.find((e: Elemento) => e.id === elementoId)
+      if (el) {
+        setEditElement(el as ElementoDetalle)
+        setEditForm({
+          descripcion: el.descripcion || "",
+          cantidad: el.cantidad?.toString() || "1",
+          costoTotal: el.costoTotal?.toString() || "0",
+        })
+      }
+    } catch {
+      console.error("Error cargando elemento para editar")
+    }
+    setDetailLoading(false)
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editElement) return
+    setSaving(true)
+    try {
+      const res = await fetch(`/api/proyectos/${projectId}/elementos/${editElement.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          descripcion: editForm.descripcion,
+          cantidad: parseInt(editForm.cantidad) || 1,
+          costoTotal: parseFloat(editForm.costoTotal) || 0,
+        }),
+      })
+      if (res.ok) {
+        const updated = await res.json()
+        setProject(prev => {
+          if (!prev) return prev
+          return {
+            ...prev,
+            elementos: prev.elementos.map(e => e.id === editElement.id ? { ...e, ...updated } : e),
+          }
+        })
+        setEditElement(null)
+      } else {
+        alert("Error al guardar")
+      }
+    } catch {
+      alert("Error al guardar")
+    }
+    setSaving(false)
   }
 
   if (loading) {
@@ -298,10 +358,8 @@ export default function ProyectoDetailPage() {
                         <Button variant="ghost" size="icon" onClick={() => handleViewElemento(element.id)}>
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" asChild>
-                          <Link href={`/proyectos/${projectId}/calculadora`}>
-                            <Edit className="h-4 w-4" />
-                          </Link>
+                        <Button variant="ghost" size="icon" onClick={() => handleEditElemento(element.id)}>
+                          <Edit className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"
@@ -652,6 +710,62 @@ export default function ProyectoDetailPage() {
               <div className="bg-primary/5 p-4 rounded-lg flex justify-between items-center">
                 <span className="font-semibold">Costo Total:</span>
                 <span className="text-xl font-bold text-primary">{formatCurrency(detailElement.costoTotal)}</span>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de edicion del elemento */}
+      <Dialog open={!!editElement} onOpenChange={open => { if (!open) setEditElement(null) }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Editar Elemento</DialogTitle>
+          </DialogHeader>
+          {editElement && (
+            <div className="space-y-4">
+              <div>
+                <Label className="text-xs">Tipo</Label>
+                <p className="text-sm font-medium">{editElement.tipoElemento}</p>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs">Descripción</Label>
+                <Input
+                  value={editForm.descripcion}
+                  onChange={e => setEditForm({ ...editForm, descripcion: e.target.value })}
+                  placeholder="Descripción del elemento"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-xs">Cantidad</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    value={editForm.cantidad}
+                    onChange={e => setEditForm({ ...editForm, cantidad: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs">Costo Total (Bs)</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={editForm.costoTotal}
+                    onChange={e => setEditForm({ ...editForm, costoTotal: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2 justify-end pt-2">
+                <Button variant="outline" onClick={() => setEditElement(null)}>
+                  <X className="mr-2 h-4 w-4" />
+                  Cancelar
+                </Button>
+                <Button onClick={handleSaveEdit} disabled={saving}>
+                  {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
+                  Guardar
+                </Button>
               </div>
             </div>
           )}

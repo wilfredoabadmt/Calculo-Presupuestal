@@ -75,16 +75,13 @@ interface PresupuestoState {
 
 interface PresupuestoContextType extends PresupuestoState {
   cargarDatos: () => Promise<void>
-  // Capítulos
   crearCapitulo: (codigo: number, nombre: string, descripcion?: string) => Promise<Capitulo | null>
   actualizarCapitulo: (capituloId: string, data: { nombre?: string; descripcion?: string }) => Promise<void>
   eliminarCapitulo: (capituloId: string) => Promise<void>
   reordenarCapitulos: (capitulos: { id: string; orden: number }[]) => Promise<void>
-  // Partidas
   crearPartida: (capituloId: string, data: { codigo: string; descripcion: string; unidad: string; precioBase: number }) => Promise<Partida | null>
   actualizarPartida: (partidaId: string, data: { descripcion?: string; unidad?: string; precioBase?: number }) => Promise<void>
   eliminarPartida: (partidaId: string) => Promise<void>
-  // Mediciones
   crearMedicion: (data: {
     partidaId: string
     veces?: number
@@ -105,10 +102,8 @@ interface PresupuestoContextType extends PresupuestoState {
     calculadoraDatos?: string
   }) => Promise<void>
   eliminarMedicion: (medicionId: string) => Promise<void>
-  // Presupuesto
   actualizarParametros: (data: { porcentajeBI?: number; porcentajeIVA?: number }) => Promise<void>
   actualizarDatosEmpresa: (data: Partial<PresupuestoDetallado>) => Promise<void>
-  // Utilidades
   obtenerMedicionesPorCapitulo: (capituloId: string) => Medicion[]
   obtenerSubtotalCapitulo: (capituloId: string) => number
 }
@@ -121,6 +116,22 @@ export function usePresupuesto() {
   return ctx
 }
 
+async function safeFetchJson<T>(url: string, fallback: T): Promise<T> {
+  try {
+    const res = await fetch(url)
+    if (!res.ok) return fallback
+    const text = await res.text()
+    if (!text) return fallback
+    try {
+      return JSON.parse(text) as T
+    } catch {
+      return fallback
+    }
+  } catch {
+    return fallback
+  }
+}
+
 export function PresupuestoProvider({ proyectoId, children }: { proyectoId: string; children: ReactNode }) {
   const [presupuesto, setPresupuesto] = useState<PresupuestoDetallado | null>(null)
   const [capitulos, setCapitulos] = useState<Capitulo[]>([])
@@ -131,17 +142,23 @@ export function PresupuestoProvider({ proyectoId, children }: { proyectoId: stri
   const cargarDatos = useCallback(async () => {
     setLoading(true)
     try {
-      const [pdRes, capRes, medRes] = await Promise.all([
-        fetch(`/api/proyectos/${proyectoId}/presupuesto-detallado`),
-        fetch(`/api/proyectos/${proyectoId}/capitulos`),
-        fetch(`/api/proyectos/${proyectoId}/mediciones`),
-      ])
+      const pd = await safeFetchJson<PresupuestoDetallado | null>(
+        `/api/proyectos/${proyectoId}/presupuesto-detallado`, null
+      )
+      const caps = await safeFetchJson<Capitulo[]>(
+        `/api/proyectos/${proyectoId}/capitulos`, []
+      )
+      const meds = await safeFetchJson<Medicion[]>(
+        `/api/proyectos/${proyectoId}/mediciones`, []
+      )
 
-      if (pdRes.ok) setPresupuesto(await pdRes.json())
-      if (capRes.ok) setCapitulos(await capRes.json())
-      if (medRes.ok) setMediciones(await medRes.json())
+      if (pd) setPresupuesto(pd)
+      setCapitulos(Array.isArray(caps) ? caps : [])
+      setMediciones(Array.isArray(meds) ? meds : [])
     } catch (e) {
       console.error("Error cargando datos del presupuesto:", e)
+      setCapitulos([])
+      setMediciones([])
     } finally {
       setLoading(false)
     }
@@ -149,7 +166,7 @@ export function PresupuestoProvider({ proyectoId, children }: { proyectoId: stri
 
   useEffect(() => { cargarDatos() }, [cargarDatos])
 
-  // ====== CAPÍTULOS ======
+  // ====== CAPITULOS ======
   const crearCapitulo = async (codigo: number, nombre: string, descripcion?: string) => {
     const res = await fetch(`/api/proyectos/${proyectoId}/capitulos`, {
       method: "POST",
@@ -157,8 +174,8 @@ export function PresupuestoProvider({ proyectoId, children }: { proyectoId: stri
       body: JSON.stringify({ codigo, nombre, descripcion }),
     })
     if (!res.ok) {
-      const err = await res.json()
-      alert(err.error || "Error al crear capítulo")
+      const err = await res.json().catch(() => ({ error: "Error" }))
+      alert(err.error || "Error al crear capitulo")
       return null
     }
     const nuevo = await res.json()
@@ -191,7 +208,6 @@ export function PresupuestoProvider({ proyectoId, children }: { proyectoId: stri
   }
 
   const reordenarCapitulos = async (items: { id: string; orden: number }[]) => {
-    // Optimistic update
     setCapitulos(prev => prev.map(c => {
       const item = items.find(i => i.id === c.id)
       return item ? { ...c, orden: item.orden } : c
@@ -213,7 +229,7 @@ export function PresupuestoProvider({ proyectoId, children }: { proyectoId: stri
       body: JSON.stringify(data),
     })
     if (!res.ok) {
-      const err = await res.json()
+      const err = await res.json().catch(() => ({ error: "Error" }))
       alert(err.error || "Error al crear partida")
       return null
     }
@@ -225,7 +241,6 @@ export function PresupuestoProvider({ proyectoId, children }: { proyectoId: stri
   }
 
   const actualizarPartida = async (partidaId: string, data: { descripcion?: string; unidad?: string; precioBase?: number }) => {
-    // Find the capitulo that owns this partida
     const cap = capitulos.find(c => c.partidas.some(p => p.id === partidaId))
     if (!cap) return
 
@@ -274,15 +289,16 @@ export function PresupuestoProvider({ proyectoId, children }: { proyectoId: stri
       body: JSON.stringify({ ...data, presupuestoId: presupuesto.id }),
     })
     if (!res.ok) {
-      const err = await res.json()
-      alert(err.error || "Error al crear medición")
+      const err = await res.json().catch(() => ({ error: "Error" }))
+      alert(err.error || "Error al crear medicion")
       return null
     }
     const nueva = await res.json()
     setMediciones(prev => [...prev, nueva])
-    // Refresh presupuesto for updated totals
-    const pdRes = await fetch(`/api/proyectos/${proyectoId}/presupuesto-detallado`)
-    if (pdRes.ok) setPresupuesto(await pdRes.json())
+    const pd = await safeFetchJson<PresupuestoDetallado | null>(
+      `/api/proyectos/${proyectoId}/presupuesto-detallado`, null
+    )
+    if (pd) setPresupuesto(pd)
     return nueva
   }
 
@@ -303,9 +319,10 @@ export function PresupuestoProvider({ proyectoId, children }: { proyectoId: stri
     if (res.ok) {
       const actualizada = await res.json()
       setMediciones(prev => prev.map(m => m.id === medicionId ? actualizada : m))
-      // Refresh presupuesto
-      const pdRes = await fetch(`/api/proyectos/${proyectoId}/presupuesto-detallado`)
-      if (pdRes.ok) setPresupuesto(await pdRes.json())
+      const pd = await safeFetchJson<PresupuestoDetallado | null>(
+        `/api/proyectos/${proyectoId}/presupuesto-detallado`, null
+      )
+      if (pd) setPresupuesto(pd)
     }
   }
 
@@ -313,8 +330,10 @@ export function PresupuestoProvider({ proyectoId, children }: { proyectoId: stri
     const res = await fetch(`/api/proyectos/${proyectoId}/mediciones?medicionId=${medicionId}`, { method: "DELETE" })
     if (res.ok) {
       setMediciones(prev => prev.filter(m => m.id !== medicionId))
-      const pdRes = await fetch(`/api/proyectos/${proyectoId}/presupuesto-detallado`)
-      if (pdRes.ok) setPresupuesto(await pdRes.json())
+      const pd = await safeFetchJson<PresupuestoDetallado | null>(
+        `/api/proyectos/${proyectoId}/presupuesto-detallado`, null
+      )
+      if (pd) setPresupuesto(pd)
     }
   }
 
@@ -325,7 +344,10 @@ export function PresupuestoProvider({ proyectoId, children }: { proyectoId: stri
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     })
-    if (res.ok) setPresupuesto(await res.json())
+    if (res.ok) {
+      const updated = await res.json()
+      if (updated) setPresupuesto(updated)
+    }
   }
 
   const actualizarDatosEmpresa = async (data: Partial<PresupuestoDetallado>) => {
@@ -334,7 +356,10 @@ export function PresupuestoProvider({ proyectoId, children }: { proyectoId: stri
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     })
-    if (res.ok) setPresupuesto(await res.json())
+    if (res.ok) {
+      const updated = await res.json()
+      if (updated) setPresupuesto(updated)
+    }
   }
 
   // ====== UTILIDADES ======
@@ -346,7 +371,7 @@ export function PresupuestoProvider({ proyectoId, children }: { proyectoId: stri
   }
 
   const obtenerSubtotalCapitulo = (capituloId: string) => {
-    return obtenerMedicionesPorCapitulo(capituloId).reduce((sum, m) => sum + m.costoTotal, 0)
+    return obtenerMedicionesPorCapitulo(capituloId).reduce((sum, m) => sum + (m.costoTotal || 0), 0)
   }
 
   return (
