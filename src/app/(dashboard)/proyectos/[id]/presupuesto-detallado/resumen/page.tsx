@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { EmptyState } from "@/components/shared/EmptyState"
 import { formatCurrency } from "@/lib/utils"
-import { calcularCascadaFinanciera, sumarCostos } from "@/lib/financial-calc"
 import {
   BarChart3,
   TrendingUp,
@@ -16,6 +15,8 @@ import {
   DollarSign,
 } from "lucide-react"
 
+function round2(n: number) { return Math.round(n * 100) / 100 }
+
 export default function ResumenPage() {
   const {
     presupuesto,
@@ -24,23 +25,19 @@ export default function ResumenPage() {
     loading,
   } = usePresupuesto()
 
-  // Build chapter summaries with decimal precision
   const chapterSummaries = useMemo(() => {
     return capitulos
       .filter(cap => cap.partidas.length > 0)
       .map(cap => {
-        const costosPartidas = cap.partidas.map(part =>
-          sumarCostos(
-            mediciones
-              .filter(m => m.partidaId === part.id)
-              .map(m => m.costoTotal)
-          )
-        )
-        const subtotal = sumarCostos(costosPartidas)
+        const subtotal = cap.partidas.reduce((sumPart, part) =>
+          sumPart + mediciones
+            .filter(m => m.partidaId === part.id)
+            .reduce((sumMed, med) => sumMed + (med.costoTotal || 0), 0)
+        , 0)
         return {
           codigo: cap.codigo,
           nombre: cap.nombre,
-          subtotal,
+          subtotal: round2(subtotal),
           partidasCount: cap.partidas.length,
           medicionesCount: mediciones.filter(m =>
             cap.partidas.some(p => p.id === m.partidaId)
@@ -51,20 +48,26 @@ export default function ResumenPage() {
   }, [capitulos, mediciones])
 
   const subtotalMaterial = useMemo(() => {
-    return sumarCostos(chapterSummaries.map(ch => ch.subtotal))
+    return round2(chapterSummaries.reduce((sum, ch) => sum + ch.subtotal, 0))
   }, [chapterSummaries])
-
-  // Usar precisión decimal para la cascada financiera
-  const totales = useMemo(() => {
-    return calcularCascadaFinanciera(
-      subtotalMaterial,
-      presupuesto?.porcentajeBI || 10,
-      presupuesto?.porcentajeIVA || 21
-    )
-  }, [subtotalMaterial, presupuesto?.porcentajeBI, presupuesto?.porcentajeIVA])
 
   const bi = presupuesto?.porcentajeBI || 10
   const iva = presupuesto?.porcentajeIVA || 21
+
+  const totales = useMemo(() => {
+    const cd = subtotalMaterial
+    const biMonto = round2(cd * bi / 100)
+    const base = round2(cd + biMonto)
+    const ivaMonto = round2(base * iva / 100)
+    const total = round2(base + ivaMonto)
+    return {
+      costoDirecto: round2(cd),
+      beneficioIndustrial: biMonto,
+      baseImponible: base,
+      iva: ivaMonto,
+      totalGeneral: total,
+    }
+  }, [subtotalMaterial, bi, iva])
 
   if (loading) {
     return (
@@ -89,11 +92,10 @@ export default function ResumenPage() {
       <div>
         <h2 className="text-xl font-semibold">Resumen Ejecutivo del Presupuesto</h2>
         <p className="text-sm text-muted-foreground">
-          Cascada financiera consolidada por capítulos
+          Cascada financiera consolidada por capitulos
         </p>
       </div>
 
-      {/* Tarjetas resumen */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -102,7 +104,7 @@ export default function ResumenPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(subtotalMaterial)}</div>
-            <p className="text-xs text-muted-foreground">{chapterSummaries.length} capítulos activos</p>
+            <p className="text-xs text-muted-foreground">{chapterSummaries.length} capitulos activos</p>
           </CardContent>
         </Card>
         <Card>
@@ -134,17 +136,16 @@ export default function ResumenPage() {
         </Card>
       </div>
 
-      {/* Desglose por capítulos */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm font-medium">Desglose por Capítulos</CardTitle>
+          <CardTitle className="text-sm font-medium">Desglose por Capitulos</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
                 <TableHead className="w-16">CAP.</TableHead>
-                <TableHead>Descripción</TableHead>
+                <TableHead>Descripcion</TableHead>
                 <TableHead className="w-20 text-center">Partidas</TableHead>
                 <TableHead className="w-20 text-center">Mediciones</TableHead>
                 <TableHead className="w-32 text-right">Subtotal</TableHead>
@@ -169,14 +170,12 @@ export default function ResumenPage() {
         </CardContent>
       </Card>
 
-      {/* Cascada financiera */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm font-medium">Cascada de Cierre Económico</CardTitle>
+          <CardTitle className="text-sm font-medium">Cascada de Cierre Economico</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-0">
-            {/* 1. Subtotal Material */}
             <div className="flex items-center justify-between py-3 px-4 bg-muted/50 rounded-t">
               <div className="flex items-center gap-3">
                 <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">1</span>
@@ -189,7 +188,6 @@ export default function ResumenPage() {
               <ArrowDown className="h-4 w-4 text-muted-foreground" />
             </div>
 
-            {/* 2. Beneficio Industrial */}
             <div className="flex items-center justify-between py-3 px-4 bg-muted/30">
               <div className="flex items-center gap-3">
                 <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">2</span>
@@ -202,7 +200,6 @@ export default function ResumenPage() {
               <ArrowDown className="h-4 w-4 text-muted-foreground" />
             </div>
 
-            {/* 3. Base Imponible */}
             <div className="flex items-center justify-between py-3 px-4 bg-muted/50">
               <div className="flex items-center gap-3">
                 <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">3</span>
@@ -215,7 +212,6 @@ export default function ResumenPage() {
               <ArrowDown className="h-4 w-4 text-muted-foreground" />
             </div>
 
-            {/* 4. IVA */}
             <div className="flex items-center justify-between py-3 px-4 bg-muted/30">
               <div className="flex items-center gap-3">
                 <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">4</span>
@@ -228,7 +224,6 @@ export default function ResumenPage() {
               <ArrowDown className="h-4 w-4 text-muted-foreground" />
             </div>
 
-            {/* 5. Total Final */}
             <div className="flex items-center justify-between py-4 px-4 bg-primary/10 border-2 border-primary rounded-b">
               <div className="flex items-center gap-3">
                 <span className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">5</span>
@@ -238,9 +233,8 @@ export default function ResumenPage() {
             </div>
           </div>
 
-          {/* Fórmula de verificación */}
           <div className="mt-6 p-4 bg-muted/30 rounded text-sm text-muted-foreground">
-            <p className="font-medium mb-1">Fórmula de cálculo (precisión decimal):</p>
+            <p className="font-medium mb-1">Formula de calculo:</p>
             <p className="font-mono text-xs">
               Total = CD + BI + IVA = {totales.costoDirecto.toFixed(2)} + {totales.beneficioIndustrial.toFixed(2)} + {totales.iva.toFixed(2)} = {totales.totalGeneral.toFixed(2)}
             </p>

@@ -9,9 +9,6 @@ import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { EmptyState } from "@/components/shared/EmptyState"
 import { formatCurrency } from "@/lib/utils"
-import { calcularCascadaFinanciera } from "@/lib/financial-calc"
-import { generarExcelPresupuesto, descargarExcel } from "@/lib/export-presupuesto"
-import { generarPDFPresupuesto, descargarPDF } from "@/lib/export-pdf"
 import {
   FileText,
   Download,
@@ -50,7 +47,6 @@ export default function InformePage() {
     setEditingHeader(false)
   }
 
-  // Build report data
   const capituloData = capitulos
     .filter(cap => cap.partidas.length > 0)
     .map(cap => ({
@@ -86,18 +82,28 @@ export default function InformePage() {
     , 0)
   , 0)
 
-  // Calcular totales con precisión decimal para la UI
   const totales = useMemo(() => {
-    return calcularCascadaFinanciera(
-      subtotalMaterial,
-      presupuesto?.porcentajeBI || 10,
-      presupuesto?.porcentajeIVA || 21
-    )
+    const bi = presupuesto?.porcentajeBI || 10
+    const iva = presupuesto?.porcentajeIVA || 21
+    const cd = subtotalMaterial
+    const biMonto = Math.round(cd * bi) / 100
+    const base = cd + biMonto
+    const ivaMonto = Math.round(base * iva) / 100
+    return {
+      costoDirecto: Math.round(cd * 100) / 100,
+      beneficioIndustrial: Math.round(biMonto * 100) / 100,
+      baseImponible: Math.round(base * 100) / 100,
+      iva: Math.round(ivaMonto * 100) / 100,
+      totalGeneral: Math.round((base + ivaMonto) * 100) / 100,
+    }
   }, [subtotalMaterial, presupuesto?.porcentajeBI, presupuesto?.porcentajeIVA])
 
   const exportExcel = async () => {
     setExporting(true)
     try {
+      const [{ generarExcelPresupuesto, descargarExcel }] = await Promise.all([
+        import("@/lib/export-presupuesto"),
+      ])
       const wb = generarExcelPresupuesto({
         empresaNombre: headerForm.empresaNombre,
         empresaDireccion: headerForm.empresaDireccion,
@@ -120,6 +126,9 @@ export default function InformePage() {
   const exportPDF = async () => {
     setExporting(true)
     try {
+      const [{ generarPDFPresupuesto, descargarPDF }] = await Promise.all([
+        import("@/lib/export-pdf"),
+      ])
       const doc = generarPDFPresupuesto({
         empresaNombre: headerForm.empresaNombre,
         empresaDireccion: headerForm.empresaDireccion,
@@ -167,7 +176,6 @@ export default function InformePage() {
 
   return (
     <div className="space-y-6">
-      {/* Encabezado con acciones */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-xl font-semibold">Informe de Presupuesto</h2>
@@ -191,10 +199,8 @@ export default function InformePage() {
         </div>
       </div>
 
-      {/* Documento de presupuesto */}
       <Card className="max-w-4xl mx-auto">
         <CardContent className="p-8">
-          {/* Encabezado editable */}
           {editingHeader ? (
             <div className="space-y-4 mb-8 border-b pb-6">
               <div className="grid grid-cols-2 gap-4">
@@ -207,11 +213,11 @@ export default function InformePage() {
                   <Input value={headerForm.clienteNombre} onChange={e => setHeaderForm({...headerForm, clienteNombre: e.target.value})} />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs">Dirección Empresa</Label>
+                  <Label className="text-xs">Direccion Empresa</Label>
                   <Input value={headerForm.empresaDireccion} onChange={e => setHeaderForm({...headerForm, empresaDireccion: e.target.value})} />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs">Dirección Cliente</Label>
+                  <Label className="text-xs">Direccion Cliente</Label>
                   <Input value={headerForm.clienteDireccion} onChange={e => setHeaderForm({...headerForm, clienteDireccion: e.target.value})} />
                 </div>
                 <div className="space-y-2">
@@ -219,7 +225,7 @@ export default function InformePage() {
                   <Input value={headerForm.empresaCif} onChange={e => setHeaderForm({...headerForm, empresaCif: e.target.value})} />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs">Población Cliente</Label>
+                  <Label className="text-xs">Poblacion Cliente</Label>
                   <Input value={headerForm.clientePoblacion} onChange={e => setHeaderForm({...headerForm, clientePoblacion: e.target.value})} />
                 </div>
                 <div className="space-y-2">
@@ -227,7 +233,7 @@ export default function InformePage() {
                   <Input value={headerForm.proyectoNombre} onChange={e => setHeaderForm({...headerForm, proyectoNombre: e.target.value})} />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs">Fecha de Emisión</Label>
+                  <Label className="text-xs">Fecha de Emision</Label>
                   <Input type="date" value={headerForm.fechaEmision} onChange={e => setHeaderForm({...headerForm, fechaEmision: e.target.value})} />
                 </div>
               </div>
@@ -253,10 +259,8 @@ export default function InformePage() {
             </div>
           )}
 
-          {/* Título */}
           <h3 className="text-center text-lg font-bold mb-6">MEDICIONES Y PRESUPUESTO</h3>
 
-          {/* Capítulos */}
           {capituloData.map(cap => {
             const subtotalCap = cap.partidas.reduce((sum, part) =>
               sum + part.mediciones.reduce((sumMed, med) => sumMed + med.costoTotal, 0)
@@ -309,7 +313,6 @@ export default function InformePage() {
             )
           })}
 
-          {/* Totales */}
           <div className="border-t-2 pt-4 mt-8 space-y-2">
             <div className="flex justify-between text-sm">
               <span className="font-semibold">TOTAL PRESUPUESTO EJECUCION MATERIAL</span>
