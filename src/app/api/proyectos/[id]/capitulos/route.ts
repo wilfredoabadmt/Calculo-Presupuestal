@@ -43,6 +43,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     })
 
     if (existing) {
+      if (!existing.activo) {
+        const capitulo = await prisma.capituloPresupuesto.update({
+          where: { id: existing.id },
+          data: { nombre, descripcion, activo: true },
+        })
+        return NextResponse.json(capitulo, { status: 200 })
+      }
       return NextResponse.json({ error: `Ya existe el capítulo ${codigo} en este proyecto` }, { status: 409 })
     }
 
@@ -58,6 +65,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         nombre,
         descripcion,
         orden: (lastCapitulo?.orden || 0) + 1,
+        activo: true,
       },
     })
 

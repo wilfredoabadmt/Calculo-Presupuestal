@@ -41,6 +41,13 @@ export async function POST(
     })
 
     if (existing) {
+      if (!existing.activo) {
+        const partida = await prisma.partidaPresupuesto.update({
+          where: { id: existing.id },
+          data: { descripcion, unidad, precioBase: precioBase || 0, activo: true },
+        })
+        return NextResponse.json(partida, { status: 200 })
+      }
       return NextResponse.json(
         { error: `Ya existe la partida ${codigo} en este capítulo` },
         { status: 409 }
@@ -54,6 +61,7 @@ export async function POST(
         descripcion,
         unidad,
         precioBase: precioBase || 0,
+        activo: true,
       },
     })
 

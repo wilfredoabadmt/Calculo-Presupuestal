@@ -52,6 +52,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
         if (existing) {
           capituloId = existing.id
+          if (!existing.activo) {
+            await prisma.capituloPresupuesto.update({
+              where: { id: existing.id },
+              data: { activo: true },
+            })
+          }
         } else {
           const lastCap = await prisma.capituloPresupuesto.findFirst({
             where: { proyectoId },
@@ -63,6 +69,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
               codigo: cod,
               nombre,
               orden: (lastCap?.orden || 0) + 1,
+              activo: true,
             },
           })
           capituloId = nuevo.id
@@ -119,6 +126,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
               descripcion: banco.actividad,
               unidad: banco.unidad,
               precioBase: banco.precioUnitario,
+              activo: true,
             },
           })
           existingCodes.add(partidaCodigo)
