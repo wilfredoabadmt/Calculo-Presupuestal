@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { EmptyState } from "@/components/shared/EmptyState"
 import { formatCurrency } from "@/lib/utils"
+import { calcularCascadaFinanciera } from "@/lib/financial-calc"
 import { generarExcelPresupuesto, descargarExcel } from "@/lib/export-presupuesto"
 import { generarPDFPresupuesto, descargarPDF } from "@/lib/export-pdf"
 import {
@@ -87,7 +88,6 @@ export default function InformePage() {
 
   // Calcular totales con precisión decimal para la UI
   const totales = useMemo(() => {
-    const { calcularCascadaFinanciera } = require("@/lib/financial-calc")
     return calcularCascadaFinanciera(
       subtotalMaterial,
       presupuesto?.porcentajeBI || 10,
@@ -120,13 +120,6 @@ export default function InformePage() {
   const exportPDF = async () => {
     setExporting(true)
     try {
-      const { calcularCascadaFinanciera } = await import("@/lib/financial-calc")
-      const totales = calcularCascadaFinanciera(
-        subtotalMaterial,
-        presupuesto?.porcentajeBI || 10,
-        presupuesto?.porcentajeIVA || 21
-      )
-
       const doc = generarPDFPresupuesto({
         empresaNombre: headerForm.empresaNombre,
         empresaDireccion: headerForm.empresaDireccion,
