@@ -16,17 +16,18 @@ const TIPO_A_CAPITULO: Record<string, { codigo: number; nombre: string }> = {
   ZOCALO: { codigo: 7, nombre: "REVESTIMIENTOS" },
   TECHO: { codigo: 5, nombre: "CUBIERTAS" },
   CIELO: { codigo: 5, nombre: "CUBIERTAS" },
+  CIELO_RASO: { codigo: 5, nombre: "CUBIERTAS" },
   PINTURA: { codigo: 11, nombre: "PINTURAS" },
 }
 
 function getUnidadFromTipo(tipo: string): string {
   switch (tipo) {
-    case "CONCRETO": case "LOSAS": return "m3"
+    case "CONCRETO": case "LOSA": case "LOSAS": return "m3"
     case "COLUMNA": case "VIGA": return "ml"
     case "MURO": case "PARED": case "PARED_CONCRETO": case "PARED_DRYWALL": return "m2"
     case "CIMIENTO": return "ml"
     case "PISO": case "ZOCALO": return "m2"
-    case "TECHO": case "CIELO": return "m2"
+    case "TECHO": case "CIELO": case "CIELO_RASO": return "m2"
     case "PINTURA": return "m2"
     default: return "ud"
   }
