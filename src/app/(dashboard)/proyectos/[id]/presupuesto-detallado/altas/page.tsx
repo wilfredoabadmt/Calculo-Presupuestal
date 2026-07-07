@@ -245,7 +245,7 @@ export default function AltasPage() {
       })
       const data = await res.json()
       if (data.ok) {
-        alert(`Importación exitosa: ${data.partidasCreadas} partidas en ${data.capitulosCreados} capítulos`)
+        alert(`Importación exitosa: ${data.partidasCreadas} partidas en ${(data.capitulosCreados || 0) + (data.capitulosEncontrados || 0)} capítulos`)
         setImportOpen(false)
         await cargarDatos()
       } else {

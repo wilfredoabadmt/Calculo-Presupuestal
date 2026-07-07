@@ -58,6 +58,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
 
     let capitulosCreados = 0
+    let capitulosEncontrados = 0
     let partidasCreadas = 0
     const errores: string[] = []
 
@@ -66,12 +67,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
       // Buscar o crear capítulo
       let capituloId: string | null = null
-      const existing = await prisma.capituloPresupuesto.findUnique({
-        where: { proyectoId_codigo: { proyectoId, codigo: capDef.codigo } },
+      const existing = await prisma.capituloPresupuesto.findFirst({
+        where: { proyectoId, codigo: capDef.codigo },
       })
 
       if (existing) {
         capituloId = existing.id
+        capitulosEncontrados++
       } else if (crearCapitulos) {
         const lastCap = await prisma.capituloPresupuesto.findFirst({
           where: { proyectoId },
@@ -145,9 +147,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({
       ok: true,
       capitulosCreados,
+      capitulosEncontrados,
       partidasCreadas,
       errores,
-      mensaje: `Importados ${partidasCreadas} elementos del proyecto en ${capitulosCreados} capítulos`,
+      mensaje: `Importados ${partidasCreadas} elementos del proyecto en ${capitulosCreados + capitulosEncontrados} capítulos`,
     })
   } catch (e: any) {
     console.error("Error importando elementos del proyecto:", e)
