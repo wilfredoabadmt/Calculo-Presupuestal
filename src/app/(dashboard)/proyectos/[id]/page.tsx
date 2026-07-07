@@ -6,6 +6,7 @@ import { useParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { 
   Plus, 
   Calculator, 
@@ -33,6 +34,21 @@ interface Elemento {
   costoTotal: number
 }
 
+interface ElementoDetalle extends Elemento {
+  dimA: number | null
+  dimB: number | null
+  dimH: number | null
+  dimLargo: number | null
+  dimAncho: number | null
+  dimEspesor: number | null
+  resistencia: number | null
+  desperdicio: number
+  aceroLongitudinal: string | null
+  estribos: string | null
+  materiales: string | null
+  createdAt: string
+}
+
 interface ProjectData {
   id: string
   nombre: string
@@ -52,6 +68,8 @@ export default function ProyectoDetailPage() {
   const [project, setProject] = useState<ProjectData | null>(null)
   const [loading, setLoading] = useState(true)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [detailElement, setDetailElement] = useState<ElementoDetalle | null>(null)
+  const [detailLoading, setDetailLoading] = useState(false)
 
   useEffect(() => {
     fetch(`/api/proyectos/${projectId}`)
@@ -79,6 +97,42 @@ export default function ProyectoDetailPage() {
       alert("Error al eliminar")
     }
     setDeletingId(null)
+  }
+
+  const handleViewElemento = async (elementoId: string) => {
+    setDetailLoading(true)
+    setDetailElement(null)
+    try {
+      const res = await fetch(`/api/proyectos/${projectId}/elementos`)
+      const elementos = await res.json()
+      const el = elementos.find((e: Elemento) => e.id === elementoId)
+      if (el) {
+        setDetailElement(el as ElementoDetalle)
+      }
+    } catch {
+      console.error("Error cargando detalle del elemento")
+    }
+    setDetailLoading(false)
+  }
+
+  const parseMateriales = (json: string | null): { nombre: string; cantidad: number; unidad: string; costo: number }[] => {
+    if (!json) return []
+    try {
+      const data = JSON.parse(json)
+      return Array.isArray(data) ? data : []
+    } catch {
+      return []
+    }
+  }
+
+  const parseAcero = (json: string | null): { tipo: string; diametro: number; cantidad: number }[] => {
+    if (!json) return []
+    try {
+      const data = JSON.parse(json)
+      return Array.isArray(data) ? data : []
+    } catch {
+      return []
+    }
   }
 
   if (loading) {
@@ -241,10 +295,8 @@ export default function ProyectoDetailPage() {
                     <div className="flex items-center gap-4">
                       <span className="font-semibold">{formatCurrency(element.costoTotal)}</span>
                       <div className="flex gap-2">
-                        <Button variant="ghost" size="icon" asChild>
-                          <Link href={`/proyectos/${projectId}/calculadora`}>
-                            <Eye className="h-4 w-4" />
-                          </Link>
+                        <Button variant="ghost" size="icon" onClick={() => handleViewElemento(element.id)}>
+                          <Eye className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="icon" asChild>
                           <Link href={`/proyectos/${projectId}/calculadora`}>
@@ -468,6 +520,143 @@ export default function ProyectoDetailPage() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Dialog de detalle del elemento */}
+      <Dialog open={!!detailElement || detailLoading} onOpenChange={open => { if (!open) { setDetailElement(null); setDetailLoading(false) } }}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Detalle del Elemento</DialogTitle>
+          </DialogHeader>
+          {detailLoading && (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          )}
+          {detailElement && (
+            <div className="space-y-6">
+              {/* Info básica */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Tipo</p>
+                  <p className="font-medium">{detailElement.tipoElemento}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Cantidad</p>
+                  <p className="font-medium">{detailElement.cantidad} uds</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-sm text-muted-foreground">Descripción</p>
+                  <p className="font-medium">{detailElement.descripcion}</p>
+                </div>
+              </div>
+
+              {/* Dimensiones */}
+              <div>
+                <h4 className="font-semibold text-sm mb-2">Dimensiones</h4>
+                <div className="grid grid-cols-3 gap-3 bg-muted/30 p-3 rounded-lg">
+                  {detailElement.dimA != null && <div><span className="text-xs text-muted-foreground">A:</span> <span className="text-sm font-medium">{detailElement.dimA} m</span></div>}
+                  {detailElement.dimB != null && <div><span className="text-xs text-muted-foreground">B:</span> <span className="text-sm font-medium">{detailElement.dimB} m</span></div>}
+                  {detailElement.dimH != null && <div><span className="text-xs text-muted-foreground">H:</span> <span className="text-sm font-medium">{detailElement.dimH} m</span></div>}
+                  {detailElement.dimLargo != null && <div><span className="text-xs text-muted-foreground">Largo:</span> <span className="text-sm font-medium">{detailElement.dimLargo} m</span></div>}
+                  {detailElement.dimAncho != null && <div><span className="text-xs text-muted-foreground">Ancho:</span> <span className="text-sm font-medium">{detailElement.dimAncho} m</span></div>}
+                  {detailElement.dimEspesor != null && <div><span className="text-xs text-muted-foreground">Espesor:</span> <span className="text-sm font-medium">{detailElement.dimEspesor} m</span></div>}
+                  {detailElement.resistencia != null && <div><span className="text-xs text-muted-foreground">Resistencia:</span> <span className="text-sm font-medium">{detailElement.resistencia} kg/cm²</span></div>}
+                  {detailElement.desperdicio > 0 && <div><span className="text-xs text-muted-foreground">Desperdicio:</span> <span className="text-sm font-medium">{detailElement.desperdicio}%</span></div>}
+                </div>
+              </div>
+
+              {/* Acero longitudinal */}
+              {detailElement.aceroLongitudinal && parseAcero(detailElement.aceroLongitudinal).length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-sm mb-2">Acero Longitudinal</h4>
+                  <div className="bg-muted/30 p-3 rounded-lg">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="text-muted-foreground">
+                          <th className="text-left">Tipo</th>
+                          <th className="text-right">Diámetro</th>
+                          <th className="text-right">Cantidad</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {parseAcero(detailElement.aceroLongitudinal).map((a, i) => (
+                          <tr key={i}>
+                            <td>{a.tipo}</td>
+                            <td className="text-right">{a.diametro} mm</td>
+                            <td className="text-right">{a.cantidad}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* Estribos */}
+              {detailElement.estribos && parseAcero(detailElement.estribos).length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-sm mb-2">Estribos</h4>
+                  <div className="bg-muted/30 p-3 rounded-lg">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="text-muted-foreground">
+                          <th className="text-left">Tipo</th>
+                          <th className="text-right">Diámetro</th>
+                          <th className="text-right">Cantidad</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {parseAcero(detailElement.estribos).map((a, i) => (
+                          <tr key={i}>
+                            <td>{a.tipo}</td>
+                            <td className="text-right">{a.diametro} mm</td>
+                            <td className="text-right">{a.cantidad}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* Materiales */}
+              {detailElement.materiales && parseMateriales(detailElement.materiales).length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-sm mb-2">Materiales</h4>
+                  <div className="bg-muted/30 p-3 rounded-lg">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="text-muted-foreground">
+                          <th className="text-left">Material</th>
+                          <th className="text-right">Cantidad</th>
+                          <th className="text-right">Unidad</th>
+                          <th className="text-right">Costo</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {parseMateriales(detailElement.materiales).map((m, i) => (
+                          <tr key={i} className="border-t border-border/50">
+                            <td>{m.nombre}</td>
+                            <td className="text-right">{m.cantidad.toFixed(4)}</td>
+                            <td className="text-right">{m.unidad}</td>
+                            <td className="text-right font-medium">{formatCurrency(m.costo)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* Costo total */}
+              <div className="bg-primary/5 p-4 rounded-lg flex justify-between items-center">
+                <span className="font-semibold">Costo Total:</span>
+                <span className="text-xl font-bold text-primary">{formatCurrency(detailElement.costoTotal)}</span>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
