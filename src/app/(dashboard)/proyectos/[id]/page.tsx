@@ -75,7 +75,11 @@ export default function ProyectoDetailPage() {
   const [detailElement, setDetailElement] = useState<ElementoDetalle | null>(null)
   const [detailLoading, setDetailLoading] = useState(false)
   const [editElement, setEditElement] = useState<ElementoDetalle | null>(null)
-  const [editForm, setEditForm] = useState({ descripcion: "", cantidad: "", costoTotal: "" })
+  const [editForm, setEditForm] = useState({
+    descripcion: "", cantidad: "", costoTotal: "",
+    dimA: "", dimB: "", dimH: "", dimLargo: "", dimAncho: "", dimEspesor: "",
+    desperdicio: "", resistencia: "",
+  })
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
@@ -155,6 +159,14 @@ export default function ProyectoDetailPage() {
           descripcion: el.descripcion || "",
           cantidad: el.cantidad?.toString() || "1",
           costoTotal: el.costoTotal?.toString() || "0",
+          dimA: el.dimA?.toString() || "",
+          dimB: el.dimB?.toString() || "",
+          dimH: el.dimH?.toString() || "",
+          dimLargo: el.dimLargo?.toString() || "",
+          dimAncho: el.dimAncho?.toString() || "",
+          dimEspesor: el.dimEspesor?.toString() || "",
+          desperdicio: el.desperdicio?.toString() || "0",
+          resistencia: el.resistencia?.toString() || "",
         })
       }
     } catch {
@@ -174,6 +186,14 @@ export default function ProyectoDetailPage() {
           descripcion: editForm.descripcion,
           cantidad: parseInt(editForm.cantidad) || 1,
           costoTotal: parseFloat(editForm.costoTotal) || 0,
+          dimA: editForm.dimA ? parseFloat(editForm.dimA) : null,
+          dimB: editForm.dimB ? parseFloat(editForm.dimB) : null,
+          dimH: editForm.dimH ? parseFloat(editForm.dimH) : null,
+          dimLargo: editForm.dimLargo ? parseFloat(editForm.dimLargo) : null,
+          dimAncho: editForm.dimAncho ? parseFloat(editForm.dimAncho) : null,
+          dimEspesor: editForm.dimEspesor ? parseFloat(editForm.dimEspesor) : null,
+          desperdicio: parseFloat(editForm.desperdicio) || 0,
+          resistencia: editForm.resistencia ? parseFloat(editForm.resistencia) : null,
         }),
       })
       if (res.ok) {
@@ -612,14 +632,14 @@ export default function ProyectoDetailPage() {
               <div>
                 <h4 className="font-semibold text-sm mb-2">Dimensiones</h4>
                 <div className="grid grid-cols-3 gap-3 bg-muted/30 p-3 rounded-lg">
-                  {detailElement.dimA != null && <div><span className="text-xs text-muted-foreground">A:</span> <span className="text-sm font-medium">{detailElement.dimA} m</span></div>}
-                  {detailElement.dimB != null && <div><span className="text-xs text-muted-foreground">B:</span> <span className="text-sm font-medium">{detailElement.dimB} m</span></div>}
-                  {detailElement.dimH != null && <div><span className="text-xs text-muted-foreground">H:</span> <span className="text-sm font-medium">{detailElement.dimH} m</span></div>}
-                  {detailElement.dimLargo != null && <div><span className="text-xs text-muted-foreground">Largo:</span> <span className="text-sm font-medium">{detailElement.dimLargo} m</span></div>}
-                  {detailElement.dimAncho != null && <div><span className="text-xs text-muted-foreground">Ancho:</span> <span className="text-sm font-medium">{detailElement.dimAncho} m</span></div>}
-                  {detailElement.dimEspesor != null && <div><span className="text-xs text-muted-foreground">Espesor:</span> <span className="text-sm font-medium">{detailElement.dimEspesor} m</span></div>}
-                  {detailElement.resistencia != null && <div><span className="text-xs text-muted-foreground">Resistencia:</span> <span className="text-sm font-medium">{detailElement.resistencia} kg/cm²</span></div>}
-                  {detailElement.desperdicio > 0 && <div><span className="text-xs text-muted-foreground">Desperdicio:</span> <span className="text-sm font-medium">{detailElement.desperdicio}%</span></div>}
+                  {detailElement.dimA != null && <div><span className="text-xs text-muted-foreground">A:</span> <span className="text-sm font-medium">{formatNumber(detailElement.dimA)} m</span></div>}
+                  {detailElement.dimB != null && <div><span className="text-xs text-muted-foreground">B:</span> <span className="text-sm font-medium">{formatNumber(detailElement.dimB)} m</span></div>}
+                  {detailElement.dimH != null && <div><span className="text-xs text-muted-foreground">H:</span> <span className="text-sm font-medium">{formatNumber(detailElement.dimH)} m</span></div>}
+                  {detailElement.dimLargo != null && <div><span className="text-xs text-muted-foreground">Largo:</span> <span className="text-sm font-medium">{formatNumber(detailElement.dimLargo)} m</span></div>}
+                  {detailElement.dimAncho != null && <div><span className="text-xs text-muted-foreground">Ancho:</span> <span className="text-sm font-medium">{formatNumber(detailElement.dimAncho)} m</span></div>}
+                  {detailElement.dimEspesor != null && <div><span className="text-xs text-muted-foreground">Espesor:</span> <span className="text-sm font-medium">{formatNumber(detailElement.dimEspesor)} m</span></div>}
+                  {detailElement.resistencia != null && <div><span className="text-xs text-muted-foreground">Resistencia:</span> <span className="text-sm font-medium">{formatNumber(detailElement.resistencia)} kg/cm²</span></div>}
+                  {detailElement.desperdicio > 0 && <div><span className="text-xs text-muted-foreground">Desperdicio:</span> <span className="text-sm font-medium">{formatNumber(detailElement.desperdicio)}%</span></div>}
                 </div>
               </div>
 
@@ -695,7 +715,7 @@ export default function ProyectoDetailPage() {
                         {parseMateriales(detailElement.materiales).map((m, i) => (
                           <tr key={i} className="border-t border-border/50">
                             <td>{m.nombre}</td>
-                            <td className="text-right">{m.cantidad.toFixed(4)}</td>
+                            <td className="text-right">{formatNumber(m.cantidad)}</td>
                             <td className="text-right">{m.unidad}</td>
                             <td className="text-right font-medium">{formatCurrency(m.costo)}</td>
                           </tr>
@@ -718,7 +738,7 @@ export default function ProyectoDetailPage() {
 
       {/* Dialog de edicion del elemento */}
       <Dialog open={!!editElement} onOpenChange={open => { if (!open) setEditElement(null) }}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Editar Elemento</DialogTitle>
           </DialogHeader>
@@ -757,6 +777,75 @@ export default function ProyectoDetailPage() {
                   />
                 </div>
               </div>
+
+              {/* Dimensiones */}
+              {(editElement.dimA != null || editElement.dimB != null || editElement.dimH != null ||
+                editElement.dimLargo != null || editElement.dimAncho != null || editElement.dimEspesor != null) && (
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-2 block">Dimensiones (m)</Label>
+                  <div className="grid grid-cols-3 gap-3">
+                    {editElement.dimA != null && (
+                      <div className="space-y-1">
+                        <Label className="text-xs">Alto / A</Label>
+                        <Input type="number" step="0.01" min="0" value={editForm.dimA}
+                          onChange={e => setEditForm({ ...editForm, dimA: e.target.value })} />
+                      </div>
+                    )}
+                    {editElement.dimB != null && (
+                      <div className="space-y-1">
+                        <Label className="text-xs">Largo / B</Label>
+                        <Input type="number" step="0.01" min="0" value={editForm.dimB}
+                          onChange={e => setEditForm({ ...editForm, dimB: e.target.value })} />
+                      </div>
+                    )}
+                    {editElement.dimH != null && (
+                      <div className="space-y-1">
+                        <Label className="text-xs">Espesor / H</Label>
+                        <Input type="number" step="0.01" min="0" value={editForm.dimH}
+                          onChange={e => setEditForm({ ...editForm, dimH: e.target.value })} />
+                      </div>
+                    )}
+                    {editElement.dimLargo != null && (
+                      <div className="space-y-1">
+                        <Label className="text-xs">Largo</Label>
+                        <Input type="number" step="0.01" min="0" value={editForm.dimLargo}
+                          onChange={e => setEditForm({ ...editForm, dimLargo: e.target.value })} />
+                      </div>
+                    )}
+                    {editElement.dimAncho != null && (
+                      <div className="space-y-1">
+                        <Label className="text-xs">Ancho</Label>
+                        <Input type="number" step="0.01" min="0" value={editForm.dimAncho}
+                          onChange={e => setEditForm({ ...editForm, dimAncho: e.target.value })} />
+                      </div>
+                    )}
+                    {editElement.dimEspesor != null && (
+                      <div className="space-y-1">
+                        <Label className="text-xs">Espesor</Label>
+                        <Input type="number" step="0.01" min="0" value={editForm.dimEspesor}
+                          onChange={e => setEditForm({ ...editForm, dimEspesor: e.target.value })} />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Otros parametros */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-xs">Desperdicio (%)</Label>
+                  <Input type="number" step="0.01" min="0" value={editForm.desperdicio}
+                    onChange={e => setEditForm({ ...editForm, desperdicio: e.target.value })} />
+                </div>
+                {editElement.resistencia != null && (
+                  <div className="space-y-2">
+                    <Label className="text-xs">Resistencia (kg/cm²)</Label>
+                    <Input type="number" step="0.01" min="0" value={editForm.resistencia}
+                      onChange={e => setEditForm({ ...editForm, resistencia: e.target.value })} />
+                  </div>
+                )}
+              </div>
+
               <div className="flex gap-2 justify-end pt-2">
                 <Button variant="outline" onClick={() => setEditElement(null)}>
                   <X className="mr-2 h-4 w-4" />
