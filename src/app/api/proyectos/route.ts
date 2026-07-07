@@ -10,7 +10,11 @@ export async function GET() {
 
   const proyectos = await prisma.proyecto.findMany({
     where: { userId: session.user.id },
-    include: { _count: { select: { elementos: true } } },
+    include: { 
+      _count: { select: { elementos: true } },
+      presupuesto: { select: { totalGeneral: true } },
+      presupuestoDetallado: { select: { totalPresupuesto: true } }
+    },
     orderBy: { createdAt: "desc" },
   })
 

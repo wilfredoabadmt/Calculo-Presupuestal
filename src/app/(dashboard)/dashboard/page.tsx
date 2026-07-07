@@ -87,11 +87,17 @@ export default function DashboardPage() {
 
   const totalElementos = projects.reduce((sum, p) => sum + (p._count?.elementos || 0), 0)
 
+  const totalPresupuesto = projects.reduce((sum, p) => {
+    const totalG = (p as any).presupuesto?.totalGeneral || 0
+    const totalD = (p as any).presupuestoDetallado?.totalPresupuesto || 0
+    return sum + totalG + totalD
+  }, 0)
+
   const stats = [
     { label: "Proyectos Activos", value: projects.length.toString(), icon: FolderKanban, color: "bg-blue-500" },
     { label: "Elementos Calculados", value: totalElementos.toString(), icon: Calculator, color: "bg-orange-500" },
     { label: "Materiales en Catálogo", value: materialCount.toString(), icon: Box, color: "bg-green-500" },
-    { label: "Presupuesto Total", value: formatCurrency(0), icon: TrendingUp, color: "bg-purple-500" },
+    { label: "Presupuesto Total", value: formatCurrency(totalPresupuesto), icon: TrendingUp, color: "bg-purple-500" },
   ]
 
   const recentProjects = projects.slice(0, 3)

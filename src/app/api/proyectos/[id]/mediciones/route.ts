@@ -8,7 +8,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     const { searchParams } = new URL(request.url)
     const presupuestoId = searchParams.get("presupuestoId")
 
-    const where: any = {}
+    const where: any = {
+      partida: {
+        activo: true,
+        capitulo: {
+          activo: true
+        }
+      }
+    }
     if (presupuestoId) {
       where.presupuestoId = presupuestoId
     } else {
