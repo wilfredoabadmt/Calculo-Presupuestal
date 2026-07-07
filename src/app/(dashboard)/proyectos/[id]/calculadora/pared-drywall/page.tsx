@@ -221,6 +221,66 @@ export default function ParedDrywallCalculatorPage() {
           <Card>
             <CardHeader><CardTitle>Parámetros de Entrada</CardTitle></CardHeader>
             <CardContent className="space-y-4">
+              <div className="bg-muted/50 rounded-lg p-6 text-center">
+                <div className="text-sm text-muted-foreground mb-2">Pared Drywall (Estructura)</div>
+                <svg className="mx-auto max-w-[320px] w-full" viewBox="0 0 320 160">
+                  {/* Top canal (guia superior) */}
+                  <rect x="50" y="22" width="220" height="6" fill="currentColor" opacity="0.12" stroke="currentColor" strokeWidth="1"/>
+                  <text x="160" y="18" textAnchor="middle" fontSize="7" fill="currentColor" opacity="0.5">Canal Superior</text>
+                  {/* Bottom canal (guia inferior) */}
+                  <rect x="50" y="122" width="220" height="6" fill="currentColor" opacity="0.12" stroke="currentColor" strokeWidth="1"/>
+                  <text x="160" y="142" textAnchor="middle" fontSize="7" fill="currentColor" opacity="0.5">Canal Inferior</text>
+                  {/* Panel (placa de yeso) - semi-transparent */}
+                  <rect x="50" y="28" width="220" height="94" fill="currentColor" opacity="0.04" stroke="currentColor" strokeWidth="0.8" strokeDasharray="4,3"/>
+                  {/* Parantes (vertical studs) */}
+                  <rect x="70" y="28" width="4" height="94" fill="#3b82f6" opacity="0.25" stroke="#3b82f6" strokeWidth="0.8"/>
+                  <rect x="120" y="28" width="4" height="94" fill="#3b82f6" opacity="0.25" stroke="#3b82f6" strokeWidth="0.8"/>
+                  <rect x="170" y="28" width="4" height="94" fill="#3b82f6" opacity="0.25" stroke="#3b82f6" strokeWidth="0.8"/>
+                  <rect x="220" y="28" width="4" height="94" fill="#3b82f6" opacity="0.25" stroke="#3b82f6" strokeWidth="0.8"/>
+                  <rect x="266" y="28" width="4" height="94" fill="#3b82f6" opacity="0.25" stroke="#3b82f6" strokeWidth="0.8"/>
+                  {/* Separation dimension between parantes */}
+                  <line x1="74" y1="150" x2="120" y2="150" stroke="#a855f7" strokeWidth="1"/>
+                  <line x1="74" y1="146" x2="74" y2="154" stroke="#a855f7" strokeWidth="0.8"/>
+                  <line x1="120" y1="146" x2="120" y2="154" stroke="#a855f7" strokeWidth="0.8"/>
+                  <text x="97" y="158" textAnchor="middle" fontSize="8" fill="#a855f7" fontWeight="600">
+                    {form.separacionParantes ? `${form.separacionParantes} m` : "(Sep)"}
+                  </text>
+                  {/* Largo (top) */}
+                  <line x1="50" y1="9" x2="270" y2="9" stroke="#f97316" strokeWidth="1.2"/>
+                  <line x1="50" y1="5" x2="50" y2="13" stroke="#f97316" strokeWidth="1"/>
+                  <line x1="270" y1="5" x2="270" y2="13" stroke="#f97316" strokeWidth="1"/>
+                  <text x="160" y="5" textAnchor="middle" fontSize="10" fill="#f97316" fontWeight="600">
+                    Largo {form.largo ? `= ${form.largo} m` : "(L)"}
+                  </text>
+                  {/* Alto (left vertical) */}
+                  <line x1="35" y1="28" x2="35" y2="122" stroke="#3b82f6" strokeWidth="1.2"/>
+                  <line x1="31" y1="28" x2="39" y2="28" stroke="#3b82f6" strokeWidth="1"/>
+                  <line x1="31" y1="122" x2="39" y2="122" stroke="#3b82f6" strokeWidth="1"/>
+                  <text x="22" y="80" textAnchor="middle" fontSize="9" fill="#3b82f6" fontWeight="600" transform="rotate(-90,22,80)">
+                    Alto {form.alto ? `= ${form.alto} m` : "(A)"}
+                  </text>
+                  {/* Labels */}
+                  <text x="72" y="80" textAnchor="middle" fontSize="7" fill="#3b82f6" opacity="0.7" transform="rotate(-90,72,80)">Parante</text>
+                </svg>
+                <div className="flex justify-center gap-3 mt-2 flex-wrap text-xs">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#f97316"}}/>
+                    <span className="text-muted-foreground">Largo</span>
+                    {form.largo && <span className="font-bold text-orange-500">{form.largo} m</span>}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#3b82f6"}}/>
+                    <span className="text-muted-foreground">Alto</span>
+                    {form.alto && <span className="font-bold text-blue-600">{form.alto} m</span>}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#a855f7"}}/>
+                    <span className="text-muted-foreground">Separación</span>
+                    {form.separacionParantes && <span className="font-bold text-purple-600">{form.separacionParantes} m</span>}
+                  </span>
+                </div>
+              </div>
+
               <InputWithHelp
                 label="Descripción del Elemento"
                 value={form.descripcion}

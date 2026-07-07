@@ -207,6 +207,49 @@ export default function ZocaloCalculatorPage() {
           <Card>
             <CardHeader><CardTitle>Parámetros de Entrada</CardTitle></CardHeader>
             <CardContent className="space-y-4">
+              <div className="bg-muted/50 rounded-lg p-6 text-center">
+                <div className="text-sm text-muted-foreground mb-2">Zócalo Cerámico</div>
+                <svg className="mx-auto max-w-[320px] w-full" viewBox="0 0 320 140">
+                  {/* Base wall */}
+                  <rect x="60" y="30" width="200" height="80" fill="none" stroke="currentColor" strokeWidth="1" strokeDasharray="4,3" opacity="0.4"/>
+                  {/* Zocalo strip on bottom of wall */}
+                  <rect x="60" y="80" width="200" height="30" fill="currentColor" opacity="0.08" stroke="currentColor" strokeWidth="1.5"/>
+                  {/* Tile lines inside zocalo */}
+                  <line x1="110" y1="80" x2="110" y2="110" stroke="currentColor" strokeWidth="0.7" opacity="0.3"/>
+                  <line x1="160" y1="80" x2="160" y2="110" stroke="currentColor" strokeWidth="0.7" opacity="0.3"/>
+                  <line x1="210" y1="80" x2="210" y2="110" stroke="currentColor" strokeWidth="0.7" opacity="0.3"/>
+                  {/* Longitud (top) */}
+                  <line x1="60" y1="17" x2="260" y2="17" stroke="#f97316" strokeWidth="1.2"/>
+                  <line x1="60" y1="13" x2="60" y2="21" stroke="#f97316" strokeWidth="1"/>
+                  <line x1="260" y1="13" x2="260" y2="21" stroke="#f97316" strokeWidth="1"/>
+                  <text x="160" y="11" textAnchor="middle" fontSize="10" fill="#f97316" fontWeight="600">
+                    Largo {form.longitud ? `= ${form.longitud} m` : "(L)"}
+                  </text>
+                  {/* Altura zocalo (right) */}
+                  <line x1="275" y1="80" x2="275" y2="110" stroke="#3b82f6" strokeWidth="1.2"/>
+                  <line x1="271" y1="80" x2="279" y2="80" stroke="#3b82f6" strokeWidth="1"/>
+                  <line x1="271" y1="110" x2="279" y2="110" stroke="#3b82f6" strokeWidth="1"/>
+                  <text x="298" y="98" textAnchor="middle" fontSize="9" fill="#3b82f6" fontWeight="600">
+                    H {form.alturaZocalo ? `= ${form.alturaZocalo}` : "(H)"}
+                  </text>
+                  {/* Label */}
+                  <text x="160" y="100" textAnchor="middle" fontSize="9" fill="currentColor" opacity="0.6">ZÓCALO</text>
+                  <text x="160" y="60" textAnchor="middle" fontSize="9" fill="currentColor" opacity="0.3">PARED</text>
+                </svg>
+                <div className="flex justify-center gap-4 mt-2 flex-wrap text-xs">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#f97316"}}/>
+                    <span className="text-muted-foreground">Largo</span>
+                    {form.longitud && <span className="font-bold text-orange-500">{form.longitud} m</span>}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#3b82f6"}}/>
+                    <span className="text-muted-foreground">Altura Zócalo</span>
+                    {form.alturaZocalo && <span className="font-bold text-blue-600">{form.alturaZocalo} m</span>}
+                  </span>
+                </div>
+              </div>
+
               <InputWithHelp
                 label="Descripción del Elemento"
                 value={form.descripcion}

@@ -212,6 +212,65 @@ export default function ParedConcretoCalculatorPage() {
           <Card>
             <CardHeader><CardTitle>Parámetros de Entrada</CardTitle></CardHeader>
             <CardContent className="space-y-4">
+              <div className="bg-muted/50 rounded-lg p-6 text-center">
+                <div className="text-sm text-muted-foreground mb-2">Pared de Concreto (Vista Frontal)</div>
+                <svg className="mx-auto max-w-[300px] w-full" viewBox="0 0 300 160">
+                  {/* Concrete wall front view */}
+                  <rect x="60" y="25" width="170" height="100" fill="currentColor" opacity="0.06" stroke="currentColor" strokeWidth="1.5"/>
+                  {/* Rebar dots inside */}
+                  <circle cx="85" cy="50" r="2.5" fill="currentColor" opacity="0.2"/>
+                  <circle cx="85" cy="75" r="2.5" fill="currentColor" opacity="0.2"/>
+                  <circle cx="85" cy="100" r="2.5" fill="currentColor" opacity="0.2"/>
+                  <circle cx="145" cy="50" r="2.5" fill="currentColor" opacity="0.2"/>
+                  <circle cx="145" cy="75" r="2.5" fill="currentColor" opacity="0.2"/>
+                  <circle cx="145" cy="100" r="2.5" fill="currentColor" opacity="0.2"/>
+                  <circle cx="205" cy="50" r="2.5" fill="currentColor" opacity="0.2"/>
+                  <circle cx="205" cy="75" r="2.5" fill="currentColor" opacity="0.2"/>
+                  <circle cx="205" cy="100" r="2.5" fill="currentColor" opacity="0.2"/>
+                  {/* Largo (top horizontal) */}
+                  <line x1="60" y1="12" x2="230" y2="12" stroke="#f97316" strokeWidth="1.2"/>
+                  <line x1="60" y1="8" x2="60" y2="16" stroke="#f97316" strokeWidth="1"/>
+                  <line x1="230" y1="8" x2="230" y2="16" stroke="#f97316" strokeWidth="1"/>
+                  <text x="145" y="7" textAnchor="middle" fontSize="10" fill="#f97316" fontWeight="600">
+                    Largo {form.largo ? `= ${form.largo} m` : "(L)"}
+                  </text>
+                  {/* Alto (left vertical) */}
+                  <line x1="45" y1="25" x2="45" y2="125" stroke="#3b82f6" strokeWidth="1.2"/>
+                  <line x1="41" y1="25" x2="49" y2="25" stroke="#3b82f6" strokeWidth="1"/>
+                  <line x1="41" y1="125" x2="49" y2="125" stroke="#3b82f6" strokeWidth="1"/>
+                  <text x="33" y="80" textAnchor="middle" fontSize="9" fill="#3b82f6" fontWeight="600" transform="rotate(-90,33,80)">
+                    Alto {form.alto ? `= ${form.alto} m` : "(A)"}
+                  </text>
+                  {/* Espesor (bottom right callout) */}
+                  <line x1="245" y1="125" x2="245" y2="145" stroke="#22c55e" strokeWidth="1.2"/>
+                  <line x1="241" y1="125" x2="249" y2="125" stroke="#22c55e" strokeWidth="1"/>
+                  <line x1="241" y1="145" x2="249" y2="145" stroke="#22c55e" strokeWidth="1"/>
+                  <text x="265" y="138" textAnchor="start" fontSize="9" fill="#22c55e" fontWeight="600">
+                    E {form.espesor ? `= ${form.espesor} m` : "(Esp)"}
+                  </text>
+                  {/* Section indicator line */}
+                  <line x1="145" y1="25" x2="145" y2="125" stroke="currentColor" strokeWidth="0.5" strokeDasharray="3,3" opacity="0.3"/>
+                  <text x="145" y="80" textAnchor="middle" fontSize="8" fill="currentColor" opacity="0.4">Sección</text>
+                </svg>
+                <div className="flex justify-center gap-3 mt-2 flex-wrap text-xs">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#f97316"}}/>
+                    <span className="text-muted-foreground">Largo</span>
+                    {form.largo && <span className="font-bold text-orange-500">{form.largo} m</span>}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#3b82f6"}}/>
+                    <span className="text-muted-foreground">Alto</span>
+                    {form.alto && <span className="font-bold text-blue-600">{form.alto} m</span>}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#22c55e"}}/>
+                    <span className="text-muted-foreground">Espesor</span>
+                    {form.espesor && <span className="font-bold text-green-600">{form.espesor} m</span>}
+                  </span>
+                </div>
+              </div>
+
               <InputWithHelp
                 label="Descripción del Elemento"
                 value={form.descripcion}

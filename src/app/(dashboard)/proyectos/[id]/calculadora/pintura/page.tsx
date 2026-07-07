@@ -180,6 +180,71 @@ export default function PinturaCalculatorPage() {
           <Card>
             <CardHeader><CardTitle>Parámetros de Entrada</CardTitle></CardHeader>
             <CardContent className="space-y-4">
+              <div className="bg-muted/50 rounded-lg p-6 text-center">
+                <div className="text-sm text-muted-foreground mb-2">Superficie a Pintar</div>
+                <svg className="mx-auto max-w-[300px] w-full" viewBox="0 0 300 160">
+                  {/* Wall surface */}
+                  <rect x="50" y="20" width="180" height="110" fill="currentColor" opacity="0.04" stroke="currentColor" strokeWidth="1.5"/>
+                  {/* Paint layers (manos) */}
+                  {form.manos === "1" || form.manos === "2" || form.manos === "3" ? (
+                    <rect x="54" y="24" width="172" height="102" fill="#f97316" opacity="0.08" stroke="#f97316" strokeWidth="0.5" strokeDasharray="2,2"/>
+                  ) : null}
+                  {form.manos === "2" || form.manos === "3" ? (
+                    <rect x="58" y="28" width="164" height="94" fill="#f97316" opacity="0.08" stroke="#f97316" strokeWidth="0.5" strokeDasharray="2,2"/>
+                  ) : null}
+                  {form.manos === "3" ? (
+                    <rect x="62" y="32" width="156" height="86" fill="#f97316" opacity="0.1" stroke="#f97316" strokeWidth="0.5"/>
+                  ) : null}
+                  {/* Paint roller icon */}
+                  <rect x="248" y="40" width="8" height="50" rx="3" fill="#f97316" opacity="0.3"/>
+                  <line x1="252" y1="40" x2="252" y2="25" stroke="#f97316" strokeWidth="1.5"/>
+                  <line x1="252" y1="25" x2="265" y2="25" stroke="#f97316" strokeWidth="1.5"/>
+                  <text x="268" y="29" fontSize="8" fill="#f97316" opacity="0.6">1ª mano</text>
+                  {/* Area label in center */}
+                  <text x="140" y="75" textAnchor="middle" fontSize="11" fill="currentColor" opacity="0.3" fontWeight="600">
+                    {form.area ? `${form.area} m²` : "Área"}
+                  </text>
+                  <text x="140" y="90" textAnchor="middle" fontSize="8" fill="currentColor" opacity="0.25">
+                    {form.manos ? `${form.manos} mano${form.manos === "2" ? "s" : ""}` : ""}
+                  </text>
+                  {form.lados === "2" && (
+                    <text x="140" y="102" textAnchor="middle" fontSize="7" fill="#22c55e" opacity="0.6">Ambos lados</text>
+                  )}
+                  {/* Area dimension - width */}
+                  <line x1="50" y1="145" x2="230" y2="145" stroke="#f97316" strokeWidth="1.2"/>
+                  <line x1="50" y1="141" x2="50" y2="149" stroke="#f97316" strokeWidth="1"/>
+                  <line x1="230" y1="141" x2="230" y2="149" stroke="#f97316" strokeWidth="1"/>
+                  <text x="140" y="155" textAnchor="middle" fontSize="9" fill="#f97316" fontWeight="600">
+                    {form.area ? `Área = ${form.area} m²` : "(Área)"}
+                  </text>
+                  {/* Manos count indicator (right side) */}
+                  <line x1="280" y1="45" x2="280" y2="115" stroke="#3b82f6" strokeWidth="1.2"/>
+                  <line x1="276" y1="45" x2="284" y2="45" stroke="#3b82f6" strokeWidth="1"/>
+                  <line x1="276" y1="115" x2="284" y2="115" stroke="#3b82f6" strokeWidth="1"/>
+                  <text x="293" y="83" textAnchor="middle" fontSize="8" fill="#3b82f6" fontWeight="600" transform="rotate(-90,293,83)">
+                    {form.manos ? `${form.manos} Capas` : "(Manos)"}
+                  </text>
+                </svg>
+                <div className="flex justify-center gap-4 mt-2 flex-wrap text-xs">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#f97316"}}/>
+                    <span className="text-muted-foreground">Área</span>
+                    {form.area && <span className="font-bold text-orange-500">{form.area} m²</span>}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#3b82f6"}}/>
+                    <span className="text-muted-foreground">Manos</span>
+                    {form.manos && <span className="font-bold text-blue-600">{form.manos}</span>}
+                  </span>
+                  {form.lados === "2" && (
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#22c55e"}}/>
+                      <span className="font-bold text-green-600">Ambos lados</span>
+                    </span>
+                  )}
+                </div>
+              </div>
+
               <InputWithHelp
                 label="Descripción del Elemento"
                 value={form.descripcion}
