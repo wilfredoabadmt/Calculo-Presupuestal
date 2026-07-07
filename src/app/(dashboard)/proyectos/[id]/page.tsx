@@ -486,17 +486,17 @@ export default function ProyectoDetailPage() {
               <CardHeader><CardTitle className="text-base">Exportar Datos</CardTitle></CardHeader>
               <CardContent className="space-y-2">
                 <Button variant="outline" className="w-full justify-start gap-2" asChild>
-                  <Link href={`/proyectos/${projectId}/reportes`}>
+                  <Link href={`/proyectos/${projectId}/presupuesto`}>
                     <FileText className="h-4 w-4" /> Presupuesto PDF/Excel
                   </Link>
                 </Button>
                 <Button variant="outline" className="w-full justify-start gap-2" asChild>
-                  <Link href={`/proyectos/${projectId}/reportes`}>
+                  <Link href={`/proyectos/${projectId}/computos`}>
                     <Ruler className="h-4 w-4" /> Computos Métricos
                   </Link>
                 </Button>
                 <Button variant="outline" className="w-full justify-start gap-2" asChild>
-                  <Link href={`/proyectos/${projectId}/reportes`}>
+                  <Link href={`/proyectos/${projectId}/cronograma`}>
                     <Calendar className="h-4 w-4" /> Cronograma PDF
                   </Link>
                 </Button>
