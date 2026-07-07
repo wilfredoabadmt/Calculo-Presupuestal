@@ -24,6 +24,12 @@ RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.23/m
 COPY package*.json ./
 COPY prisma ./prisma/
 
+# Configure npm for network resilience to prevent ECONNRESET on VPS networks
+RUN npm config set fetch-retries 10 && \
+    npm config set fetch-retry-mintimeout 20000 && \
+    npm config set fetch-retry-maxtimeout 120000 && \
+    npm config set maxsockets 3
+
 # Install dependencies (cached unless package.json changes)
 RUN --mount=type=cache,target=/root/.npm npm ci --ignore-scripts --network-timeout 600000
 
