@@ -74,6 +74,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # Copy prisma files
 COPY --from=builder /app/prisma ./prisma
 
+# Copy guia files (for database seed-banco-precios.ts)
+COPY --from=builder /app/guia ./guia
+
 # Copy prepared runtime dependencies
 COPY --from=builder --chown=nextjs:nodejs /app/rt-deps /app/rt-deps
 
