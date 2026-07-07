@@ -278,6 +278,26 @@ function determineMaterialGroup(name: string): string {
   return 'OTROS'
 }
 
+function determineMaterialSubcategory(name: string): string | null {
+  const n = name.toLowerCase()
+  
+  if (n.includes('demo')) return 'Demolición'
+  if (n.includes('hormigón') || n.includes('concreto') || n.includes('f\'c') || n.includes('plantilla')) return 'Hormigón y Concreto'
+  if (n.includes('cerámica') || n.includes('ceramica') || n.includes('porcelanato') || n.includes('azulejo') || n.includes('mosaico') || n.includes('piso')) return 'Revestimientos'
+  if (n.includes('pintura') || n.includes('esmalte') || n.includes('latex') || n.includes('barniz')) return 'Pinturas'
+  if (n.includes('tubería') || n.includes('tuberia') || n.includes('grifería') || n.includes('griferia') || n.includes('llave') || n.includes('válvula') || n.includes('valvula')) return 'Hidráulica'
+  if (n.includes('cable') || n.includes('interruptor') || n.includes('enchufe') || n.includes('lámpara') || n.includes('lampara') || n.includes('foco')) return 'Eléctrica'
+  if (n.includes('teja') || n.includes('calamina') || n.includes('chapa') || n.includes('lámina') || n.includes('lamina')) return 'Cubiertas'
+  if (n.includes('madera') || n.includes('pino') || n.includes('tablón') || n.includes('tablon') || n.includes('puntal')) return 'Carpintería'
+  if (n.includes('acero') || n.includes('fierro') || n.includes('alambre') || n.includes('malla') || n.includes('clavo') || n.includes('varilla')) return 'Structural'
+  if (n.includes('bloque') || n.includes('ladrillo') || n.includes('adobe')) return 'Mampostería'
+  if (n.includes('cemento') || n.includes('yeso') || n.includes('cal') || n.includes('arena') || n.includes('grava')) return 'Materiales Básicos'
+  if (n.includes('aislante') || n.includes('termica') || n.includes('térmica')) return 'Aislamiento'
+  if (n.includes('sello') || n.includes('silicona') || n.includes('espuma')) return 'Selladores'
+  
+  return null
+}
+
 
 async function main() {
   console.log('🏗️  Importando base de precios referenciales 2007...')
@@ -443,12 +463,15 @@ async function main() {
       }
       existingCodes.add(finalCode.toLowerCase())
       
+      const subcategoria = determineMaterialSubcategory(mat.nombre)
+      
       newMaterialsToInsert.push({
         codigo: finalCode,
         nombre: mat.nombre,
         unidad: mat.unidad,
         precio: mat.precio,
         grupo: grupo,
+        subcategoria: subcategoria,
         proveedor: 'Banco de Precios 2007',
         activo: true,
         descripcion: `Material importado desde APU - Banco de Precios 2007`

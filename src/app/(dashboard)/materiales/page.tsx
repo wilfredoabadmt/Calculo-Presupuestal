@@ -23,14 +23,16 @@ interface Material {
   unidad: string
   precio: number
   grupo: string
+  subcategoria?: string
   proveedor?: string
 }
 
-const emptyForm = { codigo: "", nombre: "", unidad: "kg", precio: "", grupo: "CEMENTO", proveedor: "" }
+const emptyForm = { codigo: "", nombre: "", unidad: "kg", precio: "", grupo: "CEMENTO", subcategoria: "", proveedor: "" }
 
 export default function MaterialesPage() {
   const [search, setSearch] = useState("")
   const [grupoFilter, setGrupoFilter] = useState("TODOS")
+  const [subcategoriaFilter, setSubcategoriaFilter] = useState("TODAS")
   const [materiales, setMateriales] = useState<Material[]>([])
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -72,6 +74,7 @@ export default function MaterialesPage() {
       unidad: m.unidad,
       precio: m.precio.toString(),
       grupo: m.grupo,
+      subcategoria: m.subcategoria || "",
       proveedor: m.proveedor || "",
     })
     setDialogOpen(true)
@@ -123,11 +126,13 @@ export default function MaterialesPage() {
   }
 
   const grupos = ["TODOS", ...Array.from(new Set(materiales.map(m => m.grupo)))]
+  const subcategorias = ["TODAS", ...Array.from(new Set(materiales.map(m => m.subcategoria).filter(Boolean) as string[]))]
 
   const filtered = materiales.filter(m => {
     const matchSearch = m.nombre.toLowerCase().includes(search.toLowerCase()) || m.codigo.toLowerCase().includes(search.toLowerCase())
     const matchGrupo = grupoFilter === "TODOS" || m.grupo === grupoFilter
-    return matchSearch && matchGrupo
+    const matchSubcategoria = subcategoriaFilter === "TODAS" || m.subcategoria === subcategoriaFilter
+    return matchSearch && matchGrupo && matchSubcategoria
   })
 
   if (loading) {
@@ -171,6 +176,19 @@ export default function MaterialesPage() {
               </button>
             ))}
           </div>
+          {subcategorias.length > 1 && (
+            <div className="flex flex-wrap gap-2">
+              {subcategorias.map(s => (
+                <button
+                  key={s}
+                  onClick={() => setSubcategoriaFilter(s)}
+                  className={`px-3 py-1 rounded-full text-xs transition-colors ${subcategoriaFilter === s ? "bg-secondary text-secondary-foreground" : "bg-muted text-muted-foreground hover:bg-accent"}`}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
 
           {filtered.length === 0 ? (
             <EmptyState
@@ -187,6 +205,7 @@ export default function MaterialesPage() {
                     <TableHead>Nombre</TableHead>
                     <TableHead>Unidad</TableHead>
                     <TableHead>Grupo</TableHead>
+                    <TableHead>Subcategoría</TableHead>
                     <TableHead className="text-right">Precio</TableHead>
                     <TableHead className="text-right">Acciones</TableHead>
                   </TableRow>
@@ -198,6 +217,7 @@ export default function MaterialesPage() {
                       <TableCell className="font-medium">{m.nombre}</TableCell>
                       <TableCell>{m.unidad}</TableCell>
                       <TableCell><span className="px-2 py-1 rounded-full text-xs bg-muted">{m.grupo}</span></TableCell>
+                      <TableCell><span className="px-2 py-1 rounded-full text-xs bg-muted">{m.subcategoria || '-'}</span></TableCell>
                       <TableCell className="text-right">{formatCurrency(m.precio)}</TableCell>
                       <TableCell className="text-right">
                         <Button variant="ghost" size="icon" onClick={() => openEdit(m)}>
@@ -262,6 +282,12 @@ export default function MaterialesPage() {
                   </SelectContent>
                 </Select>
               </div>
+              <div className="space-y-2">
+                <Label>Subcategoría</Label>
+                <Input value={form.subcategoria} onChange={e => setForm({...form, subcategoria: e.target.value})} placeholder="Opcional" />
+              </div>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label>Proveedor</Label>
                 <Input value={form.proveedor} onChange={e => setForm({...form, proveedor: e.target.value})} placeholder="Opcional" />

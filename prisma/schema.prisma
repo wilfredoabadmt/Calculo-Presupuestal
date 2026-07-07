@@ -45,6 +45,7 @@ model Material {
   unidad      String   // kg, m3, m2, ml, lt, bolsa, pza, etc.
   precio      Float
   grupo       String   // CEMENTO, ARENA, GRAVA, ACERO, BLOQUE, etc.
+  subcategoria String? // Subcategoría del material (ej: Demolición y Preparación, Cimentaciones, etc.)
   fechaPrecio DateTime @default(now())
   proveedor   String?
   activo      Boolean  @default(true)

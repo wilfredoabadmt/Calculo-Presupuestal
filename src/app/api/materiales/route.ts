@@ -5,6 +5,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const search = searchParams.get("search") || ""
   const grupo = searchParams.get("grupo") || ""
+  const subcategoria = searchParams.get("subcategoria") || ""
 
   const where: any = { activo: true }
   if (search) {
@@ -15,6 +16,9 @@ export async function GET(request: Request) {
   }
   if (grupo) {
     where.grupo = grupo
+  }
+  if (subcategoria) {
+    where.subcategoria = subcategoria
   }
 
   const materiales = await prisma.material.findMany({
@@ -27,14 +31,14 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const body = await request.json()
-  const { codigo, nombre, unidad, precio, grupo, proveedor, descripcion } = body
+  const { codigo, nombre, unidad, precio, grupo, subcategoria, proveedor, descripcion } = body
 
   if (!codigo || !nombre || !unidad || precio === undefined || !grupo) {
     return NextResponse.json({ error: "Campos requeridos: codigo, nombre, unidad, precio, grupo" }, { status: 400 })
   }
 
   const material = await prisma.material.create({
-    data: { codigo, nombre, unidad, precio, grupo, proveedor, descripcion },
+    data: { codigo, nombre, unidad, precio, grupo, subcategoria, proveedor, descripcion },
   })
 
   return NextResponse.json(material, { status: 201 })
