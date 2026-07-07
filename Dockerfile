@@ -51,6 +51,7 @@ RUN mkdir -p /app/rt-deps && \
   cp -r /app/node_modules/zod /app/rt-deps/zod && \
   cp -r /app/node_modules/get-tsconfig /app/rt-deps/get-tsconfig && \
   cp -r /app/node_modules/resolve-pkg-maps /app/rt-deps/resolve-pkg-maps && \
+  cp -r /app/node_modules/xlsx /app/rt-deps/xlsx && \
   (cp -r /app/node_modules/@prisma/engines /app/rt-deps/prisma-engines 2>/dev/null || true)
 
 # Production stage
@@ -78,7 +79,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/rt-deps /app/rt-deps
 
 # Restore runtime dependencies to node_modules
 RUN mkdir -p /app/node_modules && \
-  rm -rf /app/node_modules/.prisma /app/node_modules/@prisma /app/node_modules/prisma /app/node_modules/.bin /app/node_modules/tsx /app/node_modules/esbuild /app/node_modules/@esbuild /app/node_modules/typescript /app/node_modules/bcryptjs /app/node_modules/@types /app/node_modules/zod /app/node_modules/get-tsconfig /app/node_modules/resolve-pkg-maps && \
+  rm -rf /app/node_modules/.prisma /app/node_modules/@prisma /app/node_modules/prisma /app/node_modules/.bin /app/node_modules/tsx /app/node_modules/esbuild /app/node_modules/@esbuild /app/node_modules/typescript /app/node_modules/bcryptjs /app/node_modules/@types /app/node_modules/zod /app/node_modules/get-tsconfig /app/node_modules/resolve-pkg-maps /app/node_modules/xlsx && \
   mv /app/rt-deps/dot-prisma /app/node_modules/.prisma && \
   mv /app/rt-deps/at-prisma /app/node_modules/@prisma && \
   mv /app/rt-deps/prisma /app/node_modules/prisma && \
@@ -92,6 +93,7 @@ RUN mkdir -p /app/node_modules && \
   mv /app/rt-deps/zod /app/node_modules/zod && \
   mv /app/rt-deps/get-tsconfig /app/node_modules/get-tsconfig && \
   mv /app/rt-deps/resolve-pkg-maps /app/node_modules/resolve-pkg-maps && \
+  mv /app/rt-deps/xlsx /app/node_modules/xlsx && \
   (test -d /app/rt-deps/prisma-engines && mkdir -p /app/node_modules/@prisma/engines && cp -r /app/rt-deps/prisma-engines/* /app/node_modules/@prisma/engines/ || true) && \
   rm -rf /app/rt-deps
 

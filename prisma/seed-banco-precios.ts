@@ -46,6 +46,26 @@ function cleanText(str: string): string {
     .trim();
 }
 
+function determineSubcategory(codigo: string): string | null {
+  if (!codigo) return null
+  const prefix = codigo.split('-')[0].trim().toUpperCase()
+  
+  if (['DEM', 'DES', 'PIC', 'REM', 'RET', 'SEL'].includes(prefix)) return 'Demolición y Preparación'
+  if (['INS', 'LET', 'REP'].includes(prefix)) return 'Obras Preliminares'
+  if (['EXC', 'COR', 'MOV', 'REL'].includes(prefix)) return 'Movimiento de Tierras'
+  if (['CIM', 'SOB', 'EMP', 'PIE'].includes(prefix)) return 'Cimentaciones'
+  if (['COL', 'VIG', 'LOS', 'ESC', 'MAM', 'MUR', 'PAR'].includes(prefix)) return 'Obra Gruesa'
+  if (['REV', 'ENL', 'CIE', 'PIS', 'ZOC'].includes(prefix)) return 'Revoques y Pisos'
+  if (['CUB', 'TEJ', 'CHP', 'CUM', 'BAJ'].includes(prefix)) return 'Cubiertas y Drenajes'
+  if (['PUE', 'VEN', 'MAR', 'CER', 'BAR', 'MES'].includes(prefix)) return 'Carpintería y Cerrajería'
+  if (['PIN'].includes(prefix)) return 'Pinturas'
+  if (['TUB', 'CAM', 'SUM', 'CAN', 'VAL', 'LLA', 'POZ'].includes(prefix)) return 'Instalación Hidrosanitaria'
+  if (['LUM', 'CON', 'TAB', 'CAB'].includes(prefix)) return 'Instalación Eléctrica'
+  if (['ADO', 'PAV', 'JUN', 'ASF'].includes(prefix)) return 'Pavimentos y Vías'
+  
+  return 'Otros'
+}
+
 function parseCategorySheet(
   wb: XLSX.WorkBook,
   sheetName: string,
@@ -84,7 +104,7 @@ function parseCategorySheet(
       unidad: unidad.toLowerCase(),
       cantidad: 1,
       categoria,
-      subcategoria: currentSubcategoria ? cleanText(currentSubcategoria) : null,
+      subcategoria: (currentSubcategoria ? cleanText(currentSubcategoria) : null) || (codigo ? determineSubcategory(codigo) : null),
       materiales: null,
       manoObra: null,
       beneficiosSociales: 71.18,
