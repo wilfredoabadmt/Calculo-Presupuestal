@@ -15,7 +15,7 @@ ENV NEXTAUTH_URL=${NEXTAUTH_URL}
 ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
 ENV DATABASE_URL=${DATABASE_URL}
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV NODE_OPTIONS="--max-old-space-size=2048"
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 
 # Install OpenSSL and CA Certificates for Prisma/node SSL requests
 RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.23/main/ --repository http://dl-cdn.alpinelinux.org/alpine/v3.23/community/ openssl ca-certificates

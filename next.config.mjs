@@ -17,7 +17,7 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   experimental: {
-    cpus: 1,
+    cpus: 4,
   },
   allowedDevOrigins: ['192.168.0.7', 'localhost:3000']
 };
