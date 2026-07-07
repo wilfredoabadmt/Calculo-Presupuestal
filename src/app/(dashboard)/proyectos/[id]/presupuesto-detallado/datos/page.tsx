@@ -30,6 +30,7 @@ interface MedicionFormRow {
   alto: string
   precioUnitario: string
   calculadoraUsada: string | null
+  isDirty?: boolean
 }
 
 const emptyRow: MedicionFormRow = {
@@ -41,6 +42,7 @@ const emptyRow: MedicionFormRow = {
   alto: "",
   precioUnitario: "",
   calculadoraUsada: null,
+  isDirty: true,
 }
 
 export default function DatosPage() {
@@ -77,6 +79,7 @@ export default function DatosPage() {
       alto: m.alto.toString(),
       precioUnitario: m.precioUnitario.toString(),
       calculadoraUsada: m.calculadoraUsada,
+      isDirty: false,
     }))
 
     // Auto-add rows for partidas that don't have mediciones yet
@@ -92,6 +95,7 @@ export default function DatosPage() {
             alto: "",
             precioUnitario: part.precioBase.toString(),
             calculadoraUsada: null,
+            isDirty: false,
           })
         }
       }
@@ -123,6 +127,13 @@ export default function DatosPage() {
     const a = parseFloat(row.ancho) || 0
     const h = parseFloat(row.alto) || 0
 
+    const unit = (capitulos.find(c => c.id === row.capituloId)?.partidas.find(p => p.id === row.partidaId)?.unidad || "").toLowerCase()
+    const isDimensioned = ["m³", "m²", "ml", "m3", "m2"].includes(unit)
+
+    if (isDimensioned && l === 0 && a === 0 && h === 0) {
+      return 0
+    }
+
     const lVal = l > 0 ? l : 1
     const aVal = a > 0 ? a : 1
     const hVal = h > 0 ? h : 1
@@ -136,7 +147,7 @@ export default function DatosPage() {
   const updateRow = (index: number, field: keyof MedicionFormRow, value: string) => {
     setRows(prev => {
       const next = [...prev]
-      next[index] = { ...next[index], [field]: value }
+      next[index] = { ...next[index], [field]: value, isDirty: true }
 
       // Auto-fill price when partida changes
       if (field === "partidaId" && value) {
@@ -152,7 +163,7 @@ export default function DatosPage() {
   }
 
   const addRow = () => {
-    setRows(prev => [...prev, { ...emptyRow }])
+    setRows(prev => [...prev, { ...emptyRow, isDirty: true }])
     // Scroll to bottom
     setTimeout(() => {
       tableRef.current?.scrollTo({ top: tableRef.current.scrollHeight, behavior: "smooth" })
@@ -161,7 +172,7 @@ export default function DatosPage() {
 
   const duplicateRow = (index: number) => {
     setRows(prev => {
-      const copy = { ...prev[index], id: undefined, calculadoraUsada: null }
+      const copy = { ...prev[index], id: undefined, calculadoraUsada: null, isDirty: true }
       const next = [...prev]
       next.splice(index + 1, 0, copy)
       return next
@@ -188,32 +199,74 @@ export default function DatosPage() {
 
   const handleSaveAll = async () => {
     setSaving(true)
-    let savedCount = 0
+    const updatedRows: MedicionFormRow[] = []
 
     for (const row of rows) {
       if (!row.partidaId) continue
 
-      const data = {
-        partidaId: row.partidaId,
-        veces: parseFloat(row.veces) || 1,
-        largo: parseFloat(row.largo) || 0,
-        ancho: parseFloat(row.ancho) || 0,
-        alto: parseFloat(row.alto) || 0,
-        precioUnitario: parseFloat(row.precioUnitario) || 0,
-        calculadoraUsada: row.calculadoraUsada || undefined,
-      }
+      const unit = (capitulos.find(c => c.id === row.capituloId)?.partidas.find(p => p.id === row.partidaId)?.unidad || "").toLowerCase()
+      const isDimensioned = ["m³", "m²", "ml", "m3", "m2"].includes(unit)
+      const isEmpty = !parseFloat(row.largo) && !parseFloat(row.ancho) && !parseFloat(row.alto)
 
       if (row.id) {
-        await actualizarMedicion(row.id, data)
+        // Si ya existe en la base de datos, pero está vacío y es dimensionado, lo eliminamos
+        if (isEmpty && isDimensioned) {
+          await eliminarMedicion(row.id)
+          // No lo añadimos a los rows actualizados para que se vuelva a mostrar como vacío y no guardado
+          const capId = row.capituloId
+          const partId = row.partidaId
+          const part = capitulos.find(c => c.id === capId)?.partidas.find(p => p.id === partId)
+          updatedRows.push({
+            capituloId: capId,
+            partidaId: partId,
+            veces: "1",
+            largo: "",
+            ancho: "",
+            alto: "",
+            precioUnitario: part ? part.precioBase.toString() : "0",
+            calculadoraUsada: null,
+            isDirty: false,
+          })
+          continue
+        } else if (row.isDirty) {
+          const data = {
+            partidaId: row.partidaId,
+            veces: parseFloat(row.veces) || 1,
+            largo: parseFloat(row.largo) || 0,
+            ancho: parseFloat(row.ancho) || 0,
+            alto: parseFloat(row.alto) || 0,
+            precioUnitario: parseFloat(row.precioUnitario) || 0,
+            calculadoraUsada: row.calculadoraUsada || undefined,
+          }
+          await actualizarMedicion(row.id, data)
+        }
+        updatedRows.push({ ...row, isDirty: false })
       } else {
-        const nueva = await crearMedicion(data)
-        if (nueva) {
-          setRows(prev => prev.map(r => r === row ? { ...r, id: nueva.id } : r))
+        // Fila nueva: solo la guardamos si no está vacía o si es un ítem de unidad (no dimensionado) y ha sido modificado
+        if (!isEmpty || (!isDimensioned && row.isDirty)) {
+          const data = {
+            partidaId: row.partidaId,
+            veces: parseFloat(row.veces) || 1,
+            largo: parseFloat(row.largo) || 0,
+            ancho: parseFloat(row.ancho) || 0,
+            alto: parseFloat(row.alto) || 0,
+            precioUnitario: parseFloat(row.precioUnitario) || 0,
+            calculadoraUsada: row.calculadoraUsada || undefined,
+          }
+          const nueva = await crearMedicion(data)
+          if (nueva) {
+            updatedRows.push({ ...row, id: nueva.id, isDirty: false })
+          } else {
+            updatedRows.push(row)
+          }
+        } else {
+          // Si es nueva y está vacía, la mantenemos en el formulario para que el usuario la vea pero no la guardamos en la BD
+          updatedRows.push(row)
         }
       }
-      savedCount++
     }
 
+    setRows(updatedRows)
     setSaving(false)
   }
 

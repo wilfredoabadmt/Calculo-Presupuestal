@@ -99,10 +99,18 @@ export default function InformePage() {
           mediciones: mediciones
             .filter(m => m.partidaId === part.id)
             .map(m => {
-              const l = m.largo > 0 ? m.largo : 1
-              const a = m.ancho > 0 ? m.ancho : 1
-              const h = m.alto > 0 ? m.alto : 1
-              const parcial = m.veces * l * a * h
+              const unit = (part.unidad || "").toLowerCase()
+              const isDimensioned = ["m³", "m²", "ml", "m3", "m2"].includes(unit)
+              
+              let parcial = 0
+              if (isDimensioned && m.largo === 0 && m.ancho === 0 && m.alto === 0) {
+                parcial = 0
+              } else {
+                const l = m.largo > 0 ? m.largo : 1
+                const a = m.ancho > 0 ? m.ancho : 1
+                const h = m.alto > 0 ? m.alto : 1
+                parcial = m.veces * l * a * h
+              }
               const costoTotal = parcial * m.precioUnitario
               return {
                 veces: m.veces,

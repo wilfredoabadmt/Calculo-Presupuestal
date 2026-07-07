@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
 
     // Send welcome email
     try {
-      await sendWelcomeEmail(user.email, user.name)
+      await sendWelcomeEmail(user.email, user.name || "")
     } catch (emailErr) {
       console.error("Failed to send welcome email:", emailErr)
     }

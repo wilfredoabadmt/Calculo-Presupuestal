@@ -33,10 +33,18 @@ export default function ResumenPage() {
           sumPart + mediciones
             .filter(m => m.partidaId === part.id)
             .reduce((sumMed, med) => {
-              const l = med.largo > 0 ? med.largo : 1
-              const a = med.ancho > 0 ? med.ancho : 1
-              const h = med.alto > 0 ? med.alto : 1
-              const parcial = med.veces * l * a * h
+              const unit = (part.unidad || "").toLowerCase()
+              const isDimensioned = ["m³", "m²", "ml", "m3", "m2"].includes(unit)
+              
+              let parcial = 0
+              if (isDimensioned && med.largo === 0 && med.ancho === 0 && med.alto === 0) {
+                parcial = 0
+              } else {
+                const l = med.largo > 0 ? med.largo : 1
+                const a = med.ancho > 0 ? med.ancho : 1
+                const h = med.alto > 0 ? med.alto : 1
+                parcial = med.veces * l * a * h
+              }
               const costoTotal = parcial * med.precioUnitario
               return sumMed + (costoTotal || 0)
             }, 0)
