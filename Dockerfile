@@ -25,7 +25,7 @@ COPY package*.json ./
 COPY prisma ./prisma/
 
 # Install dependencies (cached unless package.json changes)
-RUN npm ci --ignore-scripts --network-timeout 600000
+RUN --mount=type=cache,target=/root/.npm npm ci --ignore-scripts --network-timeout 600000
 
 # Copy source code
 COPY . .
@@ -34,7 +34,7 @@ COPY . .
 RUN npx prisma generate
 
 # Build application
-RUN npm run build
+RUN --mount=type=cache,target=/app/.next/cache npm run build
 
 # Prepare runtime dependencies (avoid '@' in COPY paths for Coolify parser)
 RUN mkdir -p /app/rt-deps && \
