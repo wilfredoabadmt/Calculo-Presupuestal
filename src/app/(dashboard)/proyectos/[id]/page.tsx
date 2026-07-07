@@ -164,7 +164,7 @@ export default function ProyectoDetailPage() {
         setEditForm({
           descripcion: el.descripcion || "",
           cantidad: el.cantidad?.toString() || "1",
-          costoTotal: Math.round((el.costoTotal || 0) * 100 / 100).toString(),
+          costoTotal: (Math.round((el.costoTotal || 0) * 100) / 100).toString(),
           dimA: el.dimA?.toString() || "",
           dimB: el.dimB?.toString() || "",
           dimH: el.dimH?.toString() || "",
