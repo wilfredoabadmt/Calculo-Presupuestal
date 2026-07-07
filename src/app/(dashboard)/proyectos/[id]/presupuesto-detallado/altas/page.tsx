@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { EmptyState } from "@/components/shared/EmptyState"
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog"
+import { formatCurrency } from "@/lib/utils"
 import {
   Plus,
   GripVertical,
@@ -25,6 +26,7 @@ import {
   Search,
   CheckSquare,
   Square,
+  Calculator,
 } from "lucide-react"
 
 const UNIDADES = ["m³", "m²", "ml", "ud", "kg", "lote", "pza", "gl", "tubo", "hr", "hja", "glb"]
@@ -69,18 +71,11 @@ export default function AltasPage() {
   const [deleteType, setDeleteType] = useState<"capitulo" | "partida">("capitulo")
   const [saving, setSaving] = useState(false)
 
-  // Importación del banco de precios
+  // Importación desde calculadoras del proyecto
   const [importOpen, setImportOpen] = useState(false)
-  const [importSearch, setImportSearch] = useState("")
-  const [importCategoria, setImportCategoria] = useState("ALL")
-  const [importItems, setImportItems] = useState<{ id: string; codigo: string; actividad: string; unidad: string; precioUnitario: number; categoria: string }[]>([])
+  const [importItems, setImportItems] = useState<{ id: string; tipoElemento: string; descripcion: string; cantidad: number; costoTotal: number }[]>([])
   const [importSelected, setImportSelected] = useState<Set<string>>(new Set())
   const [importLoading, setImportLoading] = useState(false)
-  const [importCategorias, setImportCategorias] = useState<{ nombre: string; count: number }[]>([])
-  const [importPage, setImportPage] = useState(1)
-  const [importTotal, setImportTotal] = useState(0)
-  const [importTargetCap, setImportTargetCap] = useState<string>("NEW")
-  const [importNewCapName, setImportNewCapName] = useState("")
   const [importing, setImporting] = useState(false)
 
   // Capítulo form
@@ -200,40 +195,21 @@ export default function AltasPage() {
     })
   }
 
-  // ====== IMPORTAR DEL BANCO DE PRECIOS ======
+  // ====== IMPORTAR DESDE CALCULADORAS DEL PROYECTO ======
   const openImportDialog = async () => {
     setImportOpen(true)
-    setImportSearch("")
-    setImportCategoria("ALL")
     setImportSelected(new Set())
-    setImportPage(1)
-    setImportTargetCap("NEW")
-    setImportNewCapName("")
-    await loadBancoCategorias()
-    await loadBancoItems()
-  }
-
-  const loadBancoCategorias = async () => {
-    try {
-      const res = await fetch("/api/banco-precios?categorias=true")
-      const data = await res.json()
-      setImportCategorias(data.categorias || [])
-    } catch {
-      setImportCategorias([])
-    }
-  }
-
-  const loadBancoItems = async (page = 1, search = "", categoria = "") => {
     setImportLoading(true)
     try {
-      const params = new URLSearchParams({ page: page.toString(), limit: "30" })
-      if (search) params.set("search", search)
-      if (categoria && categoria !== "ALL") params.set("categoria", categoria)
-      const res = await fetch(`/api/banco-precios?${params}`)
-      const data = await res.json()
-      setImportItems(data.items || [])
-      setImportTotal(data.total || 0)
-      setImportPage(data.page || 1)
+      const res = await fetch(`/api/proyectos/${proyectoId}/elementos`)
+      const elementos = await res.json()
+      setImportItems(Array.isArray(elementos) ? elementos.map((e: any) => ({
+        id: e.id,
+        tipoElemento: e.tipoElemento,
+        descripcion: e.descripcion,
+        cantidad: e.cantidad,
+        costoTotal: e.costoTotal,
+      })) : [])
     } catch {
       setImportItems([])
     }
@@ -261,26 +237,15 @@ export default function AltasPage() {
     if (importSelected.size === 0) return
     setImporting(true)
 
-    const items = Array.from(importSelected).map(id => {
-      const item = importItems.find(i => i.id === id)
-      const cap = importTargetCap === "NEW" ? null : capitulos.find(c => c.id === importTargetCap)
-      return {
-        bancoPrecioId: id,
-        capituloId: cap?.id || undefined,
-        capituloNombre: importTargetCap === "NEW" ? (importNewCapName || item?.categoria || "SIN NOMBRE") : undefined,
-        capituloCodigo: importTargetCap === "NEW" ? (capitulos.length > 0 ? Math.max(...capitulos.map(c => c.codigo)) + 1 : 1) : undefined,
-      }
-    })
-
     try {
-      const res = await fetch(`/api/proyectos/${proyectoId}/importar-banco`, {
+      const res = await fetch(`/api/proyectos/${proyectoId}/importar-elementos`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items, crearCapitulos: true }),
+        body: JSON.stringify({ elementoIds: Array.from(importSelected), crearCapitulos: true }),
       })
       const data = await res.json()
       if (data.ok) {
-        alert(`Importación exitosa: ${data.partidasCreadas} partidas en ${data.capitulosCreados} capítulos nuevos`)
+        alert(`Importación exitosa: ${data.partidasCreadas} partidas en ${data.capitulosCreados} capítulos`)
         setImportOpen(false)
         await cargarDatos()
       } else {
@@ -290,6 +255,26 @@ export default function AltasPage() {
       alert("Error de conexión al importar")
     }
     setImporting(false)
+  }
+
+  const tipoColor = (tipo: string) => {
+    const colors: Record<string, string> = {
+      CONCRETO: "bg-blue-100 text-blue-800",
+      COLUMNA: "bg-purple-100 text-purple-800",
+      VIGA: "bg-indigo-100 text-indigo-800",
+      LOSA: "bg-cyan-100 text-cyan-800",
+      CIMIENTO: "bg-amber-100 text-amber-800",
+      MURO: "bg-green-100 text-green-800",
+      PARED: "bg-green-100 text-green-800",
+      PARED_CONCRETO: "bg-green-100 text-green-800",
+      PARED_DRYWALL: "bg-teal-100 text-teal-800",
+      PISO: "bg-rose-100 text-rose-800",
+      ZOCALO: "bg-pink-100 text-pink-800",
+      TECHO: "bg-orange-100 text-orange-800",
+      CIELO: "bg-yellow-100 text-yellow-800",
+      PINTURA: "bg-red-100 text-red-800",
+    }
+    return colors[tipo] || "bg-gray-100 text-gray-800"
   }
 
   if (loading) {
@@ -316,7 +301,7 @@ export default function AltasPage() {
           </Button>
           <Button variant="outline" onClick={openImportDialog}>
             <Download className="mr-2 h-4 w-4" />
-            Importar Banco
+            Importar del Proyecto
           </Button>
           <Button onClick={openCreateCap}>
             <Plus className="mr-2 h-4 w-4" />
@@ -582,74 +567,17 @@ export default function AltasPage() {
         confirmText="Eliminar"
       />
 
-      {/* Dialog Importar Banco de Precios */}
+      {/* Dialog Importar desde Calculadoras del Proyecto */}
       <Dialog open={importOpen} onOpenChange={setImportOpen}>
-        <DialogContent className="max-w-4xl max-h-[85vh] flex flex-col">
+        <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col">
           <DialogHeader>
-            <DialogTitle>Importar del Banco de Precios</DialogTitle>
+            <DialogTitle>Importar Elementos del Proyecto</DialogTitle>
+            <p className="text-sm text-muted-foreground">
+              Selecciona los elementos calculados en las calculadoras para crear capítulos y partidas automáticamente
+            </p>
           </DialogHeader>
 
-          {/* Filtros */}
-          <div className="flex flex-wrap gap-3 pb-3 border-b">
-            <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar actividad..."
-                value={importSearch}
-                onChange={e => setImportSearch(e.target.value)}
-                onKeyDown={e => { if (e.key === "Enter") loadBancoItems(1, importSearch, importCategoria) }}
-                className="pl-9"
-              />
-            </div>
-            <Select value={importCategoria} onValueChange={v => { setImportCategoria(v); loadBancoItems(1, importSearch, v) }}>
-              <SelectTrigger className="w-56">
-                <SelectValue placeholder="Todas las categorías" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">Todas las categorías</SelectItem>
-                {importCategorias.map(c => (
-                  <SelectItem key={c.nombre} value={c.nombre}>
-                    {c.nombre} ({c.count})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button variant="outline" onClick={() => loadBancoItems(1, importSearch, importCategoria)}>
-              <Search className="mr-2 h-4 w-4" />
-              Buscar
-            </Button>
-          </div>
-
-          {/* Destino de importación */}
-          <div className="flex flex-wrap items-center gap-3 py-3 border-b bg-muted/30 px-3 rounded">
-            <span className="text-sm font-medium">Importar a:</span>
-            <Select value={importTargetCap} onValueChange={setImportTargetCap}>
-              <SelectTrigger className="w-64">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="NEW">+ Crear capítulo nuevo</SelectItem>
-                {capitulos.map(c => (
-                  <SelectItem key={c.id} value={c.id}>
-                    Cap. {c.codigo} - {c.nombre}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {importTargetCap === "NEW" && (
-              <Input
-                placeholder="Nombre del nuevo capítulo"
-                value={importNewCapName}
-                onChange={e => setImportNewCapName(e.target.value)}
-                className="w-56"
-              />
-            )}
-            <span className="text-xs text-muted-foreground ml-auto">
-              {importSelected.size} items seleccionados
-            </span>
-          </div>
-
-          {/* Tabla de resultados */}
+          {/* Contenido */}
           <div className="flex-1 overflow-auto min-h-0">
             {importLoading ? (
               <div className="flex items-center justify-center py-12">
@@ -657,70 +585,61 @@ export default function AltasPage() {
               </div>
             ) : importItems.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
-                No se encontraron items en el banco de precios
+                <Calculator className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                <p>No hay elementos calculados en el proyecto.</p>
+                <p className="text-xs mt-1">Usa las calculadoras primero para crear elementos.</p>
               </div>
             ) : (
-              <Table>
-                <TableHeader className="sticky top-0 bg-background z-10">
-                  <TableRow>
-                    <TableHead className="w-10">
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={toggleSelectAll}>
-                        {importSelected.size === importItems.length && importItems.length > 0
-                          ? <CheckSquare className="h-4 w-4" />
+              <>
+                <div className="flex items-center justify-between pb-3 border-b mb-3">
+                  <span className="text-sm text-muted-foreground">
+                    {importItems.length} elementos disponibles • {importSelected.size} seleccionados
+                  </span>
+                  <Button variant="ghost" size="sm" onClick={toggleSelectAll}>
+                    {importSelected.size === importItems.length ? "Deseleccionar todo" : "Seleccionar todo"}
+                  </Button>
+                </div>
+
+                <div className="space-y-2">
+                  {importItems.map(item => (
+                    <div
+                      key={item.id}
+                      className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                        importSelected.has(item.id) ? "bg-primary/5 border-primary/30" : "hover:bg-muted/50"
+                      }`}
+                      onClick={() => toggleImportItem(item.id)}
+                    >
+                      <Button variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0">
+                        {importSelected.has(item.id)
+                          ? <CheckSquare className="h-4 w-4 text-primary" />
                           : <Square className="h-4 w-4" />
                         }
                       </Button>
-                    </TableHead>
-                    <TableHead className="w-20">Código</TableHead>
-                    <TableHead>Actividad / Descripción</TableHead>
-                    <TableHead className="w-16">UD</TableHead>
-                    <TableHead className="w-28 text-right">Precio Unit.</TableHead>
-                    <TableHead className="w-32">Categoría</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {importItems.map(item => (
-                    <TableRow
-                      key={item.id}
-                      className={`cursor-pointer ${importSelected.has(item.id) ? "bg-primary/5" : ""}`}
-                      onClick={() => toggleImportItem(item.id)}
-                    >
-                      <TableCell>
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={e => { e.stopPropagation(); toggleImportItem(item.id) }}>
-                          {importSelected.has(item.id)
-                            ? <CheckSquare className="h-4 w-4 text-primary" />
-                            : <Square className="h-4 w-4" />
-                          }
-                        </Button>
-                      </TableCell>
-                      <TableCell className="font-mono text-xs">{item.codigo}</TableCell>
-                      <TableCell className="text-sm">{item.actividad}</TableCell>
-                      <TableCell className="text-xs">{item.unidad}</TableCell>
-                      <TableCell className="text-right text-sm font-medium">{item.precioUnitario.toFixed(2)} Bs.</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">{item.categoria}</TableCell>
-                    </TableRow>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${tipoColor(item.tipoElemento)}`}>
+                        {item.tipoElemento}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{item.descripcion}</p>
+                      </div>
+                      <span className="text-xs text-muted-foreground">{item.cantidad} uds</span>
+                      <span className="text-sm font-medium whitespace-nowrap">{formatCurrency(item.costoTotal)}</span>
+                    </div>
                   ))}
-                </TableBody>
-              </Table>
+                </div>
+              </>
             )}
           </div>
 
-          {/* Paginación y acciones */}
+          {/* Acciones */}
           <div className="flex items-center justify-between pt-3 border-t">
             <div className="text-sm text-muted-foreground">
-              Total: {importTotal} items | Página {importPage}
+              Los elementos se agruparán por tipo en capítulos automáticos
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => setImportOpen(false)}>Cancelar</Button>
-              <Button variant="outline" disabled={importPage <= 1} onClick={() => loadBancoItems(importPage - 1, importSearch, importCategoria)}>
-                Anterior
-              </Button>
-              <Button variant="outline" onClick={() => loadBancoItems(importPage + 1, importSearch, importCategoria)}>
-                Siguiente
-              </Button>
               <Button onClick={handleImport} disabled={importSelected.size === 0 || importing}>
                 {importing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-                Importar {importSelected.size} items
+                Importar {importSelected.size} elementos
               </Button>
             </div>
           </div>
