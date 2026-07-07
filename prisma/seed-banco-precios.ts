@@ -461,12 +461,20 @@ async function main() {
 
   if (newMaterialsToInsert.length > 0) {
     console.log(`💾 Insertando ${newMaterialsToInsert.length} nuevos materiales en el catálogo...`)
-    const matBatchSize = 100
-    for (let i = 0; i < newMaterialsToInsert.length; i += matBatchSize) {
-      const batch = newMaterialsToInsert.slice(i, i + matBatchSize)
-      await prisma.material.createMany({ data: batch })
+    let insertedCount = 0
+    let failedCount = 0
+    for (const mat of newMaterialsToInsert) {
+      try {
+        await prisma.material.create({ data: mat })
+        insertedCount++
+      } catch (e: any) {
+        failedCount++
+        if (failedCount <= 5) {
+          console.log(`   ⚠️ Error insertando ${mat.codigo}: ${e.message?.slice(0, 100)}`)
+        }
+      }
     }
-    console.log(`✅ ${newMaterialsToInsert.length} nuevos materiales insertados exitosamente.`)
+    console.log(`✅ Materiales: ${insertedCount} insertados, ${failedCount} fallidos.`)
   } else {
     console.log('ℹ️ No hay nuevos materiales para agregar al catálogo.')
   }
@@ -481,6 +489,7 @@ async function main() {
   // Batch insert for performance
   const batchSize = 100
   let inserted = 0
+  let failedBanco = 0
   for (let i = 0; i < uniqueItems.length; i += batchSize) {
     const batch = uniqueItems.slice(i, i + batchSize)
     try {
@@ -492,7 +501,12 @@ async function main() {
         try {
           await prisma.bancoPrecio.create({ data: item })
           inserted++
-        } catch (err) { /* skip */ }
+        } catch (err: any) {
+          failedBanco++
+          if (failedBanco <= 5) {
+            console.log(`   ⚠️ Error insertando banco ${item.codigo}: ${err.message?.slice(0, 100)}`)
+          }
+        }
       }
     }
     if ((i / batchSize) % 5 === 0) {
@@ -505,9 +519,10 @@ async function main() {
   const withLabor = await prisma.bancoPrecio.count({ where: { manoObra: { not: null } } })
 
   console.log(`\n✅ Importación completada:`)
-  console.log(`   Total items: ${total}`)
+  console.log(`   Total items banco: ${total}`)
   console.log(`   Con materiales detallados: ${withMaterials}`)
   console.log(`   Con mano de obra detallada: ${withLabor}`)
+  if (failedBanco > 0) console.log(`   ⚠️ Fallidos banco: ${failedBanco}`)
 }
 
 main()
