@@ -51,6 +51,14 @@ export async function GET(request: Request) {
     precioUnitario: i.precioUnitario,
     categoria: i.categoria,
     subcategoria: i.subcategoria,
+    materiales: i.materiales,
+    manoObra: i.manoObra,
+    beneficiosSociales: i.beneficiosSociales,
+    iva: i.iva,
+    equipoMaquinaria: i.equipoMaquinaria,
+    gastosGenerales: i.gastosGenerales,
+    utilidad: i.utilidad,
+    it: i.it,
   }))
 
   return NextResponse.json({
@@ -59,4 +67,50 @@ export async function GET(request: Request) {
     page,
     totalPages: Math.ceil(total / limit),
   })
+}
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json()
+    const {
+      codigo,
+      actividad,
+      unidad,
+      categoria,
+      subcategoria,
+      precioUnitario,
+      materiales,
+      manoObra,
+      beneficiosSociales,
+      iva,
+      equipoMaquinaria,
+      gastosGenerales,
+      utilidad,
+      it,
+    } = body
+
+    const newItem = await prisma.bancoPrecio.create({
+      data: {
+        codigo: codigo || null,
+        actividad,
+        unidad,
+        cantidad: 1,
+        categoria,
+        subcategoria: subcategoria || null,
+        precioUnitario: parseFloat(precioUnitario) || 0,
+        materiales: materiales ? (typeof materiales === "string" ? materiales : JSON.stringify(materiales)) : "[]",
+        manoObra: manoObra ? (typeof manoObra === "string" ? manoObra : JSON.stringify(manoObra)) : "[]",
+        beneficiosSociales: parseFloat(beneficiosSociales) ?? 71.18,
+        iva: parseFloat(iva) ?? 14.94,
+        equipoMaquinaria: parseFloat(equipoMaquinaria) ?? 5,
+        gastosGenerales: parseFloat(gastosGenerales) ?? 11,
+        utilidad: parseFloat(utilidad) ?? 7,
+        it: parseFloat(it) ?? 3.09,
+      },
+    })
+
+    return NextResponse.json(newItem)
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message || "Error al crear el ítem" }, { status: 500 })
+  }
 }
