@@ -21,6 +21,10 @@ export async function GET(request: Request) {
     const allPartidasCount = await prisma.partidaPresupuesto.count()
     const allProyectosCount = await prisma.proyecto.count()
 
+    const sampleMediciones = await prisma.medicionPartida.findMany({
+      take: 5,
+    })
+
     return NextResponse.json({
       success: true,
       targetProject: {
@@ -47,6 +51,7 @@ export async function GET(request: Request) {
         capitulos: allCapitulosCount,
         partidas: allPartidasCount,
       },
+      sampleMediciones,
     })
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 })

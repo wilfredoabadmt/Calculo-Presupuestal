@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { calcularCostoMedicion, calcularCascadaFinanciera } from "@/lib/financial-calc"
 
 const TIPO_A_CAPITULO: Record<string, { codigo: number; nombre: string }> = {
   CONCRETO: { codigo: 4, nombre: "ESTRUCTURAS" },
@@ -48,6 +49,18 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     if (elementos.length === 0) {
       return NextResponse.json({ error: "No se encontraron elementos del proyecto" }, { status: 404 })
     }
+
+    // Buscar o crear PresupuestoDetallado del proyecto
+    let presupuesto = await prisma.presupuestoDetallado.findUnique({
+      where: { proyectoId },
+    })
+
+    if (!presupuesto) {
+      presupuesto = await prisma.presupuestoDetallado.create({
+        data: { proyectoId },
+      })
+    }
+    const presupuestoId = presupuesto.id
 
     // Agrupar por tipo → capítulo
     const grouped = new Map<string, typeof elementos>()
@@ -130,10 +143,34 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         }
 
         const unidad = getUnidadFromTipo(el.tipoElemento)
-        const precioUnitario = el.cantidad > 0 ? Math.round((el.costoTotal / el.cantidad) * 100) / 100 : el.costoTotal
+
+        // Mapear dimensiones físicas del elemento para la medición
+        const veces = el.cantidad || 1
+        let largo = 1
+        let ancho = 1
+        let alto = 1
+
+        if (unidad === "m3") {
+          largo = el.dimLargo || el.dimA || 1
+          ancho = el.dimAncho || el.dimB || 1
+          alto = el.dimEspesor || el.dimH || 1
+        } else if (unidad === "m2") {
+          largo = el.dimLargo || el.dimA || 1
+          ancho = el.dimAncho || el.dimB || 1
+          alto = 1
+        } else if (unidad === "ml") {
+          largo = el.dimLargo || el.dimH || el.dimA || 1
+          ancho = 1
+          alto = 1
+        }
+
+        const { parcial } = calcularCostoMedicion(veces, largo, ancho, alto, 1)
+
+        // El precio base de la partida debe ser el costo total del elemento dividido por el parcial calculado
+        const precioUnitario = parcial > 0 ? Math.round((el.costoTotal / parcial) * 100) / 100 : el.costoTotal
 
         try {
-          await prisma.partidaPresupuesto.create({
+          const partida = await prisma.partidaPresupuesto.create({
             data: {
               capituloId,
               codigo: partidaCodigo,
@@ -143,6 +180,31 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
               activo: true,
             },
           })
+
+          const { parcial: finalParcial, costoTotal: finalCostoTotal } = calcularCostoMedicion(
+            veces,
+            largo,
+            ancho,
+            alto,
+            precioUnitario
+          )
+
+          await prisma.medicionPartida.create({
+            data: {
+              partidaId: partida.id,
+              presupuestoId,
+              veces,
+              largo: largo === 1 && unidad !== "m3" && unidad !== "m2" && unidad !== "ml" ? 0 : largo,
+              ancho: ancho === 1 && unidad !== "m3" && unidad !== "m2" ? 0 : ancho,
+              alto: alto === 1 && unidad !== "m3" ? 0 : alto,
+              parcial: finalParcial,
+              precioUnitario,
+              costoTotal: finalCostoTotal,
+              calculadoraUsada: el.tipoElemento,
+              calculadoraDatos: el.materiales ? JSON.parse(el.materiales) : undefined,
+            },
+          })
+
           existingCodes.add(partidaCodigo)
           partidasCreadas++
           nextNum++
@@ -151,6 +213,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         }
       }
     }
+
+    // Recalcular presupuesto completo
+    await recalcularPresupuesto(presupuestoId)
 
     return NextResponse.json({
       ok: true,
@@ -163,5 +228,40 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   } catch (e: any) {
     console.error("Error importando elementos del proyecto:", e)
     return NextResponse.json({ error: "Error al importar: " + (e.message || "Error desconocido") }, { status: 500 })
+  }
+}
+
+async function recalcularPresupuesto(presupuestoId: string) {
+  try {
+    const presupuesto = await prisma.presupuestoDetallado.findUnique({
+      where: { id: presupuestoId },
+    })
+    if (!presupuesto) return
+
+    const result = await prisma.medicionPartida.aggregate({
+      where: { presupuestoId },
+      _sum: { costoTotal: true },
+    })
+
+    const subtotalMaterial = result._sum.costoTotal || 0
+
+    const totales = calcularCascadaFinanciera(
+      subtotalMaterial,
+      presupuesto.porcentajeBI,
+      presupuesto.porcentajeIVA
+    )
+
+    await prisma.presupuestoDetallado.update({
+      where: { id: presupuestoId },
+      data: {
+        subtotalMaterial: totales.costoDirecto,
+        beneficioIndustrial: totales.beneficioIndustrial,
+        baseImponible: totales.baseImponible,
+        montoIVA: totales.iva,
+        totalPresupuesto: totales.totalGeneral,
+      },
+    })
+  } catch (e) {
+    console.error("Error recalculando presupuesto:", e)
   }
 }
