@@ -91,17 +91,13 @@ export default function InformePage() {
           const meds = mediciones.filter(m => m.partidaId === part.id)
           return meds.length > 0
         })
-        .map(part => ({
-          codigo: part.codigo,
-          descripcion: part.descripcion,
-          unidad: part.unidad,
-          precioBase: part.precioBase,
-          mediciones: mediciones
+        .map(part => {
+          const unit = (part.unidad || "").toLowerCase()
+          const isDimensioned = ["m³", "m²", "ml", "m3", "m2"].includes(unit)
+          
+          const medicionesConCosto = mediciones
             .filter(m => m.partidaId === part.id)
             .map(m => {
-              const unit = (part.unidad || "").toLowerCase()
-              const isDimensioned = ["m³", "m²", "ml", "m3", "m2"].includes(unit)
-              
               let parcial = 0
               if (isDimensioned && m.largo === 0 && m.ancho === 0 && m.alto === 0) {
                 parcial = 0
@@ -121,8 +117,18 @@ export default function InformePage() {
                 precioUnitario: m.precioUnitario,
                 costoTotal,
               }
-            }),
-        })),
+            })
+            .filter(m => m.costoTotal > 0)
+          
+          return {
+            codigo: part.codigo,
+            descripcion: part.descripcion,
+            unidad: part.unidad,
+            precioBase: part.precioBase,
+            mediciones: medicionesConCosto,
+          }
+        })
+        .filter(part => part.mediciones.length > 0)
     }))
 
   const subtotalMaterial = capituloData.reduce((sumCap, cap) =>

@@ -63,46 +63,34 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
     const presupuestoId = presupuesto.id
 
-    // 1. Limpieza inicial de mediciones importadas previamente de la calculadora para este presupuesto/proyecto
+    // 1. Limpieza inicial: eliminar TODAS las mediciones existentes del presupuesto
+    //    para asegurar que solo queden las que se importen de la calculadora
     const existingMediciones = await prisma.medicionPartida.findMany({
       where: { presupuestoId },
     })
 
-    const calculatorMediciones = existingMediciones.filter(m => m.calculadoraUsada !== null)
-    if (calculatorMediciones.length > 0) {
+    if (existingMediciones.length > 0) {
       await prisma.medicionPartida.deleteMany({
-        where: { id: { in: calculatorMediciones.map(m => m.id) } }
+        where: { presupuestoId }
       })
-
-      // Eliminar partidas asociadas si ya no tienen mediciones
-      const partidaIds = Array.from(new Set(calculatorMediciones.map(m => m.partidaId)))
-      for (const pId of partidaIds) {
-        const count = await prisma.medicionPartida.count({
-          where: { partidaId: pId }
-        })
-        if (count === 0) {
-          try {
-            await prisma.partidaPresupuesto.delete({
-              where: { id: pId }
-            })
-          } catch (e: any) {
-            console.error(`Error al eliminar partida huérfana ${pId}:`, e.message)
-          }
-        }
-      }
-
-      // Eliminar capítulos que hayan quedado vacíos en el proyecto
-      const activeCapitulos = await prisma.capituloPresupuesto.findMany({
-        where: { proyectoId },
-        include: { _count: { select: { partidas: true } } }
-      })
-      const emptyCaps = activeCapitulos.filter(c => c._count.partidas === 0)
-      if (emptyCaps.length > 0) {
-        await prisma.capituloPresupuesto.deleteMany({
-          where: { id: { in: emptyCaps.map(c => c.id) } }
-        })
-      }
     }
+
+    // 2. Eliminar TODAS las partidas del proyecto (ya no tienen mediciones)
+    const allPartidas = await prisma.partidaPresupuesto.findMany({
+      where: { capitulo: { proyectoId } },
+      select: { id: true },
+    })
+
+    if (allPartidas.length > 0) {
+      await prisma.partidaPresupuesto.deleteMany({
+        where: { id: { in: allPartidas.map(p => p.id) } }
+      })
+    }
+
+    // 3. Eliminar TODOS los capítulos del proyecto (ya no tienen partidas)
+    await prisma.capituloPresupuesto.deleteMany({
+      where: { proyectoId }
+    })
 
     // Agrupar por tipo → capítulo
     const grouped = new Map<string, typeof elementos>()

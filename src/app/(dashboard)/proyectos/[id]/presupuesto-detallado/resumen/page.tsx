@@ -29,13 +29,13 @@ export default function ResumenPage() {
     return capitulos
       .filter(cap => cap.partidas.length > 0)
       .map(cap => {
-        const subtotal = cap.partidas.reduce((sumPart, part) =>
-          sumPart + mediciones
+        const medicionesPartidas = cap.partidas.map(part => {
+          const unit = (part.unidad || "").toLowerCase()
+          const isDimensioned = ["m³", "m²", "ml", "m3", "m2"].includes(unit)
+          
+          return mediciones
             .filter(m => m.partidaId === part.id)
-            .reduce((sumMed, med) => {
-              const unit = (part.unidad || "").toLowerCase()
-              const isDimensioned = ["m³", "m²", "ml", "m3", "m2"].includes(unit)
-              
+            .map(med => {
               let parcial = 0
               if (isDimensioned && med.largo === 0 && med.ancho === 0 && med.alto === 0) {
                 parcial = 0
@@ -46,20 +46,27 @@ export default function ResumenPage() {
                 parcial = med.veces * l * a * h
               }
               const costoTotal = parcial * med.precioUnitario
-              return sumMed + (costoTotal || 0)
-            }, 0)
-        , 0)
+              return costoTotal || 0
+            })
+            .reduce((sum, cost) => sum + cost, 0)
+        })
+        const subtotal = medicionesPartidas.reduce((sum, cost) => sum + cost, 0)
+        
+        const partidasConMedicion = cap.partidas.filter(part => 
+          mediciones.some(m => m.partidaId === part.id)
+        )
+        
         return {
           codigo: cap.codigo,
           nombre: cap.nombre,
           subtotal: round2(subtotal),
-          partidasCount: cap.partidas.length,
-          medicionesCount: mediciones.filter(m =>
-            cap.partidas.some(p => p.id === m.partidaId)
-          ).length,
+          partidasCount: partidasConMedicion.length,
+          medicionesCount: partidasConMedicion.reduce((sum, part) => 
+            sum + mediciones.filter(m => m.partidaId === part.id).length, 0
+          ),
         }
       })
-      .filter(ch => ch.subtotal > 0)
+      .filter(ch => ch.subtotal > 0 && ch.partidasCount > 0)
   }, [capitulos, mediciones])
 
   const subtotalMaterial = useMemo(() => {

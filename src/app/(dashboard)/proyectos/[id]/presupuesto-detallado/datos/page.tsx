@@ -63,24 +63,27 @@ export default function DatosPage() {
   const [selectedCapFilter, setSelectedCapFilter] = useState<string>("ALL")
   const tableRef = useRef<HTMLDivElement>(null)
 
-  // Initialize rows: existing mediciones + auto-populate partidas without mediciones
+  // Initialize rows: existing mediciones only (no auto-populate for partidas without mediciones)
   const initialized = useRef(false)
   if (!initialized.current && capitulos.length > 0 && !loading) {
-    const existingPartidaIds = new Set(mediciones.map(m => m.partidaId))
-
-    // Map existing mediciones to rows
-    const mapped: MedicionFormRow[] = mediciones.map(m => ({
-      id: m.id,
-      capituloId: m.partida?.capitulo ? capitulos.find(c => c.codigo === m.partida!.capitulo!.codigo)?.id || "" : "",
-      partidaId: m.partidaId,
-      veces: m.veces.toString(),
-      largo: m.largo.toString(),
-      ancho: m.ancho.toString(),
-      alto: m.alto.toString(),
-      precioUnitario: m.precioUnitario.toString(),
-      calculadoraUsada: m.calculadoraUsada,
-      isDirty: false,
-    }))
+    // Map existing mediciones to rows - only include mediciones with valid data
+    const mapped: MedicionFormRow[] = mediciones
+      .filter(m => {
+        // Include all existing mediciones (even with zero values for editing)
+        return true
+      })
+      .map(m => ({
+        id: m.id,
+        capituloId: m.partida?.capitulo ? capitulos.find(c => c.codigo === m.partida!.capitulo!.codigo)?.id || "" : "",
+        partidaId: m.partidaId,
+        veces: m.veces.toString(),
+        largo: m.largo.toString(),
+        ancho: m.ancho.toString(),
+        alto: m.alto.toString(),
+        precioUnitario: m.precioUnitario.toString(),
+        calculadoraUsada: m.calculadoraUsada,
+        isDirty: false,
+      }))
 
 
 
@@ -478,7 +481,7 @@ export default function DatosPage() {
                 const subtotal = rows
                   .filter(r => r.capituloId === cap.id)
                   .reduce((sum, r) => sum + calcularTotal(r), 0)
-                if (subtotal === 0) return null
+                if (subtotal <= 0) return null
                 return (
                   <div key={cap.id} className="flex justify-between items-center py-1 border-b last:border-0">
                     <span className="text-sm">
