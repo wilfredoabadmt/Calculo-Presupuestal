@@ -18,8 +18,7 @@ import {
   Menu,
   X,
   ChevronDown,
-  User,
-  Zap
+  User
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { 
@@ -75,9 +74,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         <div className="flex h-full flex-col">
           {/* Header */}
           <div className="flex h-16 items-center justify-between px-4 border-b">
-            <Link href="/dashboard" className="flex items-center gap-2 font-bold text-xl text-primary">
-              <Zap className="h-6 w-6" />
-              <span>Cálculo Presupuestal</span>
+            <Link href="/dashboard" className="flex items-center gap-2 group">
+              <div className="relative flex h-11 w-11 items-center justify-center rounded-lg bg-slate-950/60 border border-slate-800 shadow-lg shadow-cyan-500/10 group-hover:scale-105 transition-all duration-300 overflow-hidden shrink-0">
+                <img src="/logo.webp" alt="Logo" className="h-full w-full object-contain filter brightness-95 contrast-105 saturate-90" />
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/25 to-blue-600/30 mix-blend-color pointer-events-none" />
+              </div>
             </Link>
             <button
               className="lg:hidden p-2"

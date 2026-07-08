@@ -39,13 +39,10 @@ export default async function HomePage() {
       <div className="fixed top-0 left-0 right-0 z-50 px-6 md:px-12 lg:px-16 pt-6">
         <header className="liquid-glass rounded-xl px-6 py-3 flex items-center justify-between border border-white/10">
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-slate-950/60 border border-slate-800 shadow-lg shadow-cyan-500/10 group-hover:scale-105 transition-all duration-300 overflow-hidden shrink-0">
+            <div className="relative flex h-14 w-14 items-center justify-center rounded-xl bg-slate-950/60 border border-slate-800 shadow-lg shadow-cyan-500/10 group-hover:scale-105 transition-all duration-300 overflow-hidden shrink-0">
               <img src="/logo.webp" alt="Logo" className="h-full w-full object-contain filter brightness-95 contrast-105 saturate-90" />
               <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/25 to-blue-600/30 mix-blend-color pointer-events-none" />
             </div>
-            <span className="text-lg font-bold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
-              CÁLCULO PRESUPUESTAL
-            </span>
           </Link>
           <div className="flex items-center gap-4">
             <Link href="/login">
