@@ -36,26 +36,58 @@ export function AnimatedHeading({
           .slice(0, lineIndex)
           .reduce((sum, l) => sum + l.length, 0)
 
+        const words = line.split(" ")
+        let charCounter = 0
+
         return (
-          <div key={lineIndex} className="flex flex-wrap justify-center">
-            {line.split("").map((char, charIndex) => {
-              const globalCharIndex = previousLinesLength + charIndex
-              const charDelayTime = globalCharIndex * charDelay
-              
+          <div key={lineIndex} className="flex flex-wrap justify-center gap-y-2">
+            {words.map((word, wordIndex) => {
+              const wordStartOffset = charCounter
+              charCounter += word.length + 1 // +1 for the space that follows
+
               return (
-                <span
-                  key={charIndex}
-                  className={`inline-block transition-all duration-500 transform ${
-                    start
-                      ? "opacity-100 translate-x-0"
-                      : "opacity-0 -translate-x-[18px]"
-                  }`}
-                  style={{
-                    transitionDelay: start ? `${charDelayTime}ms` : "0ms",
-                  }}
-                >
-                  {char === " " ? "\u00A0" : char}
-                </span>
+                <React.Fragment key={wordIndex}>
+                  <span className="inline-block whitespace-nowrap">
+                    {word.split("").map((char, charIndex) => {
+                      const localOffset = wordStartOffset + charIndex
+                      const globalCharIndex = previousLinesLength + localOffset
+                      const charDelayTime = globalCharIndex * charDelay
+
+                      return (
+                        <span
+                          key={charIndex}
+                          className={`inline-block transition-all duration-500 transform ${
+                            start
+                              ? "opacity-100 translate-x-0"
+                              : "opacity-0 -translate-x-[18px]"
+                          }`}
+                          style={{
+                            transitionDelay: start ? `${charDelayTime}ms` : "0ms",
+                          }}
+                        >
+                          {char}
+                        </span>
+                      )
+                    })}
+                  </span>
+                  {/* Space between words, but only if not the last word */}
+                  {wordIndex < words.length - 1 && (
+                    <span
+                      className={`inline-block transition-all duration-500 transform ${
+                        start
+                          ? "opacity-100 translate-x-0"
+                          : "opacity-0 -translate-x-[18px]"
+                      }`}
+                      style={{
+                        transitionDelay: start
+                          ? `${(previousLinesLength + wordStartOffset + word.length) * charDelay}ms`
+                          : "0ms",
+                      }}
+                    >
+                      {"\u00A0"}
+                    </span>
+                  )}
+                </React.Fragment>
               )
             })}
           </div>
