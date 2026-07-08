@@ -26,6 +26,7 @@ import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import CalculatorShowcase from "@/components/shared/CalculatorShowcase"
 import AnimatedHero from "@/components/home/AnimatedHero"
+import LandingHeader from "@/components/layout/LandingHeader"
 
 export default async function HomePage() {
   const session = await auth()
@@ -36,38 +37,17 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-cyan-500 selection:text-slate-950 font-sans overflow-x-hidden">
       {/* Floating Navbar Header */}
-      <div className="fixed top-0 left-0 right-0 z-50 px-6 md:px-12 lg:px-16 pt-6">
-        <div className="max-w-[1440px] mx-auto">
-          <header className="liquid-glass rounded-xl px-6 py-3 flex items-center justify-between border border-white/10">
-            <Link href="/" className="flex items-center gap-2 group">
-              <div className="relative flex h-14 w-14 items-center justify-center rounded-xl bg-slate-950/60 border border-slate-800 shadow-lg shadow-cyan-500/10 group-hover:scale-105 transition-all duration-300 overflow-hidden shrink-0">
-                <img src="/logo.webp" alt="Logo" className="h-full w-full object-contain filter brightness-95 contrast-105 saturate-90" />
-                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/25 to-blue-600/30 mix-blend-color pointer-events-none" />
-              </div>
-            </Link>
-            <div className="flex items-center gap-4">
-              <Link href="/login">
-                <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-slate-900 font-medium">
-                  Acceso Profesional
-                </Button>
-              </Link>
-              <Link href="/register">
-                <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-slate-950 font-bold shadow-lg shadow-cyan-500/25 transition-all duration-300">
-                  Iniciar Gratis
-                </Button>
-              </Link>
-            </div>
-          </header>
-        </div>
-      </div>
+      <LandingHeader />
 
       {/* Animated Video Background & Hero Content */}
-      <AnimatedHero>
-        <CalculatorShowcase />
-      </AnimatedHero>
+      <div id="inicio">
+        <AnimatedHero>
+          <CalculatorShowcase />
+        </AnimatedHero>
+      </div>
 
       {/* Sección de Experiencia */}
-      <section className="py-24 bg-slate-950 relative border-t border-slate-900">
+      <section id="experiencia" className="py-24 bg-slate-950 relative border-t border-slate-900">
         <div className="container mx-auto px-6 max-w-5xl">
           <div className="grid md:grid-cols-12 gap-12 items-center">
             <div className="md:col-span-5 space-y-6">
@@ -116,7 +96,7 @@ export default async function HomePage() {
       </section>
 
       {/* Grid de 14 Calculadoras */}
-      <section className="py-20 bg-slate-950/50 border-t border-slate-900">
+      <section id="calculadoras" className="py-20 bg-slate-950/50 border-t border-slate-900">
         <div className="container mx-auto px-6 max-w-5xl">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-extrabold tracking-tight">14 Calculadoras de Obra Integradas</h2>
@@ -372,7 +352,7 @@ export default async function HomePage() {
       </section>
 
       {/* Comparison: Enterprise vs Standard */}
-      <section className="py-20 bg-slate-950 border-t border-slate-900">
+      <section id="comparativa" className="py-20 bg-slate-950 border-t border-slate-900">
         <div className="container mx-auto px-6 max-w-4xl">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-extrabold">Diseñado para Licitaciones Exigentes</h2>
@@ -427,7 +407,7 @@ export default async function HomePage() {
       </section>
 
       {/* Testimonios Ficticios */}
-      <section className="py-24 bg-slate-950 border-t border-slate-900 relative">
+      <section id="testimonios" className="py-24 bg-slate-950 border-t border-slate-900 relative">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-600/5 rounded-full blur-3xl pointer-events-none" />
         
         <div className="container mx-auto px-6 max-w-5xl relative z-10">
@@ -489,7 +469,7 @@ export default async function HomePage() {
       </section>
 
       {/* Preguntas Frecuentes (FAQ) */}
-      <section className="py-24 bg-slate-950 border-t border-slate-900">
+      <section id="faq" className="py-24 bg-slate-950 border-t border-slate-900">
         <div className="container mx-auto px-6 max-w-3xl">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 bg-slate-900 border border-slate-850 rounded-full px-3.5 py-1 text-xs font-semibold text-cyan-400 uppercase tracking-widest mb-3">
@@ -539,7 +519,7 @@ export default async function HomePage() {
       </section>
 
       {/* Clear Pricing Section */}
-      <section className="py-20 bg-slate-950 border-t border-slate-900">
+      <section id="precios" className="py-20 bg-slate-950 border-t border-slate-900">
         <div className="container mx-auto px-6 max-w-4xl">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-extrabold">Planes Profesionales Sin Comisiones</h2>
