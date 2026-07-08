@@ -82,24 +82,7 @@ export default function DatosPage() {
       isDirty: false,
     }))
 
-    // Auto-add rows for partidas that don't have mediciones yet
-    for (const cap of capitulos) {
-      for (const part of cap.partidas) {
-        if (!existingPartidaIds.has(part.id)) {
-          mapped.push({
-            capituloId: cap.id,
-            partidaId: part.id,
-            veces: "1",
-            largo: "",
-            ancho: "",
-            alto: "",
-            precioUnitario: part.precioBase.toString(),
-            calculadoraUsada: null,
-            isDirty: false,
-          })
-        }
-      }
-    }
+
 
     setRows(mapped)
     initialized.current = true

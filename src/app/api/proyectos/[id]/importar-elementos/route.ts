@@ -63,6 +63,47 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
     const presupuestoId = presupuesto.id
 
+    // 1. Limpieza inicial de mediciones importadas previamente de la calculadora para este presupuesto/proyecto
+    const existingMediciones = await prisma.medicionPartida.findMany({
+      where: { presupuestoId },
+    })
+
+    const calculatorMediciones = existingMediciones.filter(m => m.calculadoraUsada !== null)
+    if (calculatorMediciones.length > 0) {
+      await prisma.medicionPartida.deleteMany({
+        where: { id: { in: calculatorMediciones.map(m => m.id) } }
+      })
+
+      // Eliminar partidas asociadas si ya no tienen mediciones
+      const partidaIds = Array.from(new Set(calculatorMediciones.map(m => m.partidaId)))
+      for (const pId of partidaIds) {
+        const count = await prisma.medicionPartida.count({
+          where: { partidaId: pId }
+        })
+        if (count === 0) {
+          try {
+            await prisma.partidaPresupuesto.delete({
+              where: { id: pId }
+            })
+          } catch (e: any) {
+            console.error(`Error al eliminar partida huérfana ${pId}:`, e.message)
+          }
+        }
+      }
+
+      // Eliminar capítulos que hayan quedado vacíos en el proyecto
+      const activeCapitulos = await prisma.capituloPresupuesto.findMany({
+        where: { proyectoId },
+        include: { _count: { select: { partidas: true } } }
+      })
+      const emptyCaps = activeCapitulos.filter(c => c._count.partidas === 0)
+      if (emptyCaps.length > 0) {
+        await prisma.capituloPresupuesto.deleteMany({
+          where: { id: { in: emptyCaps.map(c => c.id) } }
+        })
+      }
+    }
+
     // Agrupar por tipo → capítulo
     const grouped = new Map<string, typeof elementos>()
     for (const el of elementos) {
@@ -190,6 +231,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
             precioUnitario
           )
 
+          let parsedDatos = {}
+          if (el.materiales) {
+            try {
+              parsedDatos = JSON.parse(el.materiales)
+            } catch {}
+          }
+
           await prisma.medicionPartida.create({
             data: {
               partidaId: partida.id,
@@ -202,7 +250,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
               precioUnitario,
               costoTotal: finalCostoTotal,
               calculadoraUsada: el.tipoElemento,
-              calculadoraDatos: el.materiales ? JSON.parse(el.materiales) : undefined,
+              calculadoraDatos: {
+                elementoId: el.id,
+                ...parsedDatos
+              },
             },
           })
 
