@@ -735,9 +735,9 @@ export default async function HomePage() {
               </div>
               <div className="space-y-2">
                 <Link href="/register" className="w-full block">
-                  <Button variant="outline" className="w-full border-slate-800 hover:bg-slate-900 text-slate-200 font-bold">
+                  <button className="w-full bg-slate-900 hover:bg-slate-850 text-violet-400 font-bold border border-slate-800 hover:border-violet-500/30 py-2.5 rounded-lg text-sm transition-colors duration-300">
                     Contratar Plan Equipo
-                  </Button>
+                  </button>
                 </Link>
                 <a 
                   href="https://wa.me/59171523780?text=Hola,%20quisiera%20solicitar%20una%20demostración%20para%20el%20Plan%20Equipo%20de%20Cálculo%20Presupuestal"
