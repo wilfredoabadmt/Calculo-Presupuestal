@@ -625,17 +625,18 @@ export default async function HomePage() {
 
       {/* Clear Pricing Section */}
       <section id="precios" className="py-16 sm:py-20 bg-slate-950 border-t border-slate-900">
-        <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
+        <div className="container mx-auto px-4 sm:px-6 max-w-5xl">
           <div className="text-center mb-16">
             <h2 className="text-2xl sm:text-3xl font-extrabold">Planes Profesionales Sin Comisiones</h2>
             <p className="text-slate-400 mt-2">Empieza a trabajar en tus presupuestos sin costos ocultos.</p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-2xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {/* Free Plan */}
             <div className="p-6 sm:p-8 rounded-2xl border border-slate-900 bg-slate-950 flex flex-col justify-between">
               <div>
-                <h3 className="text-lg font-bold text-slate-300">Acceso Inicial</h3>
+                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest bg-slate-900 border border-slate-850 px-2 py-0.5 rounded">Para Probar</span>
+                <h3 className="text-lg font-bold text-slate-350 mt-3">Acceso Inicial</h3>
                 <div className="text-4xl font-extrabold mt-4">Bs. 0</div>
                 <p className="text-xs text-slate-500 mt-1">Acceso libre para siempre</p>
                 <div className="h-px bg-slate-900 my-6" />
@@ -649,11 +650,11 @@ export default async function HomePage() {
                   <li className="flex items-center gap-2">
                     <span className="text-cyan-400">✓</span> Exportación PDF básica
                   </li>
-                  <li className="flex items-center gap-2 text-slate-600 line-through">
-                    <span>Workspaces de equipo</span>
+                  <li className="flex items-center gap-2 text-slate-700 line-through">
+                    <span>Exportación Formulario B-1</span>
                   </li>
-                  <li className="flex items-center gap-2 text-slate-600 line-through">
-                    <span>Formulario B-1 Oficial</span>
+                  <li className="flex items-center gap-2 text-slate-700 line-through">
+                    <span>Workspaces de equipo</span>
                   </li>
                 </ul>
               </div>
@@ -665,14 +666,15 @@ export default async function HomePage() {
             </div>
 
             {/* Pro Plan */}
-            <div className="p-6 sm:p-8 rounded-2xl border border-cyan-500/30 bg-cyan-950/15 flex flex-col justify-between relative shadow-xl shadow-cyan-500/5">
+            <div className="p-6 sm:p-8 rounded-2xl border border-cyan-500/30 bg-cyan-950/10 flex flex-col justify-between relative shadow-xl shadow-cyan-500/5">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-cyan-500 text-slate-950 px-3 py-0.5 rounded-full text-xs font-extrabold uppercase tracking-wider">
-                Recomendado
+                Popular
               </div>
               <div>
-                <h3 className="text-lg font-bold text-cyan-400">Ingeniería Pro</h3>
+                <span className="text-[9px] font-bold text-cyan-400 uppercase tracking-widest bg-cyan-950/20 border border-cyan-500/20 px-2 py-0.5 rounded">Para Profesionales</span>
+                <h3 className="text-lg font-bold text-cyan-400 mt-3">Ingeniería Pro</h3>
                 <div className="text-4xl font-extrabold mt-4">Bs. 137<span className="text-xs text-slate-400 font-normal"> / mes</span></div>
-                <p className="text-xs text-slate-500 mt-1">Facturación mensual simple</p>
+                <p className="text-xs text-slate-550 mt-1">Facturación mensual simple</p>
                 <div className="h-px bg-slate-800/50 my-6" />
                 <ul className="space-y-3 text-sm text-slate-300 mb-8">
                   <li className="flex items-center gap-2">
@@ -682,19 +684,16 @@ export default async function HomePage() {
                     <span className="text-cyan-400">✓</span> Proyectos ilimitados y cómputos
                   </li>
                   <li className="flex items-center gap-2">
-                    <span className="text-cyan-400">✓</span> <strong>Exportación Formulario B-1 Oficial (SICOES)</strong>
+                    <span className="text-cyan-400">✓</span> <strong>Exportación Formulario B-1 (SICOES)</strong>
                   </li>
                   <li className="flex items-center gap-2">
-                    <span className="text-cyan-400">✓</span> <strong>Colaboración en Workspaces (Equipos)</strong>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="text-cyan-400">✓</span> <strong>Importación/Exportación de Excel masiva</strong>
+                    <span className="text-cyan-400">✓</span> Importación/Exportación Excel
                   </li>
                   <li className="flex items-center gap-2">
                     <span className="text-cyan-400">✓</span> Cronograma Gantt y Curva S
                   </li>
                   <li className="flex items-center gap-2">
-                    <span className="text-cyan-400">✓</span> Impuestos y AIU personalizables por proyecto
+                    <span className="text-cyan-400">✓</span> Parámetros AIU por proyecto
                   </li>
                 </ul>
               </div>
@@ -703,6 +702,52 @@ export default async function HomePage() {
                   Adquirir Plan Pro
                 </Button>
               </Link>
+            </div>
+
+            {/* Team/Workspace Plan */}
+            <div className="p-6 sm:p-8 rounded-2xl border border-slate-900 bg-slate-950 flex flex-col justify-between relative">
+              <div>
+                <span className="text-[9px] font-bold text-violet-400 uppercase tracking-widest bg-violet-950/20 border border-violet-500/20 px-2 py-0.5 rounded">Para Constructoras</span>
+                <h3 className="text-lg font-bold text-slate-300 mt-3">Equipos & Workspaces</h3>
+                <div className="text-4xl font-extrabold mt-4">Bs. 200<span className="text-xs text-slate-400 font-normal"> / mes</span></div>
+                <p className="text-xs text-slate-500 mt-1">Soporte multiusuario de empresa</p>
+                <div className="h-px bg-slate-900 my-6" />
+                <ul className="space-y-3 text-sm text-slate-450 mb-8">
+                  <li className="flex items-center gap-2 text-slate-200">
+                    <span className="text-violet-400">✓</span> <strong>Todo lo del Plan Pro</strong>
+                  </li>
+                  <li className="flex items-center gap-2 text-slate-200">
+                    <span className="text-violet-400">✓</span> <strong>Colaboración en Workspaces</strong>
+                  </li>
+                  <li className="flex items-center gap-2 text-slate-200">
+                    <span className="text-violet-400">✓</span> Invita a ingenieros y residentes
+                  </li>
+                  <li className="flex items-center gap-2 text-slate-200">
+                    <span className="text-violet-400">✓</span> Roles Admin / Miembro
+                  </li>
+                  <li className="flex items-center gap-2 text-slate-200">
+                    <span className="text-violet-400">✓</span> Base de Precios Personalizada
+                  </li>
+                  <li className="flex items-center gap-2 text-slate-200">
+                    <span className="text-violet-400">✓</span> Proyectos compartidos de equipo
+                  </li>
+                </ul>
+              </div>
+              <div className="space-y-2">
+                <Link href="/register" className="w-full block">
+                  <Button variant="outline" className="w-full border-slate-800 hover:bg-slate-900 text-slate-200 font-bold">
+                    Contratar Plan Equipo
+                  </Button>
+                </Link>
+                <a 
+                  href="https://wa.me/59171523780?text=Hola,%20quisiera%20solicitar%20una%20demostración%20para%20el%20Plan%20Equipo%20de%20Cálculo%20Presupuestal"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-center text-[10px] text-cyan-400 hover:underline pt-1"
+                >
+                  O solicita una demo por WhatsApp
+                </a>
+              </div>
             </div>
           </div>
         </div>
