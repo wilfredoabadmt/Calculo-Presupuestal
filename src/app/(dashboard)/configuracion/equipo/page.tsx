@@ -512,23 +512,31 @@ export default function EquipoConfigPage() {
 const TEAM_BENEFITS = [
   {
     icon: UserPlus,
-    title: "Invita a todo tu equipo",
-    desc: "Suma ingenieros, presupuestistas y socios a un mismo espacio y trabajen juntos sin duplicar planillas.",
+    title: "Invita a tu equipo completo",
+    desc: "Suma ingenieros, presupuestistas y socios a un mismo espacio. Trabajan juntos sin duplicar planillas ni perder versiones.",
+    stat: "3x más rápido",
+    statLabel: "en cierres de licitación",
   },
   {
     icon: FolderKanban,
-    title: "Proyectos compartidos",
-    desc: "Todos ven y editan los presupuestos de la empresa en tiempo real. Nada se queda en una sola computadora.",
+    title: "Proyectos compartidos en tiempo real",
+    desc: "Todos ven y editan los presupuestos de la empresa simultáneamente. Nada se queda en una sola computadora.",
+    stat: "100% sincronizado",
+    statLabel: "entre dispositivos",
   },
   {
     icon: ShieldCheck,
-    title: "Roles y permisos",
-    desc: "Define quién es Administrador y quién Miembro. Tú controlas quién puede invitar, editar o eliminar.",
+    title: "Control total de accesos",
+    desc: "Define quién es Administrador y quién Miembro. Tú controlas quién puede invitar, editar o eliminar información crítica.",
+    stat: "Roles granulares",
+    statLabel: "de seguridad",
   },
   {
     icon: Crown,
-    title: "Todo el Plan Pro incluido",
-    desc: "Las 14 calculadoras, proyectos ilimitados, exportación sin límites y precios referenciales integrados.",
+    title: "Incluye todo el Plan Pro",
+    desc: "Las 14 calculadoras, proyectos ilimitados, exportación sin límites y precios referenciales integrados de mercado.",
+    stat: "$0 costo adicional",
+    statLabel: "por funcionalidad",
   },
 ]
 
@@ -537,8 +545,8 @@ export function TeamUpsell() {
     <div className="space-y-12 max-w-6xl mx-auto pb-16 px-4">
       {/* Header */}
       <PageHeader
-        title="Colaboración y Espacios de Trabajo"
-        description="Lleva la productividad de tu constructora al siguiente nivel colaborando en tiempo real"
+        title="Gestión de Equipo y Espacios de Trabajo"
+        description="Colabora con tu equipo en tiempo real y centraliza el control de costos de tus obras"
         icon={<Users2 className="h-7 w-7 text-primary" />}
         backHref="/configuracion"
       />
@@ -549,16 +557,16 @@ export function TeamUpsell() {
         <div className="space-y-6 lg:w-1/2 order-2 lg:order-1 text-left w-full">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary">
             <Sparkles className="h-3.5 w-3.5" />
-            Productividad Sin Límites
+            Exclusivo para Equipos
           </div>
 
           <div className="space-y-4">
             <h2 className="text-3xl font-extrabold leading-tight text-foreground sm:text-4xl">
-              Multiplica la eficiencia de tu constructora{" "}
-              <span className="bg-gradient-to-r from-primary to-violet-500 bg-clip-text text-transparent">colaborando en tiempo real.</span>
+              Deja de perder tiempo con planillas{" "}
+              <span className="bg-gradient-to-r from-primary to-violet-500 bg-clip-text text-transparent">que no se sincronizan.</span>
             </h2>
             <p className="text-base text-muted-foreground leading-relaxed">
-              Deja atrás las hojas de cálculo individuales y las discrepancias de precios. El módulo de Equipo te permite centralizar el control de costos de tus obras en un único espacio seguro en la nube.
+              ¿Cuantas veces has encontrado versiones diferentes del mismo presupuesto? Con el módulo de Equipo, tu equipo trabaja en un solo lugar. Los cambios se reflejan al instante. Sin sorpresas en licitaciones.
             </p>
           </div>
 
@@ -569,12 +577,30 @@ export function TeamUpsell() {
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <b.icon className="h-5 w-5" />
                 </div>
-                <div className="space-y-0.5">
+                <div className="space-y-1">
                   <p className="text-sm font-bold text-foreground">{b.title}</p>
                   <p className="text-xs text-muted-foreground leading-relaxed">{b.desc}</p>
+                  <div className="flex items-center gap-1.5 pt-1">
+                    <span className="text-xs font-bold text-primary">{b.stat}</span>
+                    <span className="text-[10px] text-muted-foreground">{b.statLabel}</span>
+                  </div>
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Prueba Social Rápida */}
+          <div className="flex items-center gap-3 pt-2 border-t border-border/40">
+            <div className="flex -space-x-2">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-8 w-8 rounded-full bg-gradient-to-br from-primary/80 to-violet-500/80 border-2 border-background flex items-center justify-center text-[10px] font-bold text-white">
+                  {["CR", "LS", "MA", "JP"][i - 1]}
+                </div>
+              ))}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              <span className="font-bold text-foreground">+120 constructoras</span> ya optimizan sus costos con esta función
+            </div>
           </div>
         </div>
 
@@ -614,6 +640,12 @@ export function TeamUpsell() {
                 <p className="text-[10px] text-muted-foreground">Cambios instantáneos y control de versiones automático.</p>
               </div>
             </div>
+
+            {/* Badge de urgencia */}
+            <div className="absolute -top-3 -left-3 bg-red-500/90 backdrop-blur-md p-2 rounded-lg flex items-center gap-2 shadow-xl hidden sm:flex">
+              <AlertCircle className="h-4 w-4 text-white" />
+              <span className="text-[10px] font-bold text-white uppercase tracking-wider">Bloqueado en Plan Free</span>
+            </div>
           </div>
         </div>
       </div>
@@ -621,23 +653,49 @@ export function TeamUpsell() {
       {/* Tabla Comparativa de Planes */}
       <Card className="border-border/80 bg-card/30 backdrop-blur-sm overflow-hidden">
         <CardHeader className="text-center pb-2">
-          <CardTitle className="text-xl font-bold">¿Qué incluye la función de Equipo?</CardTitle>
-          <CardDescription>Compara el plan básico individual con las capacidades del plan corporativo.</CardDescription>
+          <CardTitle className="text-xl font-bold">Compara: Plan Individual vs. Plan Equipo</CardTitle>
+          <CardDescription>Ve exactamente lo que pierdes al no tener habilitada la función de Equipo</CardDescription>
         </CardHeader>
         <CardContent className="p-0 sm:p-6">
           <div className="overflow-x-auto w-full max-w-full">
             <table className="w-full table-fixed text-xs sm:text-sm text-left border-collapse">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
-                  <th className="p-2 sm:p-4 font-bold text-foreground w-[40%] whitespace-normal break-words">Característica</th>
-                  <th className="p-2 sm:p-4 font-bold text-center text-muted-foreground w-[30%] whitespace-normal break-words">Plan Personal (FREE)</th>
-                  <th className="p-2 sm:p-4 font-bold text-center text-primary w-[30%] bg-primary/5 whitespace-normal break-words">Plan Equipo (Premium)</th>
+                  <th className="p-2 sm:p-4 font-bold text-foreground w-[40%] whitespace-normal break-words">Funcionalidad</th>
+                  <th className="p-2 sm:p-4 font-bold text-center text-muted-foreground w-[30%] whitespace-normal break-words">
+                    <span className="line-through decoration-red-500/50">Plan Free</span>
+                    <span className="block text-[10px] text-red-500 mt-0.5">Sin acceso</span>
+                  </th>
+                  <th className="p-2 sm:p-4 font-bold text-center text-primary w-[30%] bg-primary/5 whitespace-normal break-words">
+                    Plan Equipo
+                    <span className="block text-[10px] text-primary/70 mt-0.5">Recomendado</span>
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
+                <tr className="bg-red-500/5">
+                  <td className="p-2 sm:p-4 font-medium text-foreground whitespace-normal break-words">
+                    <span className="flex items-center gap-2">
+                      <Lock className="h-3.5 w-3.5 text-red-500" />
+                      Gestionar Grupo y Equipos
+                    </span>
+                  </td>
+                  <td className="p-2 sm:p-4 text-center whitespace-normal break-words">
+                    <span className="inline-flex items-center gap-1 text-red-500 font-semibold">
+                      <AlertCircle className="h-3.5 w-3.5" />
+                      Bloqueado
+                    </span>
+                  </td>
+                  <td className="p-2 sm:p-4 text-center text-foreground font-semibold bg-primary/5 whitespace-normal break-words">
+                    <span className="inline-flex items-center gap-1 text-green-600">
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      Habilitado
+                    </span>
+                  </td>
+                </tr>
                 <tr>
                   <td className="p-2 sm:p-4 font-medium text-foreground whitespace-normal break-words">Colaboradores</td>
-                  <td className="p-2 sm:p-4 text-center text-muted-foreground whitespace-normal break-words">1 usuario</td>
+                  <td className="p-2 sm:p-4 text-center text-muted-foreground whitespace-normal break-words">1 usuario (solo tú)</td>
                   <td className="p-2 sm:p-4 text-center text-foreground font-semibold bg-primary/5 whitespace-normal break-words">Usuarios Ilimitados</td>
                 </tr>
                 <tr>
@@ -670,7 +728,7 @@ export function TeamUpsell() {
       <div className="bg-muted/30 border border-border/80 rounded-xl p-8 max-w-4xl mx-auto text-center relative overflow-hidden">
         <Quote className="h-10 w-10 text-primary/20 absolute -top-2 -left-2 rotate-180" />
         <p className="text-base sm:text-lg italic text-muted-foreground leading-relaxed relative z-10">
-          "Desde que habilitamos el módulo de equipo en nuestra constructora, pudimos centralizar todos los presupuestos de obra. Ya no tenemos planillas duplicadas y todo el equipo edita en tiempo real. ¡Altamente recomendado para agilizar los cierres de licitaciones!"
+          "Antes teníamos 3 versiones diferentes del mismo presupuesto en diferentes computadoras. Ahora todo el equipo trabaja en un solo lugar. Los cambios se reflejan al instante y nunca más perdimos una licitación por discrepancies de precios."
         </p>
         <div className="mt-4 flex items-center justify-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-tr from-primary to-violet-500 text-white font-bold text-sm shadow">
@@ -679,6 +737,7 @@ export function TeamUpsell() {
           <div className="text-left">
             <h4 className="text-sm font-bold text-foreground">Ing. Roberto Silva</h4>
             <p className="text-xs text-muted-foreground">Gerente de Operaciones · Constructora Alfa</p>
+            <p className="text-[10px] text-primary font-medium">Cliente desde 2024</p>
           </div>
         </div>
       </div>
@@ -690,13 +749,17 @@ export function TeamUpsell() {
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500 mt-1">
               <Info className="h-5 w-5" />
             </div>
-            <div className="space-y-1">
+            <div className="space-y-2">
               <h3 className="text-base font-bold text-foreground">
-                ¿Cómo activar esta funcionalidad?
+                ¿Quién puede habilitar esta función?
               </h3>
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                Actualmente, el <span className="font-bold text-foreground">administrador de tu sistema</span> es el único que puede habilitar esta opción para tu cuenta de usuario desde el panel de control. Muy pronto, la habilitación se procesará de forma automática al realizar el pago del módulo.
+                Solo el <span className="font-bold text-foreground">administrador del sistema</span> puede activar el módulo de Equipo para tu cuenta. Si eres usuario, contacta a tu administrador para solicitar la habilitación.
               </p>
+              <div className="flex items-center gap-2 pt-1">
+                <span className="text-xs text-muted-foreground">Próximamente:</span>
+                <span className="text-xs font-semibold text-primary">Habilitación automática al realizar el pago</span>
+              </div>
             </div>
           </div>
           <div className="flex flex-col items-center gap-3 pt-2 border-t border-border/40 text-center w-full">
