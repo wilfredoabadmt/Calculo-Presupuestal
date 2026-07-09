@@ -20,7 +20,11 @@ import {
   Activity,
   CheckCircle2,
   MessageSquare,
-  HelpCircle
+  HelpCircle,
+  FileSpreadsheet,
+  Sliders,
+  Smartphone,
+  Share2
 } from "lucide-react"
 import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
@@ -52,19 +56,19 @@ export default async function HomePage() {
           <div className="grid md:grid-cols-12 gap-12 items-center">
             <div className="md:col-span-5 space-y-6">
               <div className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/25 rounded-md px-3 py-1 text-xs font-semibold text-cyan-400 uppercase tracking-wider">
-                Trayectoria de Precisión
+                Trayectoria de Precisión en Bolivia
               </div>
               <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-                Respaldando las obras más exigentes del país
+                Respaldando las obras y licitaciones más exigentes
               </h2>
               <p className="text-slate-400 leading-relaxed text-sm">
-                Nuestra plataforma consolida décadas de conocimiento de ingeniería civil, automatizando cálculos complejos de materiales que antes tomaban horas de revisión manual.
+                Nuestra plataforma consolida el conocimiento técnico de ingeniería civil, automatizando presupuestos complejos y dosificaciones de materiales bajo la normativa de construcción local.
               </p>
               <div className="space-y-3.5">
                 {[
-                  "Fórmulas validadas bajo normas bolivianas de construcción",
+                  "Fórmulas paramétricas validadas técnicamente",
                   "Cálculo automatizado de desperdicio por tipo de ítem",
-                  "Reportes ejecutivos listos para auditorías públicas"
+                  "Reportes ejecutivos listos para licitaciones públicas y SICOES"
                 ].map((item, idx) => (
                   <div key={idx} className="flex items-center gap-2.5 text-sm font-medium text-slate-300">
                     <CheckCircle2 className="h-5 w-5 text-cyan-500 shrink-0" />
@@ -76,10 +80,10 @@ export default async function HomePage() {
 
             <div className="md:col-span-7 grid grid-cols-2 gap-4">
               {[
-                { val: "Bs. 940M+", label: "Presupuestos Calculados", desc: "En volumen total financiero", icon: Scale },
-                { val: "12,000+", label: "Proyectos Procesados", desc: "Privados y gubernamentales", icon: Building2 },
+                { val: "Bs. 940M+", label: "Presupuestos Calculados", desc: "Volumen financiero estimado", icon: Scale },
+                { val: "12,000+", label: "Proyectos Procesados", desc: "Privados y estatales en Bolivia", icon: Building2 },
                 { val: "4.8M m³", label: "Hormigón Estimado", desc: "Con dosificaciones exactas", icon: Layers },
-                { val: "99.98%", label: "Precisión Paramétrica", desc: "Sin errores de redondeo", icon: Activity }
+                { val: "99.98%", label: "Precisión Paramétrica", desc: "Sin errores de redondeo en APU", icon: Activity }
               ].map((stat, i) => (
                 <div key={i} className="p-4 sm:p-6 rounded-2xl border border-slate-900 bg-slate-900/10 hover:border-slate-800/80 hover:bg-slate-900/20 transition-all duration-300">
                   <div className="w-10 h-10 rounded-lg bg-slate-900/80 border border-slate-800 flex items-center justify-center text-cyan-400 mb-4">
@@ -108,7 +112,7 @@ export default async function HomePage() {
               {
                 name: "Concreto Standard",
                 free: true,
-                spec: "Dosificación cemento/arena",
+                spec: "Dosificación cemento/arena/grava/agua",
                 renderSvg: () => (
                   <svg className="w-16 h-16 text-cyan-500/20 group-hover:text-cyan-400/40 transition-colors" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="1.2">
                     <rect x="10" y="20" width="30" height="30" />
@@ -123,7 +127,7 @@ export default async function HomePage() {
               {
                 name: "Paredes de Ladrillo",
                 free: true,
-                spec: "Cómputo piezas y mezcla",
+                spec: "Cómputo de piezas, pegas y morteros",
                 renderSvg: () => (
                   <svg className="w-16 h-16 text-orange-500/20 group-hover:text-orange-400/40 transition-colors" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="1.2">
                     <rect x="5" y="10" width="50" height="40" rx="2" />
@@ -142,7 +146,7 @@ export default async function HomePage() {
               {
                 name: "Pisos y Cerámicas",
                 free: true,
-                spec: "Piezas, juntas y pegamento",
+                spec: "Piezas, pegamento y juntas",
                 renderSvg: () => (
                   <svg className="w-16 h-16 text-emerald-500/20 group-hover:text-emerald-400/40 transition-colors" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="1.2">
                     <rect x="8" y="8" width="44" height="44" rx="1" />
@@ -156,7 +160,7 @@ export default async function HomePage() {
               {
                 name: "Pintura y Acabados",
                 free: true,
-                spec: "Rendimiento y manos de pintura",
+                spec: "Rendimiento, áreas y manos",
                 renderSvg: () => (
                   <svg className="w-16 h-16 text-cyan-500/20 group-hover:text-cyan-400/40 transition-colors" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="1.2">
                     <rect x="15" y="10" width="30" height="40" rx="2" />
@@ -170,7 +174,7 @@ export default async function HomePage() {
               {
                 name: "Columnas de Hormigón",
                 free: false,
-                spec: "Acero longitudinal y estribos",
+                spec: "Acero longitudinal y estribado",
                 renderSvg: () => (
                   <svg className="w-16 h-16 text-cyan-500/20 group-hover:text-cyan-400/40 transition-colors" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="1.2">
                     <rect x="20" y="5" width="20" height="50" />
@@ -185,7 +189,7 @@ export default async function HomePage() {
               {
                 name: "Vigas Estructurales",
                 free: false,
-                spec: "Encofrados y fierrería",
+                spec: "Encofrados y armadura de refuerzo",
                 renderSvg: () => (
                   <svg className="w-16 h-16 text-cyan-500/20 group-hover:text-cyan-400/40 transition-colors" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="1.2">
                     <rect x="5" y="20" width="50" height="20" />
@@ -200,7 +204,7 @@ export default async function HomePage() {
               {
                 name: "Losas de Concreto",
                 free: false,
-                spec: "Aligeradas y macizas",
+                spec: "Aligeradas, macizas y bovedillas",
                 renderSvg: () => (
                   <svg className="w-16 h-16 text-cyan-500/20 group-hover:text-cyan-400/40 transition-colors" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="1.2">
                     <rect x="5" y="25" width="50" height="15" />
@@ -246,7 +250,7 @@ export default async function HomePage() {
               {
                 name: "Techos y Coberturas",
                 free: false,
-                spec: "Tejas, listones y aleros",
+                spec: "Tejas, listonados y faldones",
                 renderSvg: () => (
                   <svg className="w-16 h-16 text-cyan-500/20 group-hover:text-cyan-400/40 transition-colors" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="1.2">
                     <polygon points="10,45 50,45 50,20" />
@@ -257,7 +261,7 @@ export default async function HomePage() {
               {
                 name: "Cielo Raso y Yeso",
                 free: false,
-                spec: "Perfiles y placas drywall",
+                spec: "Perfiles, paneles y drywall",
                 renderSvg: () => (
                   <svg className="w-16 h-16 text-cyan-500/20 group-hover:text-cyan-400/40 transition-colors" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="1.2">
                     <rect x="5" y="15" width="50" height="30" rx="1" />
@@ -272,7 +276,7 @@ export default async function HomePage() {
               {
                 name: "Paredes Drywall",
                 free: false,
-                spec: "Pernos, rieles y masilla",
+                spec: "Parantes, canales, pernos y masilla",
                 renderSvg: () => (
                   <svg className="w-16 h-16 text-cyan-500/20 group-hover:text-cyan-400/40 transition-colors" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="1.2">
                     <rect x="10" y="10" width="40" height="40" rx="1" />
@@ -286,7 +290,7 @@ export default async function HomePage() {
               {
                 name: "Paredes de Concreto",
                 free: false,
-                spec: "Armaduras y vaciado",
+                spec: "Muros de concreto armado con rebar",
                 renderSvg: () => (
                   <svg className="w-16 h-16 text-cyan-500/20 group-hover:text-cyan-400/40 transition-colors" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="1.2">
                     <rect x="10" y="10" width="40" height="40" />
@@ -302,7 +306,7 @@ export default async function HomePage() {
               {
                 name: "Zócalos de Acabado",
                 free: false,
-                spec: "Pegamento y piezas lineales",
+                spec: "Zócalos lineales y dosificaciones",
                 renderSvg: () => (
                   <svg className="w-16 h-16 text-cyan-500/20 group-hover:text-cyan-400/40 transition-colors" viewBox="0 0 60 60" fill="none" stroke="currentColor" strokeWidth="1.2">
                     <path d="M10,10 L10,45 L50,45" />
@@ -351,12 +355,109 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Nueva Sección: Características de Ingeniería Avanzada */}
+      <section id="avanzado" className="py-16 sm:py-24 bg-slate-950 relative border-t border-slate-900">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-600/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="container mx-auto px-4 sm:px-6 max-w-5xl relative z-10">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 bg-slate-900 border border-slate-850 rounded-full px-3.5 py-1 text-xs font-semibold text-cyan-400 uppercase tracking-widest mb-3">
+              <Cpu className="h-3.5 w-3.5" />
+              Ingeniería de Siguiente Nivel
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+              Herramientas Diseñadas para Constructoras
+            </h2>
+            <p className="text-slate-400 mt-2 max-w-2xl mx-auto">
+              Hemos integrado potentes utilidades empresariales para optimizar cada fase de tus proyectos públicos y privados.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                title: "Workspaces Colaborativos",
+                desc: "Invita a ingenieros, residentes de obra y administradores. Administra permisos con roles de ADMIN y MEMBER para trabajar en paralelo en los mismos presupuestos.",
+                icon: Users2,
+                tag: "Equipos"
+              },
+              {
+                title: "Formulario B-1 Oficial PDF",
+                desc: "Genera el Análisis de Precios Unitarios (APU) según las especificaciones de contratación pública de Bolivia (SICOES). Listo para incluir en tus propuestas formales.",
+                icon: FileText,
+                tag: "SICOES"
+              },
+              {
+                title: "Importación/Exportación Excel",
+                desc: "Sube tus listas de materiales o descarga presupuestos completos de forma bidireccional. Integración rápida con el Banco de Precios referencial de más de 36,000 ítems.",
+                icon: FileSpreadsheet,
+                tag: "Productividad"
+              },
+              {
+                title: "Persistencia AIU Paramétrica",
+                desc: "Configura valores de Cargas Sociales, IVA, IT, Gastos Generales y Utilidad de forma persistente para cada proyecto. Se aplican y recalculan en tiempo real.",
+                icon: Sliders,
+                tag: "Finanzas"
+              },
+              {
+                title: "Precios Locales Sobreescritos",
+                desc: "Visualiza de forma clara qué insumos han sido modificados con precios específicos para un proyecto, manteniendo intacta tu base de precios globales de referencia.",
+                icon: Award,
+                tag: "Control"
+              },
+              {
+                title: "Planificación Gantt y Curva S",
+                desc: "Planifica plazos con un cronograma visual, establece dependencias y analiza el progreso financiero a través de la Curva S integrada a los costos de tus cómputos.",
+                icon: Calendar,
+                tag: "Plazos"
+              }
+            ].map((feat, idx) => (
+              <div key={idx} className="p-6 rounded-2xl border border-slate-900 bg-slate-900/10 hover:border-slate-800 transition-all duration-300 flex flex-col justify-between relative group overflow-hidden">
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                <div>
+                  <div className="flex justify-between items-center mb-4">
+                    <div className="w-10 h-10 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-cyan-400">
+                      <feat.icon className="h-5 w-5" />
+                    </div>
+                    <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider bg-slate-900/60 border border-slate-800/80 px-2 py-0.5 rounded">
+                      {feat.tag}
+                    </span>
+                  </div>
+                  <h3 className="text-base font-bold text-slate-200 mb-2">{feat.title}</h3>
+                  <p className="text-xs text-slate-400 leading-relaxed font-light">{feat.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Mobile Responsiveness Highlight banner */}
+          <div className="mt-8 p-6 rounded-2xl border border-cyan-500/20 bg-cyan-950/5 flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-400 shrink-0">
+                <Smartphone className="h-6 w-6" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-slate-200">100% Responsivo en Obra</h4>
+                <p className="text-xs text-slate-400 mt-1 max-w-xl">
+                  Accede a tus proyectos, edita presupuestos y ejecuta cálculos técnicos directamente desde tu smartphone o tablet en plena obra de construcción.
+                </p>
+              </div>
+            </div>
+            <Link href="/register">
+              <Button size="sm" className="bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-bold whitespace-nowrap gap-2">
+                Ver en Mi Celular
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Comparison: Enterprise vs Standard */}
       <section id="comparativa" className="py-16 sm:py-20 bg-slate-950 border-t border-slate-900">
         <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
           <div className="text-center mb-16">
-            <h2 className="text-2xl sm:text-3xl font-extrabold">Diseñado para Licitaciones Exigentes</h2>
-            <p className="text-slate-400 mt-2">Diferencia técnica frente a métodos de cálculo manuales tradicionales.</p>
+            <h2 className="text-2xl sm:text-3xl font-extrabold">Optimizado para Licitaciones y Obra</h2>
+            <p className="text-slate-400 mt-2">Diferencia técnica frente a métodos de cálculo manuales tradicionales en Excel.</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8">
@@ -366,39 +467,39 @@ export default async function HomePage() {
               </h3>
               <ul className="space-y-4 text-sm text-slate-500">
                 <li className="flex items-start gap-2">
-                  <span className="text-red-500 mt-0.5">•</span> Copiar y pegar fórmulas propenso a errores humanos fatales.
+                  <span className="text-red-500 mt-0.5">•</span> Copiar y pegar fórmulas propenso a errores humanos fatales en volúmenes.
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-red-500 mt-0.5">•</span> Sin base de datos oficial actualizada; cotizaciones lentas.
+                  <span className="text-red-500 mt-0.5">•</span> Sin base de datos oficial centralizada; cotizaciones desactualizadas.
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-red-500 mt-0.5">•</span> Cronograma desconectado del análisis de materiales del presupuesto.
+                  <span className="text-red-500 mt-0.5">•</span> Cronograma e inversión financiera (Curva S) desconectados del APU.
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-red-500 mt-0.5">•</span> Reportes inconsistentes o difíciles de exportar a PDF formal.
+                  <span className="text-red-500 mt-0.5">•</span> Dificultad para generar reportes oficiales compatibles con el SICOES.
                 </li>
               </ul>
             </Card>
 
             <Card className="border border-cyan-500/30 bg-cyan-950/10 p-6 rounded-2xl relative shadow-lg shadow-cyan-500/5">
               <div className="absolute top-4 right-4 bg-cyan-500/10 text-cyan-400 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-cyan-500/20">
-                PROFESIONAL
+                SISTEMA INTEGRADO
               </div>
               <h3 className="text-lg font-bold text-cyan-400 flex items-center gap-2 mb-6">
                 <span className="text-cyan-400">⚡</span> Motor Cálculo Presupuestal
               </h3>
               <ul className="space-y-4 text-sm text-slate-300">
                 <li className="flex items-start gap-2">
-                  <span className="text-cyan-400 mt-0.5">✓</span> Fórmulas estandarizadas y validadas con precisión ingenieril.
+                  <span className="text-cyan-400 mt-0.5">✓</span> Fórmulas estandarizadas y validadas con precisión paramétrica.
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-cyan-400 mt-0.5">✓</span> Base de precios de referencia integrada para estimaciones rápidas y reales.
+                  <span className="text-cyan-400 mt-0.5">✓</span> Base de más de 36,000 precios referenciales con importación/exportación de Excel.
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-cyan-400 mt-0.5">✓</span> Cronograma Gantt y Curva S sincronizados en base al presupuesto.
+                  <span className="text-cyan-400 mt-0.5">✓</span> Cronograma Gantt interactivo y Curva S recalculados automáticamente.
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-cyan-400 mt-0.5">✓</span> Reportes ejecutivos formales listos para licitaciones públicas.
+                  <span className="text-cyan-400 mt-0.5">✓</span> Exportación del Formulario B-1 Oficial en un clic, reduciendo tiempos de propuesta.
                 </li>
               </ul>
             </Card>
@@ -406,7 +507,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Testimonios Ficticios */}
+      {/* Testimonios */}
       <section id="testimonios" className="py-16 sm:py-24 bg-slate-950 border-t border-slate-900 relative">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-600/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -420,28 +521,28 @@ export default async function HomePage() {
               Opiniones de Líderes de la Construcción
             </h2>
             <p className="text-slate-400 mt-2">
-              Empresas constructoras y consultores independientes comparten su experiencia.
+              Empresas constructoras y consultores independientes comparten su experiencia en proyectos en Bolivia.
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
             {[
               {
-                quote: "Redujimos el tiempo de preparación de ofertas de licitación de 3 días a solo un par de horas. Las calculadoras de dosificación son sumamente precisas.",
+                quote: "Redujimos el tiempo de preparación de ofertas de licitación de 3 días a solo un par de horas. Las exportaciones en PDF del Formulario B-1 son sumamente profesionales.",
                 author: "Ing. Carlos Mendoza",
                 role: "Director de Proyectos",
                 org: "Constructora Andes SRL",
                 initials: "CM"
               },
               {
-                quote: "La integración directa de los cómputos métricos con la generación del diagrama de Gantt y la curva S nos da un control financiero absoluto.",
+                quote: "La integración directa de los cómputos métricos con la generación del diagrama de Gantt y la curva S nos da un control financiero absoluto y transparente para nuestro equipo.",
                 author: "Arq. Laura Salinas",
                 role: "Supervisora de Obras",
                 org: "Consultores y Constructores Asociados",
                 initials: "LS"
               },
               {
-                quote: "Para consultores que trabajamos con el estado, contar con los parámetros de rendimiento y desperdicio oficiales listos es un salto tecnológico enorme.",
+                quote: "Poder configurar las cargas sociales, IVA y gastos generales por proyecto y exportar todo de manera consistente es un salto tecnológico enorme para las licitaciones estatales.",
                 author: "Ing. Roberto Valdez",
                 role: "Consultor Independiente",
                 org: "Obras Públicas Bolivia",
@@ -484,19 +585,23 @@ export default async function HomePage() {
             {[
               {
                 q: "¿Cómo se calculan las dosificaciones y cantidades de materiales?",
-                a: "Nuestras calculadoras emplean fórmulas estandarizadas de ingeniería civil basadas en ratios oficiales de rendimiento por metro cúbico o metro cuadrado. Cada calculadora tiene en cuenta el factor de desperdicio ingresado por el usuario."
+                a: "Nuestras calculadoras emplean fórmulas estandarizadas de ingeniería civil basadas en ratios de rendimiento oficiales. Cada calculadora tiene en cuenta el factor de desperdicio ingresado por el usuario y los coeficientes de aporte de los insumos."
               },
               {
-                q: "¿Puedo exportar mis presupuestos a Excel y PDF?",
-                a: "Sí, todos los cómputos métricos, presupuestos generales consolidados y diagramas de Gantt se pueden descargar en un solo clic con formatos profesionales ideales para carpetas de licitación."
+                q: "¿El Formulario B-1 PDF es compatible con licitaciones estatales en Bolivia?",
+                a: "Sí. El PDF exportado genera automáticamente la planilla de Análisis de Precios Unitarios (APU) oficial según el Formulario B-1 exigido por el SICOES y las alcaldías/gobernaciones, desglosando correctamente mano de obra, materiales, equipos, cargas sociales, impuestos (IVA, IT) y AIU."
               },
               {
-                q: "¿Qué es el Plan Free y qué limitaciones tiene?",
-                a: "El Plan Free te permite crear hasta 1 proyecto activo simultáneo y utilizar 4 de nuestras calculadoras principales (Concreto, Paredes, Pisos y Pintura) de forma ilimitada y sin costo."
+                q: "¿Puedo importar mis propios precios referenciales en Excel?",
+                a: "Sí, el plan PRO te permite subir planillas en Excel directamente al Banco de Precios. El sistema detecta y actualiza los costos de forma masiva para que no tengas que transcribirlos a mano."
               },
               {
-                q: "¿Cómo funciona el generador de cronograma Gantt y la curva S?",
-                a: "Una vez que guardas tus elementos calculados en el presupuesto, el sistema te permite en la sección 'Cronograma' agendar las actividades asignándoles una fecha de inicio y duración. La curva S se calcula acumulando automáticamente el progreso financiero de las partidas."
+                q: "¿Cómo funcionan los Workspaces colaborativos?",
+                a: "Permiten agrupar a varios usuarios en un mismo espacio de trabajo. El administrador (ADMIN) puede invitar a miembros (MEMBER) para que colaboren en la edición de presupuestos, cómputos métricos y cronogramas Gantt del equipo en tiempo real."
+              },
+              {
+                q: "¿Qué limitaciones tiene el Plan Free?",
+                a: "El Plan Free está diseñado para pruebas individuales y pequeños presupuestos. Permite crear hasta 1 proyecto activo simultáneo y utilizar 4 calculadoras básicas (Concreto, Paredes, Pisos y Pintura) de forma ilimitada y gratuita."
               }
             ].map((faq, idx) => (
               <details
@@ -544,6 +649,12 @@ export default async function HomePage() {
                   <li className="flex items-center gap-2">
                     <span className="text-cyan-400">✓</span> Exportación PDF básica
                   </li>
+                  <li className="flex items-center gap-2 text-slate-600 line-through">
+                    <span>Workspaces de equipo</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-slate-600 line-through">
+                    <span>Formulario B-1 Oficial</span>
+                  </li>
                 </ul>
               </div>
               <Link href="/register" className="w-full">
@@ -568,13 +679,22 @@ export default async function HomePage() {
                     <span className="text-cyan-400">✓</span> <strong>Las 14 calculadoras</strong> completas
                   </li>
                   <li className="flex items-center gap-2">
-                    <span className="text-cyan-400">✓</span> Proyectos ilimitados
+                    <span className="text-cyan-400">✓</span> Proyectos ilimitados y cómputos
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-cyan-400">✓</span> <strong>Exportación Formulario B-1 Oficial (SICOES)</strong>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-cyan-400">✓</span> <strong>Colaboración en Workspaces (Equipos)</strong>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-cyan-400">✓</span> <strong>Importación/Exportación de Excel masiva</strong>
                   </li>
                   <li className="flex items-center gap-2">
                     <span className="text-cyan-400">✓</span> Cronograma Gantt y Curva S
                   </li>
                   <li className="flex items-center gap-2">
-                    <span className="text-cyan-400">✓</span> Exportación PDF y Excel ilimitada
+                    <span className="text-cyan-400">✓</span> Impuestos y AIU personalizables por proyecto
                   </li>
                 </ul>
               </div>
@@ -624,7 +744,7 @@ export default async function HomePage() {
                 <li>Hormigón Estructural</li>
                 <li>Muros y Contenciones</li>
                 <li>Planificación Gantt</li>
-                <li>Exportación BIM-Excel</li>
+                <li>Exportación Formulario B-1</li>
               </ul>
             </div>
             <div>
