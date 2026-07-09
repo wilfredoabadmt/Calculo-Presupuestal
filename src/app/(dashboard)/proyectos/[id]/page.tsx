@@ -256,7 +256,7 @@ export default function ProyectoDetailPage() {
           <h1 className="text-3xl font-bold">{project.nombre}</h1>
           <p className="text-muted-foreground">{project.cliente} • {project.empresa}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button variant="outline" asChild>
             <Link href={`/proyectos/${projectId}/calculadora`}>
               <Plus className="mr-2 h-4 w-4" />
@@ -273,13 +273,13 @@ export default function ProyectoDetailPage() {
       </div>
 
       <Tabs defaultValue="dashboard" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="dashboard">Resumen</TabsTrigger>
-          <TabsTrigger value="elementos">Elementos</TabsTrigger>
-          <TabsTrigger value="presupuesto">Presupuesto</TabsTrigger>
-          <TabsTrigger value="detallado">Detallado</TabsTrigger>
-          <TabsTrigger value="cronograma">Cronograma</TabsTrigger>
-          <TabsTrigger value="reportes">Reportes</TabsTrigger>
+        <TabsList className="flex w-full overflow-x-auto justify-start sm:grid sm:grid-cols-6 h-auto sm:h-10 no-scrollbar gap-1 sm:gap-0 p-1">
+          <TabsTrigger value="dashboard" className="shrink-0 sm:shrink">Resumen</TabsTrigger>
+          <TabsTrigger value="elementos" className="shrink-0 sm:shrink">Elementos</TabsTrigger>
+          <TabsTrigger value="presupuesto" className="shrink-0 sm:shrink">Presupuesto</TabsTrigger>
+          <TabsTrigger value="detallado" className="shrink-0 sm:shrink">Detallado</TabsTrigger>
+          <TabsTrigger value="cronograma" className="shrink-0 sm:shrink">Cronograma</TabsTrigger>
+          <TabsTrigger value="reportes" className="shrink-0 sm:shrink">Reportes</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard">

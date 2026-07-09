@@ -42,22 +42,22 @@ export default function PresupuestoDetalladoLayout({ children }: { children: Rea
         />
 
         <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="altas" className="flex items-center gap-2">
+          <TabsList className="flex w-full overflow-x-auto justify-start sm:grid sm:grid-cols-4 h-auto sm:h-10 no-scrollbar gap-1 sm:gap-0 p-1">
+            <TabsTrigger value="altas" className="flex items-center gap-2 shrink-0 sm:shrink">
               <Tag className="h-4 w-4" />
-              <span className="hidden sm:inline">Altas</span>
+              <span>Altas</span>
             </TabsTrigger>
-            <TabsTrigger value="datos" className="flex items-center gap-2">
+            <TabsTrigger value="datos" className="flex items-center gap-2 shrink-0 sm:shrink">
               <Ruler className="h-4 w-4" />
-              <span className="hidden sm:inline">Datos</span>
+              <span>Datos</span>
             </TabsTrigger>
-            <TabsTrigger value="informe" className="flex items-center gap-2">
+            <TabsTrigger value="informe" className="flex items-center gap-2 shrink-0 sm:shrink">
               <FileText className="h-4 w-4" />
-              <span className="hidden sm:inline">Informe</span>
+              <span>Informe</span>
             </TabsTrigger>
-            <TabsTrigger value="resumen" className="flex items-center gap-2">
+            <TabsTrigger value="resumen" className="flex items-center gap-2 shrink-0 sm:shrink">
               <BarChart3 className="h-4 w-4" />
-              <span className="hidden sm:inline">Resumen</span>
+              <span>Resumen</span>
             </TabsTrigger>
           </TabsList>
 
