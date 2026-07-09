@@ -699,9 +699,9 @@ export function TeamUpsell() {
                   <td className="p-2 sm:p-4 text-center text-foreground font-semibold bg-primary/5 whitespace-normal break-words">Usuarios Ilimitados</td>
                 </tr>
                 <tr>
-                  <td className="p-2 sm:p-4 font-medium text-foreground whitespace-normal break-words">Sincronización en Tiempo Real</td>
-                  <td className="p-2 sm:p-4 text-center text-muted-foreground whitespace-normal break-words">No disponible (Local)</td>
-                  <td className="p-2 sm:p-4 text-center text-foreground font-semibold bg-primary/5 whitespace-normal break-words">Sí, en la Nube</td>
+                  <td className="p-2 sm:p-4 font-medium text-foreground whitespace-normal break-words">Colaboración en Tiempo Real</td>
+                  <td className="p-2 sm:p-4 text-center text-muted-foreground whitespace-normal break-words">Trabajo aislado</td>
+                  <td className="p-2 sm:p-4 text-center text-foreground font-semibold bg-primary/5 whitespace-normal break-words">Sí, todos comparten los mismos datos</td>
                 </tr>
                 <tr>
                   <td className="p-2 sm:p-4 font-medium text-foreground whitespace-normal break-words">Proyectos y Presupuestos</td>
@@ -709,14 +709,14 @@ export function TeamUpsell() {
                   <td className="p-2 sm:p-4 text-center text-foreground font-semibold bg-primary/5 whitespace-normal break-words">Proyectos Ilimitados</td>
                 </tr>
                 <tr>
-                  <td className="p-2 sm:p-4 font-medium text-foreground whitespace-normal break-words">Roles y Permisos Granulares</td>
+                  <td className="p-2 sm:p-4 font-medium text-foreground whitespace-normal break-words">Roles y Permisos</td>
                   <td className="p-2 sm:p-4 text-center text-muted-foreground whitespace-normal break-words">—</td>
-                  <td className="p-2 sm:p-4 text-center text-foreground font-semibold bg-primary/5 whitespace-normal break-words">Admin, Colaborador, Auditor</td>
+                  <td className="p-2 sm:p-4 text-center text-foreground font-semibold bg-primary/5 whitespace-normal break-words">Administrador y Miembro</td>
                 </tr>
                 <tr>
-                  <td className="p-2 sm:p-4 font-medium text-foreground whitespace-normal break-words">Base de Materiales Compartida</td>
-                  <td className="p-2 sm:p-4 text-center text-muted-foreground whitespace-normal break-words">Individual por computadora</td>
-                  <td className="p-2 sm:p-4 text-center text-foreground font-semibold bg-primary/5 whitespace-normal break-words">Compartida para toda la Empresa</td>
+                  <td className="p-2 sm:p-4 font-medium text-foreground whitespace-normal break-words">Base de Materiales</td>
+                  <td className="p-2 sm:p-4 text-center text-muted-foreground whitespace-normal break-words">Catálogo global (sin personalizar)</td>
+                  <td className="p-2 sm:p-4 text-center text-foreground font-semibold bg-primary/5 whitespace-normal break-words">Catálogo + precios por empresa</td>
                 </tr>
               </tbody>
             </table>
