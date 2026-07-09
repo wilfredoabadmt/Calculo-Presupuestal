@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { PageHeader } from "@/components/shared/PageHeader"
-import { Users2, Mail, Plus, Trash2, Edit3, Check, Loader2, UserPlus, AlertCircle, Lock, Building2 } from "lucide-react"
+import { Users2, Mail, Plus, Trash2, Edit3, Check, Loader2, UserPlus, AlertCircle, Lock, Building2, ShieldCheck, FolderKanban, Crown, ArrowRight, Sparkles, Headset } from "lucide-react"
 import Link from "next/link"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
@@ -283,29 +283,9 @@ export default function EquipoConfigPage() {
     )
   }
 
-  // Sin workspace y sin permiso: invitar a contratar el módulo de Equipo
+  // Sin workspace y sin permiso: pantalla persuasiva para invitar a habilitar el módulo de Equipo
   if (!workspace) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Card className="max-w-md w-full">
-          <CardContent className="p-8 text-center">
-            <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Lock className="h-8 w-8 text-orange-600" />
-            </div>
-            <h2 className="text-xl font-bold mb-2">Función de Equipo</h2>
-            <p className="text-muted-foreground mb-6">
-              La colaboración en equipo es una función adicional. Contáctate con el
-              administrador para habilitarla en tu cuenta y crear tu espacio de trabajo.
-            </p>
-            <Link href="/precios">
-              <Button className="w-full gap-2 font-bold">
-                Ver planes y precios
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
-    )
+    return <TeamUpsell />
   }
 
   return (
@@ -507,6 +487,173 @@ export default function EquipoConfigPage() {
           </Card>
         </div>
       </div>
+    </div>
+  )
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Pantalla de venta (upsell) para el plan Free / sin permiso de Equipo      */
+/* -------------------------------------------------------------------------- */
+
+const TEAM_BENEFITS = [
+  {
+    icon: UserPlus,
+    title: "Invita a todo tu equipo",
+    desc: "Suma ingenieros, presupuestistas y socios a un mismo espacio y trabajen juntos sin duplicar planillas.",
+  },
+  {
+    icon: FolderKanban,
+    title: "Proyectos compartidos",
+    desc: "Todos ven y editan los presupuestos de la empresa en tiempo real. Nada se queda en una sola computadora.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Roles y permisos",
+    desc: "Define quién es Administrador y quién Miembro. Tú controlas quién puede invitar, editar o eliminar.",
+  },
+  {
+    icon: Crown,
+    title: "Todo el Plan Pro incluido",
+    desc: "Las 14 calculadoras, proyectos ilimitados, exportación sin límites y precios referenciales integrados.",
+  },
+]
+
+// Miembros ficticios solo para la vista previa (captura) de la función.
+const PREVIEW_MEMBERS = [
+  { initials: "MR", name: "María Rojas", email: "maria@constructora.com", role: "ADMIN", color: "bg-primary text-primary-foreground" },
+  { initials: "JG", name: "Jorge Gutiérrez", email: "jorge@constructora.com", role: "MIEMBRO", color: "bg-emerald-500/90 text-white" },
+  { initials: "LP", name: "Lucía Paredes", email: "lucia@constructora.com", role: "MIEMBRO", color: "bg-sky-500/90 text-white" },
+]
+
+export function TeamUpsell() {
+  return (
+    <div className="space-y-8 max-w-6xl mx-auto pb-10">
+      <PageHeader
+        title="Mi Equipo y Espacio de Trabajo"
+        description="Colabora con toda tu empresa en un solo lugar"
+        icon={<Users2 className="h-7 w-7 text-primary" />}
+        backHref="/configuracion"
+      />
+
+      {/* Hero + captura de la función */}
+      <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
+        {/* Copy persuasivo */}
+        <div className="space-y-6 order-2 lg:order-1">
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary">
+            <Sparkles className="h-3.5 w-3.5" />
+            Función Premium
+          </div>
+
+          <div className="space-y-3">
+            <h2 className="text-3xl font-extrabold leading-tight text-foreground sm:text-4xl">
+              Deja de trabajar solo.{" "}
+              <span className="text-primary">Presupuesta en equipo.</span>
+            </h2>
+            <p className="text-base text-muted-foreground leading-relaxed">
+              Crea el espacio de trabajo de tu empresa, invita a tus colaboradores y
+              compartan proyectos, precios y calculadoras en tiempo real. Un solo lugar,
+              toda tu obra bajo control.
+            </p>
+          </div>
+
+          {/* Beneficios */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            {TEAM_BENEFITS.map((b) => (
+              <div key={b.title} className="flex gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <b.icon className="h-5 w-5" />
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-sm font-bold text-foreground">{b.title}</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{b.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Captura / vista previa bloqueada de la función */}
+        <div className="order-1 lg:order-2">
+          <div className="relative">
+            {/* Mockup de la pantalla de Equipo */}
+            <div className="pointer-events-none select-none rounded-xl border border-border bg-card p-4 shadow-2xl shadow-black/30 blur-[1.5px]">
+              {/* Barra superior tipo ventana */}
+              <div className="mb-4 flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-red-400/70" />
+                <span className="h-2.5 w-2.5 rounded-full bg-yellow-400/70" />
+                <span className="h-2.5 w-2.5 rounded-full bg-green-400/70" />
+                <span className="ml-3 flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+                  <Building2 className="h-3.5 w-3.5" /> Constructora Andina S.R.L.
+                </span>
+              </div>
+
+              {/* Tabla de miembros simulada */}
+              <div className="overflow-hidden rounded-lg border border-border">
+                <div className="flex items-center justify-between bg-muted/40 px-3 py-2 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+                  <span>Miembros del equipo</span>
+                  <span className="inline-flex items-center gap-1 rounded bg-primary/15 px-2 py-0.5 text-primary">
+                    <Plus className="h-3 w-3" /> Invitar
+                  </span>
+                </div>
+                <div className="divide-y divide-border">
+                  {PREVIEW_MEMBERS.map((m) => (
+                    <div key={m.initials} className="flex items-center gap-3 px-3 py-2.5">
+                      <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${m.color}`}>
+                        {m.initials}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-xs font-semibold text-foreground">{m.name}</p>
+                        <p className="truncate text-[11px] text-muted-foreground">{m.email}</p>
+                      </div>
+                      <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${m.role === "ADMIN" ? "bg-primary/15 text-primary" : "bg-secondary text-secondary-foreground"}`}>
+                        {m.role}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Overlay con candado */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center rounded-xl bg-background/40 backdrop-blur-[1px]">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full border border-primary/30 bg-background/90 shadow-lg">
+                <Lock className="h-6 w-6 text-primary" />
+              </div>
+              <span className="mt-3 rounded-full bg-background/90 px-3 py-1 text-xs font-semibold text-foreground shadow">
+                Vista previa · Función bloqueada
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Llamada a la acción + aviso de habilitación por el administrador */}
+      <Card className="border-primary/20 bg-gradient-to-br from-primary/10 via-card to-card">
+        <CardContent className="flex flex-col items-center gap-5 p-8 text-center sm:flex-row sm:justify-between sm:text-left">
+          <div className="space-y-1.5">
+            <h3 className="text-lg font-bold text-foreground">
+              ¿Listo para colaborar con tu equipo?
+            </h3>
+            <p className="max-w-xl text-sm text-muted-foreground leading-relaxed">
+              Esta función la activa el <span className="font-semibold text-foreground">administrador</span> del
+              sistema en tu cuenta. Escríbenos o revisa los planes y la habilitamos para
+              que crees tu espacio de trabajo hoy mismo.
+            </p>
+          </div>
+          <div className="flex w-full shrink-0 flex-col items-stretch gap-2 sm:w-auto">
+            <Link href="/precios" className="block w-full sm:w-auto">
+              <Button size="lg" className="w-full gap-2 font-bold sm:w-auto">
+                Ver planes y precios
+                <ArrowRight className="h-4 w-4 shrink-0" />
+              </Button>
+            </Link>
+            <span className="flex flex-wrap items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
+              <Headset className="h-3.5 w-3.5 shrink-0" />
+              Solo el administrador puede habilitarla
+            </span>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }
