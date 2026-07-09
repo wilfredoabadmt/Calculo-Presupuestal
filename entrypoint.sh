@@ -33,5 +33,13 @@ else
   echo "  → WARNING: Banco de Precios import failed"
 fi
 
+# Migrate Workspaces (backwards compatibility)
+echo "[2.7/3] Migrating User Workspaces..."
+if npx tsx prisma/migrate-workspaces.ts 2>&1; then
+  echo "  → Workspace migration OK"
+else
+  echo "  → WARNING: Workspace migration failed"
+fi
+
 echo "[3/3] Starting Next.js server..."
 exec node server.js
