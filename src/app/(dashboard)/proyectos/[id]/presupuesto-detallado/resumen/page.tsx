@@ -163,7 +163,7 @@ export default function ResumenPage() {
           <CardTitle className="text-sm font-medium">Desglose por Capitulos</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
+          <Table className="min-w-[640px]">
             <TableHeader>
               <TableRow className="hover:bg-transparent">
                 <TableHead className="w-16">CAP.</TableHead>

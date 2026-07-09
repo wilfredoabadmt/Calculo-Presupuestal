@@ -98,7 +98,7 @@ export default function NuevoProyectoPage() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold">Nuevo Proyecto</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Nuevo Proyecto</h1>
           <p className="text-muted-foreground">Configura los datos básicos de tu proyecto de construcción</p>
         </div>
       </div>
@@ -155,7 +155,7 @@ export default function NuevoProyectoPage() {
               {errors.empresa && <p className="text-sm text-destructive">{errors.empresa}</p>}
             </div>
 
-            <div className="grid gap-4 md:grid-cols-4">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
               <div className="space-y-2">
                 <Label htmlFor="fecha">Fecha de Inicio</Label>
                 <Input
@@ -217,13 +217,13 @@ export default function NuevoProyectoPage() {
           </form>
         </CardContent>
         <CardFooter className="flex flex-col sm:flex-row gap-4">
-          <Link href="/proyectos">
-            <Button variant="outline" className="flex-1">
+          <Link href="/proyectos" className="w-full sm:flex-1">
+            <Button variant="outline" className="w-full">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Volver
             </Button>
           </Link>
-          <Button type="submit" form="proyecto-form" disabled={isLoading} className="flex-1">
+          <Button type="submit" form="proyecto-form" disabled={isLoading} className="w-full sm:flex-1">
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

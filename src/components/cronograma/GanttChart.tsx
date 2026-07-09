@@ -25,9 +25,9 @@ export function GanttChart({ items }: GanttChartProps) {
         {items.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">Sin actividades programadas</div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-2 overflow-x-auto">
             {items.map(item => (
-              <div key={item.id} className="flex items-center gap-4">
+              <div key={item.id} className="flex items-center gap-4 min-w-[480px]">
                 <div className="w-48 text-sm truncate">{item.codigo} {item.item}</div>
                 <div className="flex-1 h-6 bg-muted rounded overflow-hidden">
                   <div

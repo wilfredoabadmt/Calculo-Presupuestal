@@ -244,16 +244,16 @@ export default function InformePage() {
             Vista previa del presupuesto detallado
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setEditingHeader(!editingHeader)}>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => setEditingHeader(!editingHeader)} className="flex-1 sm:flex-none">
             {editingHeader ? <Check className="mr-2 h-4 w-4" /> : <Pencil className="mr-2 h-4 w-4" />}
             {editingHeader ? "Guardar" : "Editar Encabezado"}
           </Button>
-          <Button variant="outline" onClick={exportExcel} disabled={exporting}>
+          <Button variant="outline" onClick={exportExcel} disabled={exporting} className="flex-1 sm:flex-none">
             <FileSpreadsheet className="mr-2 h-4 w-4" />
             Excel
           </Button>
-          <Button onClick={exportPDF} disabled={exporting}>
+          <Button onClick={exportPDF} disabled={exporting} className="flex-1 sm:flex-none">
             {exporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
             PDF
           </Button>
@@ -261,10 +261,10 @@ export default function InformePage() {
       </div>
 
       <Card className="max-w-4xl mx-auto">
-        <CardContent className="p-8">
+        <CardContent className="p-4 sm:p-8">
           {editingHeader ? (
             <div className="space-y-4 mb-8 border-b pb-6">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-xs">Empresa Constructora</Label>
                   <Input value={headerForm.empresaNombre} onChange={e => setHeaderForm({...headerForm, empresaNombre: e.target.value})} />
@@ -307,7 +307,7 @@ export default function InformePage() {
                 </div>
 
                 {/* Upload Logos */}
-                <div className="space-y-2 col-span-2 border-t pt-4 grid grid-cols-2 gap-4">
+                <div className="space-y-2 sm:col-span-2 border-t pt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label className="text-xs font-semibold">Logotipo de la Empresa</Label>
                     <div className="flex items-center gap-4">
@@ -367,7 +367,7 @@ export default function InformePage() {
             </div>
           ) : (
             <div className="mb-8 border-b pb-6">
-              <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div className="flex gap-4 items-start">
                   {headerForm.empresaLogo && (
                     <img src={headerForm.empresaLogo} alt="Logo Empresa" className="h-16 w-auto object-contain border rounded p-1 bg-white shrink-0" />
@@ -378,7 +378,7 @@ export default function InformePage() {
                     <p className="text-muted-foreground">{headerForm.empresaCif}</p>
                   </div>
                 </div>
-                <div className="flex gap-4 items-start justify-end text-right">
+                <div className="flex gap-4 items-start sm:justify-end sm:text-right">
                   <div>
                     <p className="text-muted-foreground">CLIENTE: <span className="font-medium text-foreground">{headerForm.clienteNombre || "-"}</span></p>
                     <p className="text-muted-foreground">OBRA: <span className="font-medium text-foreground">{headerForm.proyectoNombre || "-"}</span></p>
@@ -404,7 +404,7 @@ export default function InformePage() {
                 <div className="bg-muted/50 px-4 py-2 rounded-t font-semibold text-sm">
                   CAP. {cap.codigo} - {cap.nombre}
                 </div>
-                <Table className="border">
+                <Table className="border min-w-[720px]">
                   <TableHeader>
                     <TableRow className="hover:bg-transparent">
                       <TableHead className="w-16">Partida</TableHead>

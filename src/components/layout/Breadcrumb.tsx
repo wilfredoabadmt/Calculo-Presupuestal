@@ -10,10 +10,10 @@ interface BreadcrumbItem {
 
 export function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
   return (
-    <nav className="flex items-center gap-1 text-sm text-muted-foreground">
+    <nav className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
       {items.map((item, i) => (
-        <span key={i} className="flex items-center gap-1">
-          {i > 0 && <ChevronRight className="h-3 w-3" />}
+        <span key={i} className="flex items-center gap-1 min-w-0">
+          {i > 0 && <ChevronRight className="h-3 w-3 shrink-0" />}
           {item.href ? (
             <Link href={item.href} className="hover:text-foreground transition-colors">{item.label}</Link>
           ) : (

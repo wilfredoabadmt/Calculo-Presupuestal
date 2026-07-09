@@ -146,7 +146,7 @@ export default function TechoCalculatorPage() {
         <div className="flex items-center gap-4">
           <Link href={`/proyectos/${projectId}/calculadora`} className="p-2 hover:bg-accent rounded-lg"><ArrowLeft className="h-5 w-5" /></Link>
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2"><Box className="h-7 w-7 text-primary" /> Calculadora de Techo</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2"><Box className="h-7 w-7 text-primary" /> Calculadora de Techo</h1>
             <p className="text-muted-foreground">Tejas - area = √(L²+H²) × A</p>
           </div>
         </div>

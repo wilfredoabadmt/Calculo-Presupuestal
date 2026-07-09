@@ -122,7 +122,7 @@ export default function MuroCalculatorPage() {
         <div className="flex items-center gap-4">
           <Link href={`/proyectos/${projectId}/calculadora`} className="p-2 hover:bg-accent rounded-lg"><ArrowLeft className="h-5 w-5" /></Link>
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2"><Box className="h-7 w-7 text-primary" /> Calculadora de Muro Piedra</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2"><Box className="h-7 w-7 text-primary" /> Calculadora de Muro Piedra</h1>
             <p className="text-muted-foreground">Piedra + Mortero - Volumen promedio ((C+B)/2 × H × L)</p>
           </div>
         </div>

@@ -295,15 +295,15 @@ export default function AltasPage() {
             {capitulos.length} capítulos • {capitulos.reduce((sum, c) => sum + c.partidas.length, 0)} partidas
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={expandAll}>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={expandAll} className="flex-1 sm:flex-none">
             {expandedCaps.size === capitulos.length ? "Colapsar todo" : "Expandir todo"}
           </Button>
-          <Button variant="outline" onClick={openImportDialog}>
+          <Button variant="outline" onClick={openImportDialog} className="flex-1 sm:flex-none">
             <Download className="mr-2 h-4 w-4" />
             Importar del Proyecto
           </Button>
-          <Button onClick={openCreateCap}>
+          <Button onClick={openCreateCap} className="flex-1 sm:flex-none">
             <Plus className="mr-2 h-4 w-4" />
             Nuevo Capítulo
           </Button>
@@ -380,11 +380,11 @@ export default function AltasPage() {
                 <span className="font-mono text-sm font-medium text-muted-foreground w-8">
                   {cap.codigo}
                 </span>
-                <span className="font-medium flex-1">{cap.nombre}</span>
-                <span className="text-sm text-muted-foreground">
+                <span className="font-medium flex-1 min-w-0 truncate">{cap.nombre}</span>
+                <span className="text-sm text-muted-foreground whitespace-nowrap hidden sm:inline">
                   {cap.partidas.length} partidas
                 </span>
-                <div className="flex gap-1" onClick={e => e.stopPropagation()}>
+                <div className="flex gap-1 shrink-0" onClick={e => e.stopPropagation()}>
                   <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEditCap(cap)}>
                     <Edit className="h-3.5 w-3.5" />
                   </Button>
@@ -404,7 +404,7 @@ export default function AltasPage() {
                       </Button>
                     </div>
                   ) : (
-                    <Table>
+                    <Table className="min-w-[560px]">
                       <TableHeader>
                         <TableRow className="hover:bg-transparent">
                           <TableHead className="w-20">Código</TableHead>

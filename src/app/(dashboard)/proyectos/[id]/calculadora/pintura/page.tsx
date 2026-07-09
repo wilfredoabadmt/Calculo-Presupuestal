@@ -154,7 +154,7 @@ export default function PinturaCalculatorPage() {
               <ArrowLeft className="h-5 w-5" />
             </Link>
             <div>
-              <h1 className="text-3xl font-bold flex items-center gap-2">
+              <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
                 <Droplets className="h-7 w-7 text-primary" />
                 Pintura
               </h1>
@@ -250,7 +250,7 @@ export default function PinturaCalculatorPage() {
                 placeholder="Ej. Pintado Dormitorio Principal"
               />
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <InputWithHelp
                   label="Área de Pared"
                   unit="m²"
@@ -270,7 +270,7 @@ export default function PinturaCalculatorPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Número de Manos (Capas)</Label>
                   <Select value={form.manos} onValueChange={v => setForm({ ...form, manos: v })}>
@@ -294,7 +294,7 @@ export default function PinturaCalculatorPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <InputWithHelp
                   label="Cantidad de Áreas Iguales"
                   type="number"

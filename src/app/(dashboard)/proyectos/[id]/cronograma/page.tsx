@@ -376,7 +376,7 @@ export default function CronogramaPage() {
 
       {/* ─── Gantt chart ─── */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <CardTitle className="flex items-center gap-2">
             <GanttChart className="h-5 w-5" />
             Diagrama de Gantt
@@ -409,7 +409,8 @@ export default function CronogramaPage() {
               }
             />
           ) : (
-            <div className="space-y-1">
+            <div className="space-y-1 overflow-x-auto">
+              <div className="min-w-[720px] space-y-1">
               {/* Column headers */}
               <div className="flex items-center gap-2 mb-3 border-b pb-2">
                 <div className="w-48 text-xs font-semibold text-muted-foreground">Actividad</div>
@@ -486,6 +487,7 @@ export default function CronogramaPage() {
                   </div>
                 )
               })}
+              </div>
             </div>
           )}
         </CardContent>
@@ -627,7 +629,7 @@ export default function CronogramaPage() {
             <DialogTitle>{editingItem ? "Editar Actividad" : "Nueva Actividad"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Código</Label>
                 <Input value={form.codigo} onChange={e => setForm({ ...form, codigo: e.target.value })} placeholder="OG01" />

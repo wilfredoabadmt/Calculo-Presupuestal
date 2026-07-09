@@ -108,7 +108,7 @@ export default function DashboardPage() {
       {/* Welcome header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">
+          <h1 className="text-2xl sm:text-3xl font-bold">
             {projects.length === 0 ? "¡Bienvenido!" : `Hola, ${session.user.name?.split(" ")[0] || "Usuario"}`}
           </h1>
           <p className="text-muted-foreground mt-1">
@@ -118,8 +118,8 @@ export default function DashboardPage() {
             }
           </p>
         </div>
-        <Link href="/proyectos/nuevo">
-          <Button className="gap-2 font-bold" size="lg">
+        <Link href="/proyectos/nuevo" className="w-full sm:w-auto">
+          <Button className="gap-2 font-bold w-full sm:w-auto" size="lg">
             <Plus className="h-4 w-4" />
             Nuevo Proyecto
           </Button>
@@ -138,7 +138,7 @@ export default function DashboardPage() {
       ) : (
         <>
           {/* Stats */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             {stats.map((stat) => (
               <Card key={stat.label}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -157,7 +157,7 @@ export default function DashboardPage() {
           {/* Quick actions */}
           <div>
             <h2 className="text-xl font-semibold mb-4">Acciones Rápidas</h2>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
               {quickActions.map((action) => (
                 <Link key={action.name} href={action.href}>
                   <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
@@ -189,7 +189,7 @@ export default function DashboardPage() {
               )}
             </div>
             {recentProjects.length > 0 ? (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 {recentProjects.map((project) => (
                   <Link key={project.id} href={`/proyectos/${project.id}`}>
                     <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">

@@ -217,7 +217,7 @@ export default function ColumnaCalculatorPage() {
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
               <Ruler className="h-7 w-7 text-primary" />
               Calculadora de Columna
             </h1>

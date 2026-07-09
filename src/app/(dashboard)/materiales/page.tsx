@@ -153,19 +153,19 @@ export default function MaterialesPage() {
         description="Gestión de materiales y precios de referencia"
         icon={<Box className="h-7 w-7 text-primary" />}
         actions={
-          <div className="flex items-center gap-2">
-            <Link href="/materiales/precios">
-              <Button variant="outline">Ver Banco de Precios</Button>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
+            <Link href="/materiales/precios" className="w-full sm:w-auto">
+              <Button variant="outline" className="w-full sm:w-auto">Ver Banco de Precios</Button>
             </Link>
-            <Button onClick={openCreate}><Plus className="mr-2 h-4 w-4" /> Nuevo Material</Button>
+            <Button onClick={openCreate} className="w-full sm:w-auto"><Plus className="mr-2 h-4 w-4" /> Nuevo Material</Button>
           </div>
         }
       />
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <CardTitle>Materiales ({filtered.length})</CardTitle>
-          <SearchInput value={search} onChange={setSearch} className="w-64" />
+          <SearchInput value={search} onChange={setSearch} className="w-full sm:w-64" />
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-2">
@@ -201,7 +201,7 @@ export default function MaterialesPage() {
             />
           ) : (
             <div className="overflow-x-auto">
-              <Table>
+              <Table className="min-w-[700px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Código</TableHead>

@@ -56,7 +56,7 @@ export function AnalisisPrecioUnitario({
       <Card>
         <CardHeader><CardTitle>A. MATERIALES</CardTitle></CardHeader>
         <CardContent>
-          <Table>
+          <Table className="min-w-[560px]">
             <TableHeader><TableRow><TableHead>Cod</TableHead><TableHead>Descripción</TableHead><TableHead>Und</TableHead><th className="text-right">Cant</th><th className="text-right">P.U.</th><th className="text-right">Total</th></TableRow></TableHeader>
             <TableBody>
               {materiales.map(m => (
@@ -71,7 +71,7 @@ export function AnalisisPrecioUnitario({
       <Card>
         <CardHeader><CardTitle>B. MANO DE OBRA</CardTitle></CardHeader>
         <CardContent>
-          <Table>
+          <Table className="min-w-[480px]">
             <TableHeader><TableRow><TableHead>Profesión</TableHead><th className="text-right">Horas</th><th className="text-right">Tarifa/hr</th><th className="text-right">Total</th></TableRow></TableHeader>
             <TableBody>
               {manoObra.map(m => (

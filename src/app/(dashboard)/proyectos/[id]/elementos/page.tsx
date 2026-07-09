@@ -81,9 +81,9 @@ export default function ElementosPage() {
       />
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <CardTitle>Lista de Elementos ({filtered.length})</CardTitle>
-          <SearchInput value={search} onChange={setSearch} className="w-64" />
+          <SearchInput value={search} onChange={setSearch} className="w-full sm:w-64" />
         </CardHeader>
         <CardContent>
           {filtered.length === 0 ? (
@@ -99,7 +99,7 @@ export default function ElementosPage() {
             />
           ) : (
             <div className="overflow-x-auto">
-              <Table>
+              <Table className="min-w-[600px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Tipo</TableHead>

@@ -154,7 +154,7 @@ export default function PresupuestoPage() {
         backHref={`/proyectos/${projectId}`}
         icon={<FileText className="h-7 w-7 text-primary" />}
         actions={
-          <>
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
             <Button variant="outline" className="border-indigo-600/30 text-indigo-400 hover:text-indigo-300 hover:bg-indigo-950/20" onClick={() => {
               exportarFormularioB1PDF(elementos, "Presupuesto General", "Empresa Constructora", {
                 cargasSociales: aiu.cargasSociales,
@@ -176,7 +176,7 @@ export default function PresupuestoPage() {
               const items = elementos.map(e => ({ codigo: e.tipoElemento, descripcion: e.descripcion, unidad: "ud", cantidad: e.cantidad, precioUnitario: e.costoTotal / e.cantidad, costoTotal: e.costoTotal }))
               exportarExcel(items, "Presupuesto General")
             }}><Download className="mr-2 h-4 w-4" /> Excel</Button>
-          </>
+          </div>
         }
       />
 
@@ -199,7 +199,7 @@ export default function PresupuestoPage() {
                     <h3 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">{group.module}</h3>
                     <span className="text-sm font-medium">{formatCurrency(group.subtotal)}</span>
                   </div>
-                  <Table>
+                  <Table className="min-w-[640px]">
                     <TableHeader>
                       <TableRow>
                         <TableHead className="w-8">#</TableHead>

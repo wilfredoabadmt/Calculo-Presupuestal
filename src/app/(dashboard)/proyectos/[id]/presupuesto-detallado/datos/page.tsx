@@ -292,9 +292,9 @@ export default function DatosPage() {
             {rows.length} partidas en la matriz
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Select value={selectedCapFilter} onValueChange={setSelectedCapFilter}>
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-full sm:w-48">
               <SelectValue placeholder="Filtrar por capítulo" />
             </SelectTrigger>
             <SelectContent>
@@ -306,11 +306,11 @@ export default function DatosPage() {
               ))}
             </SelectContent>
           </Select>
-          <Button onClick={addRow}>
+          <Button onClick={addRow} className="flex-1 sm:flex-none">
             <Plus className="mr-2 h-4 w-4" />
             Agregar Fila
           </Button>
-          <Button variant="outline" onClick={handleSaveAll} disabled={saving}>
+          <Button variant="outline" onClick={handleSaveAll} disabled={saving} className="flex-1 sm:flex-none">
             {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             Guardar Todo
           </Button>
@@ -321,7 +321,7 @@ export default function DatosPage() {
       <Card>
         <CardContent className="p-0">
           <div ref={tableRef} className="overflow-auto max-h-[600px]">
-            <Table>
+            <Table className="min-w-[900px]">
               <TableHeader className="sticky top-0 bg-background z-10">
                 <TableRow>
                   <TableHead className="w-12">#</TableHead>

@@ -51,7 +51,7 @@ export default function ConfiguracionPage() {
         }
       />
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 sm:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2"><DollarSign className="h-5 w-5" /> Moneda e Impuestos</CardTitle>

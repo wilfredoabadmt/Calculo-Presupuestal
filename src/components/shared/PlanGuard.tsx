@@ -30,8 +30,8 @@ export function PlanGuard({ children, requiredPlan = "PRO" }: PlanGuardProps) {
   if (!hasAccess) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Card className="max-w-md w-full">
-          <CardContent className="p-8 text-center">
+        <Card className="max-w-md w-full mx-4">
+          <CardContent className="p-6 sm:p-8 text-center">
             <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Lock className="h-8 w-8 text-orange-600" />
             </div>

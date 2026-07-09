@@ -107,7 +107,7 @@ export default function CuentaPage() {
         }
       />
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 sm:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2"><User className="h-5 w-5" /> Información Personal</CardTitle>
@@ -147,7 +147,7 @@ export default function CuentaPage() {
         </Card>
 
         {/* Password Change Card */}
-        <Card className="md:col-span-2">
+        <Card className="sm:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2"><Lock className="h-5 w-5" /> Cambiar Contraseña</CardTitle>
             <CardDescription>Actualiza tu contraseña de acceso al sistema</CardDescription>
@@ -166,7 +166,7 @@ export default function CuentaPage() {
               </Alert>
             )}
 
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
               <div className="space-y-2">
                 <Label htmlFor="currentPassword">Contraseña Actual</Label>
                 <div className="relative">

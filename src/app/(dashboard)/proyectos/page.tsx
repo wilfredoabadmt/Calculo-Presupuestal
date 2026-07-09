@@ -69,11 +69,11 @@ export default function ProyectosPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Proyectos</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Proyectos</h1>
           <p className="text-muted-foreground">Gestiona tus proyectos de construcción</p>
         </div>
-        <Link href="/proyectos/nuevo">
-          <Button className="gap-2">
+        <Link href="/proyectos/nuevo" className="w-full sm:w-auto">
+          <Button className="gap-2 w-full sm:w-auto">
             <Plus className="h-4 w-4" />
             Nuevo Proyecto
           </Button>
@@ -95,7 +95,7 @@ export default function ProyectosPage() {
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       ) : filteredProjects.length > 0 ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {filteredProjects.map((project) => (
             <Card key={project.id} className="hover:shadow-lg transition-shadow">
               <CardHeader>

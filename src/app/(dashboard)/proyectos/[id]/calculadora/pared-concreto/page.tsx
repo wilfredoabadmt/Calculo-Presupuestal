@@ -188,7 +188,7 @@ export default function ParedConcretoCalculatorPage() {
               <ArrowLeft className="h-5 w-5" />
             </Link>
             <div>
-              <h1 className="text-3xl font-bold flex items-center gap-2">
+              <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
                 <Building2 className="h-7 w-7 text-primary" />
                 Paredes de Concreto
               </h1>
@@ -278,7 +278,7 @@ export default function ParedConcretoCalculatorPage() {
                 placeholder="Ej. Pared de Contención Sótano"
               />
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <InputWithHelp
                   label="Alto"
                   unit="m"
@@ -305,7 +305,7 @@ export default function ParedConcretoCalculatorPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Dosificación Concreto</Label>
                   <Select value={form.dosificacion} onValueChange={v => setForm({ ...form, dosificacion: v })}>
@@ -330,7 +330,7 @@ export default function ParedConcretoCalculatorPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <InputWithHelp
                   label="Desperdicio Concreto"
                   unit="%"
@@ -347,7 +347,7 @@ export default function ParedConcretoCalculatorPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <InputWithHelp
                   label="Cantidad de Elementos"
                   type="number"
@@ -377,7 +377,7 @@ export default function ParedConcretoCalculatorPage() {
             <Card className="h-fit">
               <CardHeader><CardTitle>Resultados Obtenidos</CardTitle></CardHeader>
               <CardContent className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="bg-primary/5 p-4 rounded-lg text-center border">
                     <div className="text-xl font-bold text-primary">{formatNumber(results.volumenConcreto, 2)} m³</div>
                     <div className="text-xs text-muted-foreground">Volumen Concreto</div>

@@ -23,7 +23,7 @@ interface TablaComputosProps {
 export function TablaComputos({ items }: TablaComputosProps) {
   return (
     <div className="overflow-x-auto">
-      <Table>
+      <Table className="min-w-[820px]">
         <TableHeader>
           <TableRow>
             <TableHead>Cód.</TableHead>

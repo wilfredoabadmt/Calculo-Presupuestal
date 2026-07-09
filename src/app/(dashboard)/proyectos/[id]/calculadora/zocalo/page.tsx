@@ -183,7 +183,7 @@ export default function ZocaloCalculatorPage() {
               <ArrowLeft className="h-5 w-5" />
             </Link>
             <div>
-              <h1 className="text-3xl font-bold flex items-center gap-2">
+              <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
                 <Square className="h-7 w-7 text-primary" />
                 Zócalos Cerámicos
               </h1>
@@ -257,7 +257,7 @@ export default function ZocaloCalculatorPage() {
                 placeholder="Ej. Rodapié Cerámico Sala Estar"
               />
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <InputWithHelp
                   label="Longitud Lineal"
                   unit="m"
@@ -277,7 +277,7 @@ export default function ZocaloCalculatorPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Tipo Cerámica a Cortar</Label>
                   <Select value={form.tipoCeramica} onValueChange={v => setForm({ ...form, tipoCeramica: v })}>
@@ -300,7 +300,7 @@ export default function ZocaloCalculatorPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <InputWithHelp
                   label="Desp. Cerámica"
                   unit="%"
@@ -345,7 +345,7 @@ export default function ZocaloCalculatorPage() {
             <Card className="h-fit">
               <CardHeader><CardTitle>Resultados Obtenidos</CardTitle></CardHeader>
               <CardContent className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="bg-primary/5 p-4 rounded-lg text-center border">
                     <div className="text-xl font-bold text-primary">{formatNumber(results.longitudTotal, 1)} m</div>
                     <div className="text-xs text-muted-foreground">Longitud Total Perímetro</div>

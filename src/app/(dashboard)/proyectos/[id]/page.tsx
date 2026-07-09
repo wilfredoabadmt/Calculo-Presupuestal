@@ -637,7 +637,7 @@ export default function ProyectoDetailPage() {
               {/* Dimensiones */}
               <div>
                 <h4 className="font-semibold text-sm mb-2">Dimensiones</h4>
-                <div className="grid grid-cols-3 gap-3 bg-muted/30 p-3 rounded-lg">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-muted/30 p-3 rounded-lg">
                   {detailElement.dimA != null && <div><span className="text-xs text-muted-foreground">A:</span> <span className="text-sm font-medium">{formatNumber(detailElement.dimA)} m</span></div>}
                   {detailElement.dimB != null && <div><span className="text-xs text-muted-foreground">B:</span> <span className="text-sm font-medium">{formatNumber(detailElement.dimB)} m</span></div>}
                   {detailElement.dimH != null && <div><span className="text-xs text-muted-foreground">H:</span> <span className="text-sm font-medium">{formatNumber(detailElement.dimH)} m</span></div>}
@@ -789,7 +789,7 @@ export default function ProyectoDetailPage() {
                 editElement.dimLargo != null || editElement.dimAncho != null || editElement.dimEspesor != null) && (
                 <div>
                   <Label className="text-xs text-muted-foreground mb-2 block">Dimensiones (m)</Label>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {editElement.dimA != null && (
                       <div className="space-y-1">
                         <Label className="text-xs">Alto / A</Label>

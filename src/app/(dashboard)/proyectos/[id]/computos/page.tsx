@@ -55,10 +55,10 @@ export default function ComputosPage() {
         backHref={`/proyectos/${projectId}`}
         icon={<Ruler className="h-7 w-7 text-primary" />}
         actions={
-          <>
-            <Button variant="outline"><Download className="mr-2 h-4 w-4" /> Exportar</Button>
-            <Button><Plus className="mr-2 h-4 w-4" /> Agregar Medición</Button>
-          </>
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+            <Button variant="outline" className="flex-1 sm:flex-none"><Download className="mr-2 h-4 w-4" /> Exportar</Button>
+            <Button className="flex-1 sm:flex-none"><Plus className="mr-2 h-4 w-4" /> Agregar Medición</Button>
+          </div>
         }
       />
 
@@ -75,7 +75,7 @@ export default function ComputosPage() {
             />
           ) : (
             <div className="overflow-x-auto">
-              <Table>
+              <Table className="min-w-[720px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead>#</TableHead>

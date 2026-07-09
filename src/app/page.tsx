@@ -47,8 +47,8 @@ export default async function HomePage() {
       </div>
 
       {/* Sección de Experiencia */}
-      <section id="experiencia" className="py-24 bg-slate-950 relative border-t border-slate-900">
-        <div className="container mx-auto px-6 max-w-5xl">
+      <section id="experiencia" className="py-16 sm:py-24 bg-slate-950 relative border-t border-slate-900">
+        <div className="container mx-auto px-4 sm:px-6 max-w-5xl">
           <div className="grid md:grid-cols-12 gap-12 items-center">
             <div className="md:col-span-5 space-y-6">
               <div className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/25 rounded-md px-3 py-1 text-xs font-semibold text-cyan-400 uppercase tracking-wider">
@@ -81,7 +81,7 @@ export default async function HomePage() {
                 { val: "4.8M m³", label: "Hormigón Estimado", desc: "Con dosificaciones exactas", icon: Layers },
                 { val: "99.98%", label: "Precisión Paramétrica", desc: "Sin errores de redondeo", icon: Activity }
               ].map((stat, i) => (
-                <div key={i} className="p-6 rounded-2xl border border-slate-900 bg-slate-900/10 hover:border-slate-800/80 hover:bg-slate-900/20 transition-all duration-300">
+                <div key={i} className="p-4 sm:p-6 rounded-2xl border border-slate-900 bg-slate-900/10 hover:border-slate-800/80 hover:bg-slate-900/20 transition-all duration-300">
                   <div className="w-10 h-10 rounded-lg bg-slate-900/80 border border-slate-800 flex items-center justify-center text-cyan-400 mb-4">
                     <stat.icon className="h-5 w-5" />
                   </div>
@@ -96,10 +96,10 @@ export default async function HomePage() {
       </section>
 
       {/* Grid de 14 Calculadoras */}
-      <section id="calculadoras" className="py-20 bg-slate-950/50 border-t border-slate-900">
-        <div className="container mx-auto px-6 max-w-5xl">
+      <section id="calculadoras" className="py-16 sm:py-20 bg-slate-950/50 border-t border-slate-900">
+        <div className="container mx-auto px-4 sm:px-6 max-w-5xl">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-extrabold tracking-tight">14 Calculadoras de Obra Integradas</h2>
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">14 Calculadoras de Obra Integradas</h2>
             <p className="text-slate-400 mt-2">Acceso a cálculos paramétricos precisos en cualquier dispositivo sin instalaciones.</p>
           </div>
 
@@ -352,10 +352,10 @@ export default async function HomePage() {
       </section>
 
       {/* Comparison: Enterprise vs Standard */}
-      <section id="comparativa" className="py-20 bg-slate-950 border-t border-slate-900">
-        <div className="container mx-auto px-6 max-w-4xl">
+      <section id="comparativa" className="py-16 sm:py-20 bg-slate-950 border-t border-slate-900">
+        <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-extrabold">Diseñado para Licitaciones Exigentes</h2>
+            <h2 className="text-2xl sm:text-3xl font-extrabold">Diseñado para Licitaciones Exigentes</h2>
             <p className="text-slate-400 mt-2">Diferencia técnica frente a métodos de cálculo manuales tradicionales.</p>
           </div>
 
@@ -407,10 +407,10 @@ export default async function HomePage() {
       </section>
 
       {/* Testimonios Ficticios */}
-      <section id="testimonios" className="py-24 bg-slate-950 border-t border-slate-900 relative">
+      <section id="testimonios" className="py-16 sm:py-24 bg-slate-950 border-t border-slate-900 relative">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-600/5 rounded-full blur-3xl pointer-events-none" />
-        
-        <div className="container mx-auto px-6 max-w-5xl relative z-10">
+
+        <div className="container mx-auto px-4 sm:px-6 max-w-5xl relative z-10">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 bg-slate-900 border border-slate-850 rounded-full px-3.5 py-1 text-xs font-semibold text-cyan-400 uppercase tracking-widest mb-3">
               <MessageSquare className="h-3.5 w-3.5" />
@@ -469,14 +469,14 @@ export default async function HomePage() {
       </section>
 
       {/* Preguntas Frecuentes (FAQ) */}
-      <section id="faq" className="py-24 bg-slate-950 border-t border-slate-900">
-        <div className="container mx-auto px-6 max-w-3xl">
+      <section id="faq" className="py-16 sm:py-24 bg-slate-950 border-t border-slate-900">
+        <div className="container mx-auto px-4 sm:px-6 max-w-3xl">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 bg-slate-900 border border-slate-850 rounded-full px-3.5 py-1 text-xs font-semibold text-cyan-400 uppercase tracking-widest mb-3">
               <HelpCircle className="h-3.5 w-3.5" />
               Soporte Técnico
             </div>
-            <h2 className="text-3xl font-extrabold tracking-tight">Preguntas Frecuentes</h2>
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Preguntas Frecuentes</h2>
             <p className="text-slate-400 mt-2">Respuestas rápidas a las consultas de ingeniería más habituales.</p>
           </div>
 
@@ -519,16 +519,16 @@ export default async function HomePage() {
       </section>
 
       {/* Clear Pricing Section */}
-      <section id="precios" className="py-20 bg-slate-950 border-t border-slate-900">
-        <div className="container mx-auto px-6 max-w-4xl">
+      <section id="precios" className="py-16 sm:py-20 bg-slate-950 border-t border-slate-900">
+        <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-extrabold">Planes Profesionales Sin Comisiones</h2>
+            <h2 className="text-2xl sm:text-3xl font-extrabold">Planes Profesionales Sin Comisiones</h2>
             <p className="text-slate-400 mt-2">Empieza a trabajar en tus presupuestos sin costos ocultos.</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8 max-w-2xl mx-auto">
             {/* Free Plan */}
-            <div className="p-8 rounded-2xl border border-slate-900 bg-slate-950 flex flex-col justify-between">
+            <div className="p-6 sm:p-8 rounded-2xl border border-slate-900 bg-slate-950 flex flex-col justify-between">
               <div>
                 <h3 className="text-lg font-bold text-slate-300">Acceso Inicial</h3>
                 <div className="text-4xl font-extrabold mt-4">Bs. 0</div>
@@ -554,7 +554,7 @@ export default async function HomePage() {
             </div>
 
             {/* Pro Plan */}
-            <div className="p-8 rounded-2xl border border-cyan-500/30 bg-cyan-950/15 flex flex-col justify-between relative shadow-xl shadow-cyan-500/5">
+            <div className="p-6 sm:p-8 rounded-2xl border border-cyan-500/30 bg-cyan-950/15 flex flex-col justify-between relative shadow-xl shadow-cyan-500/5">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-cyan-500 text-slate-950 px-3 py-0.5 rounded-full text-xs font-extrabold uppercase tracking-wider">
                 Recomendado
               </div>
@@ -589,11 +589,11 @@ export default async function HomePage() {
       </section>
 
       {/* Enterprise / Corporate Contact Call */}
-      <section className="py-20 bg-slate-900/30 border-t border-slate-900 text-center relative overflow-hidden">
+      <section className="py-16 sm:py-20 bg-slate-900/30 border-t border-slate-900 text-center relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="container mx-auto px-6 max-w-3xl relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 max-w-3xl relative z-10">
           <Award className="h-10 w-10 text-cyan-400 mx-auto mb-6" />
-          <h2 className="text-3xl sm:text-4xl font-extrabold mb-4">¿Representas a una Constructora o Institución Pública?</h2>
+          <h2 className="text-2xl sm:text-4xl font-extrabold mb-4">¿Representas a una Constructora o Institución Pública?</h2>
           <p className="text-slate-400 mb-8 max-w-xl mx-auto leading-relaxed">
             Ofrecemos licencias corporativas multiusuario, base de precios centralizada para tu equipo y parametrización personalizada de catálogos para licitaciones públicas y privadas.
           </p>
@@ -607,8 +607,8 @@ export default async function HomePage() {
 
       {/* Footer */}
       <footer className="bg-slate-950 py-12 border-t border-slate-900">
-        <div className="container mx-auto px-6 max-w-5xl">
-          <div className="grid md:grid-cols-4 gap-8 mb-12">
+        <div className="container mx-auto px-4 sm:px-6 max-w-5xl">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
             <div>
               <div className="relative flex h-10 w-10 items-center justify-center rounded-lg bg-slate-950/60 border border-slate-800 shadow-lg shadow-cyan-500/10 overflow-hidden shrink-0 mb-4">
                 <img src="/logo.webp" alt="Logo" className="h-full w-full object-contain filter brightness-95 contrast-105 saturate-90" />

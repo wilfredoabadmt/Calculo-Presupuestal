@@ -401,24 +401,24 @@ export default function BancoPreciosPage() {
         description="Base de precios unitarios de referencia"
         icon={<DollarSign className="h-7 w-7 text-primary" />}
         actions={
-          <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={handleExport} disabled={exporting}>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
+            <Button variant="outline" onClick={handleExport} disabled={exporting} className="w-full sm:w-auto">
               {exporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
               Exportar
             </Button>
-            <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={importing}>
+            <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={importing} className="w-full sm:w-auto">
               {importing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
               Importar Excel
             </Button>
-            <Button onClick={openCreate}><Plus className="mr-2 h-4 w-4" /> Nuevo Ítem</Button>
+            <Button onClick={openCreate} className="w-full sm:w-auto"><Plus className="mr-2 h-4 w-4" /> Nuevo Ítem</Button>
           </div>
         }
       />
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <CardTitle>Ítems del Banco de Precios ({total})</CardTitle>
-          <SearchInput value={search} onChange={handleSearchChange} className="w-64" />
+          <SearchInput value={search} onChange={handleSearchChange} className="w-full sm:w-64" />
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-2">
@@ -446,7 +446,7 @@ export default function BancoPreciosPage() {
           ) : (
             <div className="space-y-4">
               <div className="overflow-x-auto">
-                <Table>
+                <Table className="min-w-[700px]">
                   <TableHeader>
                     <TableRow>
                       <TableHead>Código</TableHead>
@@ -489,7 +489,7 @@ export default function BancoPreciosPage() {
               </div>
 
               {/* Pagination */}
-              <div className="flex items-center justify-between px-2 py-4 border-t">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-2 py-4 border-t">
                 <div className="text-sm text-muted-foreground">
                   Mostrando ítems {((page - 1) * 50) + 1} - {Math.min(page * 50, total)} de {total}
                 </div>

@@ -166,7 +166,7 @@ export default function CalculatorShowcase() {
   const activeCalc = calculators[activeTab]
 
   return (
-    <div className="w-full bg-slate-900/35 border border-slate-800/80 rounded-2xl p-6 backdrop-blur-sm relative overflow-hidden">
+    <div className="w-full bg-slate-900/35 border border-slate-800/80 rounded-2xl p-4 sm:p-6 backdrop-blur-sm relative overflow-hidden">
       {/* CAD grid overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:16px_16px] opacity-10 pointer-events-none" />
 

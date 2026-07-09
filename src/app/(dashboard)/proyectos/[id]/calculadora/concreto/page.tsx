@@ -233,7 +233,7 @@ export default function ConcretoCalculatorPage() {
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
               <Box className="h-7 w-7 text-primary" />
               Calculadora de Concreto
             </h1>

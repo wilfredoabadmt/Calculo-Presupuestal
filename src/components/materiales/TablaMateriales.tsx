@@ -19,7 +19,7 @@ interface TablaMaterialesProps {
 export function TablaMateriales({ materiales }: TablaMaterialesProps) {
   return (
     <div className="overflow-x-auto">
-      <Table>
+      <Table className="min-w-[600px]">
         <TableHeader>
           <TableRow>
             <TableHead>Código</TableHead>

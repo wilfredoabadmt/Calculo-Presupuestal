@@ -24,6 +24,7 @@ export function GraficoTorta({ items }: GraficoTortaProps) {
           <div className="text-center py-8 text-muted-foreground">Sin datos para mostrar</div>
         ) : (
           <div className="flex flex-col md:flex-row items-center gap-6">
+            <div className="w-full min-w-0">
             <ResponsiveContainer width="100%" height={280}>
               <PieChart>
                 <Pie
@@ -44,7 +45,8 @@ export function GraficoTorta({ items }: GraficoTortaProps) {
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
-            <div className="space-y-2 min-w-[200px]">
+            </div>
+            <div className="space-y-2 w-full md:w-auto md:min-w-[200px]">
               {items.map((item, i) => (
                 <div key={i} className="flex items-center gap-2 text-sm">
                   <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: item.color }} />

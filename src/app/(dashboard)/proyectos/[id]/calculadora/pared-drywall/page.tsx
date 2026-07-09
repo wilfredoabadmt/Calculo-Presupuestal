@@ -197,7 +197,7 @@ export default function ParedDrywallCalculatorPage() {
               <ArrowLeft className="h-5 w-5" />
             </Link>
             <div>
-              <h1 className="text-3xl font-bold flex items-center gap-2">
+              <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
                 <Layers className="h-7 w-7 text-primary" />
                 Paredes Drywall
               </h1>
@@ -288,7 +288,7 @@ export default function ParedDrywallCalculatorPage() {
                 placeholder="Ej. Tabique divisorio Dormitorio"
               />
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <InputWithHelp
                   label="Alto"
                   unit="m"
@@ -307,7 +307,7 @@ export default function ParedDrywallCalculatorPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Separación de Parantes (m)</Label>
                   <Select value={form.separacionParantes} onValueChange={v => setForm({ ...form, separacionParantes: v })}>
@@ -331,7 +331,7 @@ export default function ParedDrywallCalculatorPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <InputWithHelp
                   label="Desperdicio Placas"
                   unit="%"
@@ -348,7 +348,7 @@ export default function ParedDrywallCalculatorPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <InputWithHelp
                   label="Cantidad de Divisiones"
                   type="number"

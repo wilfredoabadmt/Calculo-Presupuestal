@@ -14,11 +14,11 @@ export default async function PricingPage() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b border-border">
-        <div className="container mx-auto px-4 py-6 flex items-center justify-between">
-          <Link href="/" className="font-bold text-xl text-foreground">
+        <div className="container mx-auto px-4 py-6 flex flex-wrap items-center justify-between gap-3">
+          <Link href="/" className="font-bold text-lg sm:text-xl text-foreground">
             Cálculo Presupuestal
           </Link>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <Link href="/login">
               <Button variant="ghost" size="sm">Iniciar Sesión</Button>
             </Link>
@@ -29,10 +29,10 @@ export default async function PricingPage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-20">
-        <div className="max-w-4xl mx-auto text-center mb-16">
+      <div className="container mx-auto px-4 py-12 sm:py-20">
+        <div className="max-w-4xl mx-auto text-center mb-12 sm:mb-16">
           <p className="text-sm font-bold uppercase tracking-wider text-primary mb-3">Planes y Precios</p>
-          <h1 className="text-4xl lg:text-5xl font-extrabold text-foreground mb-4">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground mb-4">
             Elige el plan perfecto para ti
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">

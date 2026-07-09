@@ -128,7 +128,7 @@ export function FadeIn({ children, delay, duration = 800 }: FadeInProps) {
 // Main AnimatedHero Component
 export default function AnimatedHero({ children }: { children: React.ReactNode }) {
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-between overflow-hidden pt-32 pb-24">
+    <section className="relative min-h-screen flex flex-col items-center justify-between overflow-hidden pt-28 sm:pt-32 pb-16 sm:pb-24">
       {/* Background Video */}
       <video
         autoPlay
@@ -149,7 +149,7 @@ export default function AnimatedHero({ children }: { children: React.ReactNode }
       {/* Content wrapper */}
       <div className="relative z-10 w-full flex-1 flex flex-col justify-between">
         
-        <div className="container mx-auto px-6 flex flex-col items-center justify-center text-center max-w-5xl my-auto">
+        <div className="container mx-auto px-4 sm:px-6 flex flex-col items-center justify-center text-center max-w-5xl my-auto">
           {/* Badge */}
           <FadeIn delay={100} duration={800}>
             <div className="inline-flex items-center gap-2 bg-slate-900/80 border border-slate-800/80 rounded-full px-4 py-1.5 text-xs font-semibold text-cyan-400 uppercase tracking-widest mb-10 backdrop-blur-sm shadow-inner shadow-white/5">
@@ -161,7 +161,7 @@ export default function AnimatedHero({ children }: { children: React.ReactNode }
           {/* Title */}
           <AnimatedHeading
             text={"La ingeniería del futuro,\npresupuestada hoy"}
-            className="text-5xl sm:text-7xl lg:text-8xl font-black tracking-tight mb-8 leading-[1.05] drop-shadow-lg text-white"
+            className="text-4xl sm:text-7xl lg:text-8xl font-black tracking-tight mb-8 leading-[1.05] drop-shadow-lg text-white"
             delay={200}
             charDelay={30}
           />
@@ -210,8 +210,8 @@ export default function AnimatedHero({ children }: { children: React.ReactNode }
         {/* Bottom Tagline Pill */}
         <div className="flex justify-center mt-6">
           <FadeIn delay={1600} duration={1000}>
-            <div className="liquid-glass border border-white/10 px-8 py-3.5 rounded-2xl">
-              <p className="text-lg md:text-xl lg:text-2xl font-light text-slate-200 tracking-wide">
+            <div className="liquid-glass border border-white/10 px-5 sm:px-8 py-3.5 rounded-2xl mx-4">
+              <p className="text-sm sm:text-lg md:text-xl lg:text-2xl font-light text-slate-200 tracking-wide text-center">
                 Cálculo · Planificación · Licitaciones
               </p>
             </div>

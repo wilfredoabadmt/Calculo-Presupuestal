@@ -152,7 +152,7 @@ export default function CalculadoraSelectorPage() {
           <Link href={`/proyectos/${projectId}`} className="text-sm text-muted-foreground hover:text-foreground mb-1 block">
             ← Volver al proyecto
           </Link>
-          <h1 className="text-3xl font-bold">Seleccionar Calculadora</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Seleccionar Calculadora</h1>
           <p className="text-muted-foreground">
             {isPro ? "Acceso completo a las 14 calculadoras" : "Plan Free: 4 calculadoras disponibles · Plan Pro: las 14 completas"}
           </p>
