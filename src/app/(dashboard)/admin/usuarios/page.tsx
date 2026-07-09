@@ -30,7 +30,9 @@ import {
   Eye,
   EyeOff,
   Lock,
-  Save
+  Save,
+  Users2,
+  Building2
 } from "lucide-react"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
@@ -42,6 +44,8 @@ interface Usuario {
   role: string
   plan: string
   planExpiresAt: string | null
+  workspaceEnabled: boolean
+  workspaceExpiresAt: string | null
   emailVerified: string | null
   createdAt: string
   _count?: { proyectos: number }
@@ -67,6 +71,12 @@ export default function UsuariosPage() {
   // Toast Notification State
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
 
+  // Workspace / Equipo settings
+  const [wsUpdatingId, setWsUpdatingId] = useState<string | null>(null)
+  const [wsPrice, setWsPrice] = useState<string>("")
+  const [wsCurrency, setWsCurrency] = useState<string>("USD")
+  const [savingPrice, setSavingPrice] = useState(false)
+
   const triggerSuccessMsg = (msg: string) => {
     setSuccessMsg(msg)
     const timer = setTimeout(() => {
@@ -83,7 +93,79 @@ export default function UsuariosPage() {
         setLoading(false)
       })
       .catch(() => setLoading(false))
+
+    fetch("/api/admin/settings")
+      .then(r => r.json())
+      .then(data => {
+        if (data?.priceMonthly !== undefined) setWsPrice(String(data.priceMonthly))
+        if (data?.currency) setWsCurrency(data.currency)
+      })
+      .catch(() => {})
   }, [])
+
+  const handleSavePrice = async () => {
+    const parsed = Number(wsPrice)
+    if (!Number.isFinite(parsed) || parsed < 0) {
+      alert("Ingresa un precio mensual válido")
+      return
+    }
+    setSavingPrice(true)
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ priceMonthly: parsed, currency: wsCurrency }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setWsPrice(String(data.priceMonthly))
+        setWsCurrency(data.currency)
+        triggerSuccessMsg("Precio del módulo de Equipo actualizado.")
+      } else {
+        alert("Error al guardar el precio.")
+      }
+    } catch {
+      alert("Error de conexión al servidor.")
+    } finally {
+      setSavingPrice(false)
+    }
+  }
+
+  const handleToggleWorkspace = async (userId: string, isActivating: boolean) => {
+    setWsUpdatingId(userId)
+    try {
+      const expiresAt = isActivating
+        ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // +30 days
+        : null
+
+      const res = await fetch(`/api/admin/usuarios/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          workspaceEnabled: isActivating,
+          workspaceExpiresAt: expiresAt,
+        }),
+      })
+
+      if (res.ok) {
+        const updated = await res.json()
+        setUsuarios(usuarios.map(u =>
+          u.id === userId
+            ? { ...u, workspaceEnabled: updated.workspaceEnabled, workspaceExpiresAt: updated.workspaceExpiresAt }
+            : u
+        ))
+        triggerSuccessMsg(
+          isActivating ? "Función de Equipo activada (+30 días)." : "Función de Equipo desactivada."
+        )
+      } else {
+        alert("Error al actualizar la función de Equipo.")
+      }
+    } catch {
+      alert("Error al conectar con el servidor.")
+    } finally {
+      setWsUpdatingId(null)
+    }
+  }
 
   const handleTogglePlan = async (userId: string, isActivating: boolean) => {
     setUpdatingId(userId)
@@ -275,6 +357,51 @@ export default function UsuariosPage() {
         </Card>
       </div>
 
+      {/* Configuración del módulo de Equipo */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Building2 className="h-5 w-5 text-primary" />
+            Módulo de Equipo — Precio Mensual
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col sm:flex-row sm:items-end gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="wsPrice" className="text-xs text-muted-foreground">Precio mensual</Label>
+              <Input
+                id="wsPrice"
+                type="number"
+                min={0}
+                step="0.01"
+                value={wsPrice}
+                onChange={e => setWsPrice(e.target.value)}
+                className="h-9 w-40"
+                placeholder="29"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="wsCurrency" className="text-xs text-muted-foreground">Moneda</Label>
+              <Input
+                id="wsCurrency"
+                value={wsCurrency}
+                onChange={e => setWsCurrency(e.target.value)}
+                className="h-9 w-28"
+                placeholder="USD"
+                maxLength={8}
+              />
+            </div>
+            <Button onClick={handleSavePrice} disabled={savingPrice} className="gap-2 h-9">
+              {savingPrice ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              Guardar precio
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground mt-3">
+            Este precio se muestra en la página pública de precios. Habilita la función por usuario con el botón &quot;Equipo&quot; en la tabla.
+          </p>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <CardTitle>Usuarios del Sistema ({filtered.length})</CardTitle>
@@ -298,13 +425,14 @@ export default function UsuariosPage() {
                     <TableHead>Vencimiento Suscripción</TableHead>
                     <TableHead>Correos</TableHead>
                     <TableHead>Mensualidad</TableHead>
+                    <TableHead>Equipo</TableHead>
                     <TableHead className="text-right">Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filtered.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
                         {search ? "No se encontraron usuarios" : "No hay usuarios registrados"}
                       </TableCell>
                     </TableRow>
@@ -431,6 +559,57 @@ export default function UsuariosPage() {
                             <span className={`px-2 py-0.5 rounded-full text-xs font-semibold border ${statusBadgeClass}`}>
                               {statusText}
                             </span>
+                          </TableCell>
+                          {/* Workspace / Equipo Column */}
+                          <TableCell>
+                            {(() => {
+                              const wsActive =
+                                u.workspaceEnabled &&
+                                (!u.workspaceExpiresAt || new Date(u.workspaceExpiresAt) >= new Date())
+                              const wsExpired = u.workspaceEnabled && !wsActive
+                              return (
+                                <div className="flex flex-col items-start gap-1.5">
+                                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border ${
+                                    wsActive
+                                      ? "bg-green-100 text-green-800 border-green-200"
+                                      : wsExpired
+                                        ? "bg-red-100 text-red-800 border-red-200"
+                                        : "bg-slate-100 text-slate-700 border-slate-200"
+                                  }`}>
+                                    <Users2 className="h-3 w-3" />
+                                    {wsActive ? "Activo" : wsExpired ? "Vencido" : "Inactivo"}
+                                  </span>
+                                  {u.workspaceExpiresAt && (
+                                    <span className="text-[11px] text-muted-foreground">
+                                      {format(new Date(u.workspaceExpiresAt), "dd MMM yyyy", { locale: es })}
+                                    </span>
+                                  )}
+                                  {!isCurrentUser && (
+                                    wsUpdatingId === u.id ? (
+                                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                                    ) : wsActive ? (
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="h-6 text-[11px] px-2 text-destructive hover:text-destructive"
+                                        onClick={() => handleToggleWorkspace(u.id, false)}
+                                      >
+                                        Desactivar
+                                      </Button>
+                                    ) : (
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="h-6 text-[11px] px-2 text-emerald-700 hover:text-emerald-700"
+                                        onClick={() => handleToggleWorkspace(u.id, true)}
+                                      >
+                                        Activar
+                                      </Button>
+                                    )
+                                  )}
+                                </div>
+                              )
+                            })()}
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-2">

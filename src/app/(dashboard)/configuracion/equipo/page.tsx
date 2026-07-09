@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { PageHeader } from "@/components/shared/PageHeader"
-import { Users2, Mail, Plus, Trash2, Edit3, Check, Loader2, UserPlus, AlertCircle } from "lucide-react"
+import { Users2, Mail, Plus, Trash2, Edit3, Check, Loader2, UserPlus, AlertCircle, Lock, Building2 } from "lucide-react"
+import Link from "next/link"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 
@@ -33,6 +34,12 @@ export default function EquipoConfigPage() {
   const [workspace, setWorkspace] = useState<Workspace | null>(null)
   const [userRole, setUserRole] = useState<string>("MEMBER")
   const [loading, setLoading] = useState(true)
+
+  // Estado cuando no hay workspace: ¿el usuario puede crear uno?
+  const [canCreate, setCanCreate] = useState(false)
+  const [newWorkspaceName, setNewWorkspaceName] = useState("")
+  const [creating, setCreating] = useState(false)
+  const [createError, setCreateError] = useState("")
   
   // Workspace name editing
   const [editingName, setEditingName] = useState(false)
@@ -62,11 +69,39 @@ export default function EquipoConfigPage() {
         setWorkspace(data.workspace)
         setWorkspaceName(data.workspace.name)
         setUserRole(data.role)
+      } else {
+        setCanCreate(Boolean(data?.canCreate))
       }
     } catch (e) {
       console.error("Error cargando workspace:", e)
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleCreateWorkspace(e: React.FormEvent) {
+    e.preventDefault()
+    if (newWorkspaceName.trim().length < 2) return
+    setCreating(true)
+    setCreateError("")
+    try {
+      const res = await fetch("/api/workspace", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newWorkspaceName.trim() }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setCreateError(data.error || "No se pudo crear el espacio de trabajo.")
+      } else {
+        setWorkspace(data.workspace)
+        setWorkspaceName(data.workspace.name)
+        setUserRole(data.role || "ADMIN")
+      }
+    } catch (e) {
+      setCreateError("Error de conexión al servidor.")
+    } finally {
+      setCreating(false)
     }
   }
 
@@ -188,14 +223,87 @@ export default function EquipoConfigPage() {
     )
   }
 
+  // Sin workspace pero con permiso activo: permitir crear uno (auto-servicio)
+  if (!workspace && canCreate) {
+    return (
+      <div className="space-y-6 max-w-2xl mx-auto">
+        <PageHeader
+          title="Crear mi Equipo"
+          description="Aún no tienes un espacio de trabajo. Crea el de tu empresa para empezar a colaborar."
+          icon={<Users2 className="h-7 w-7 text-primary" />}
+          backHref="/configuracion"
+        />
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5 text-primary" /> Nuevo Espacio de Trabajo
+            </CardTitle>
+            <CardDescription>
+              Serás el administrador de la organización y podrás invitar a tu equipo.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleCreateWorkspace} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="workspaceName">Nombre de la Organización</Label>
+                <Input
+                  id="workspaceName"
+                  placeholder="Constructora Ejemplo S.R.L."
+                  value={newWorkspaceName}
+                  onChange={(e) => setNewWorkspaceName(e.target.value)}
+                  disabled={creating}
+                  required
+                />
+              </div>
+
+              {createError && (
+                <div className="flex items-start gap-2 bg-destructive/15 text-destructive p-3 rounded-md text-xs border border-destructive/20">
+                  <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                  <span>{createError}</span>
+                </div>
+              )}
+
+              <Button type="submit" className="w-full" disabled={creating || newWorkspaceName.trim().length < 2}>
+                {creating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creando...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Crear Espacio de Trabajo
+                  </>
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Sin workspace y sin permiso: invitar a contratar el módulo de Equipo
   if (!workspace) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center space-y-4">
-          <AlertCircle className="h-12 w-12 text-destructive mx-auto" />
-          <h2 className="text-xl font-bold">Workspace No Encontrado</h2>
-          <p className="text-muted-foreground">Hubo un error cargando el espacio de trabajo.</p>
-        </div>
+        <Card className="max-w-md w-full">
+          <CardContent className="p-8 text-center">
+            <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Lock className="h-8 w-8 text-orange-600" />
+            </div>
+            <h2 className="text-xl font-bold mb-2">Función de Equipo</h2>
+            <p className="text-muted-foreground mb-6">
+              La colaboración en equipo es una función adicional. Contáctate con el
+              administrador para habilitarla en tu cuenta y crear tu espacio de trabajo.
+            </p>
+            <Link href="/precios">
+              <Button className="w-full gap-2 font-bold">
+                Ver planes y precios
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
       </div>
     )
   }

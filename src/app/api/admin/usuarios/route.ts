@@ -20,6 +20,8 @@ export async function GET() {
       role: true,
       plan: true,
       planExpiresAt: true,
+      workspaceEnabled: true,
+      workspaceExpiresAt: true,
       emailVerified: true,
       createdAt: true,
       _count: { select: { proyectos: true } },

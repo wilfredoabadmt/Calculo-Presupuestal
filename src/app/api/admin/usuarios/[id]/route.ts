@@ -20,7 +20,7 @@ export async function PATCH(
 
   try {
     const body = await request.json()
-    const { plan, planExpiresAt, action, newPassword } = body
+    const { plan, planExpiresAt, workspaceEnabled, workspaceExpiresAt, action, newPassword } = body
 
     // Admin change password for user
     if (action === "changePassword") {
@@ -57,8 +57,12 @@ export async function PATCH(
       where: { id },
       data: {
         ...(plan !== undefined && { plan }),
-        planExpiresAt: planExpiresAt !== undefined 
-          ? (planExpiresAt ? new Date(planExpiresAt) : null) 
+        planExpiresAt: planExpiresAt !== undefined
+          ? (planExpiresAt ? new Date(planExpiresAt) : null)
+          : undefined,
+        ...(workspaceEnabled !== undefined && { workspaceEnabled: Boolean(workspaceEnabled) }),
+        workspaceExpiresAt: workspaceExpiresAt !== undefined
+          ? (workspaceExpiresAt ? new Date(workspaceExpiresAt) : null)
           : undefined,
       },
       select: {
@@ -68,6 +72,8 @@ export async function PATCH(
         role: true,
         plan: true,
         planExpiresAt: true,
+        workspaceEnabled: true,
+        workspaceExpiresAt: true,
         createdAt: true,
       }
     })

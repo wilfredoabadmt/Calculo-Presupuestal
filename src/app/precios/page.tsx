@@ -1,9 +1,15 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Check, ArrowRight } from "lucide-react"
+import { Check, ArrowRight, Users2 } from "lucide-react"
+import { getWorkspacePricing } from "@/lib/workspace-access"
 
-export default function PricingPage() {
+export const dynamic = "force-dynamic"
+
+export default async function PricingPage() {
+  const { priceMonthly: teamPrice, currency: teamCurrency } = await getWorkspacePricing()
+  const teamPriceLabel = teamCurrency === "USD" ? `$${teamPrice}` : `${teamPrice} ${teamCurrency}`
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -35,7 +41,7 @@ export default function PricingPage() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto mb-16">
+        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-16">
           {/* Free */}
           <Card className="relative shadow-md">
             <CardHeader>
@@ -94,6 +100,40 @@ export default function PricingPage() {
               <Link href="/register" className="block mt-8">
                 <Button className="w-full font-bold gap-2" size="lg">
                   Empezar Plan Pro
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* Equipo / Workspace */}
+          <Card className="relative shadow-md">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Users2 className="h-5 w-5 text-primary" /> Equipo
+              </CardTitle>
+              <div className="text-5xl font-extrabold text-foreground mt-2">
+                {teamPriceLabel}<span className="text-lg font-normal text-muted-foreground">/mes</span>
+              </div>
+              <p className="text-sm text-muted-foreground">Colaboración para tu empresa</p>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {[
+                "Espacio de trabajo compartido",
+                "Invita a ingenieros y colaboradores",
+                "Roles y permisos (Admin / Miembro)",
+                "Proyectos compartidos del equipo",
+                "Precios de materiales personalizados",
+                "Todo lo del Plan Pro incluido",
+              ].map((f) => (
+                <div key={f} className="flex items-start gap-2 text-sm">
+                  <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                  <span>{f}</span>
+                </div>
+              ))}
+              <Link href="/register" className="block mt-8">
+                <Button variant="outline" className="w-full font-bold gap-2" size="lg">
+                  Contratar Equipo
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>

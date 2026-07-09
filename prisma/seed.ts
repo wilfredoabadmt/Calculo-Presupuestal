@@ -6,6 +6,15 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('🌱 Iniciando seed de base de datos...')
 
+  // Guard de idempotencia: omitir si el catálogo ya fue sembrado.
+  // Usa SEED_FORCE=true para forzar el re-sembrado.
+  const FORCE = process.env.SEED_FORCE === 'true'
+  const existingMaterials = await prisma.material.count()
+  if (!FORCE && existingMaterials > 0) {
+    console.log(`✅ Catálogo ya sembrado (${existingMaterials} materiales). Omitiendo seed. Usa SEED_FORCE=true para forzar.`)
+    return
+  }
+
   // ============================================
   // USUARIOS DEMO
   // ============================================

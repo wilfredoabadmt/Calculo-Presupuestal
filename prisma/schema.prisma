@@ -22,6 +22,8 @@ model User {
   role             String    @default("USER")
   plan             String    @default("FREE")
   planExpiresAt    DateTime?
+  workspaceEnabled Boolean   @default(false)
+  workspaceExpiresAt DateTime?
   emailVerified    DateTime?
   image            String?
   resetToken       String?   @unique
@@ -547,4 +549,19 @@ model WorkspaceMaterialPrice {
 
   @@unique([workspaceId, materialId])
   @@map("workspace_material_prices")
+}
+
+// ============================================
+// CONFIGURACIÓN GLOBAL DEL SISTEMA (clave-valor)
+// Editable solo por el administrador del sistema
+// ============================================
+
+model AppSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique // "workspace_price_monthly", "workspace_currency", etc.
+  value     String // Valor almacenado como texto
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("app_settings")
 }

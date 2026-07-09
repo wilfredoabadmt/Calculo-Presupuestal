@@ -5,6 +5,15 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('🔄 Iniciando migración de datos para Espacios de Trabajo...')
 
+  // Guard de idempotencia: si no hay usuarios sin espacio de trabajo, no hay nada que migrar.
+  const usersWithoutWorkspace = await prisma.user.count({
+    where: { memberships: { none: {} } },
+  })
+  if (usersWithoutWorkspace === 0) {
+    console.log('✅ Todos los usuarios ya tienen espacio de trabajo. Migración omitida.')
+    return
+  }
+
   // 1. Obtener todos los usuarios con sus proyectos y memberships
   const users = await prisma.user.findMany({
     include: {

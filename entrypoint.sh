@@ -17,24 +17,25 @@ else
   fi
 fi
 
-# Seed database (users, materials, dosificaciones)
-echo "[2/3] Seeding database..."
+# Seeds (idempotentes): se auto-omiten si la data ya existe.
+# Fuerza el re-sembrado con SEED_FORCE=true en las variables de entorno.
+echo "[2/3] Seeding database (condicional)..."
 if npx tsx prisma/seed.ts 2>&1; then
   echo "  → Seed OK"
 else
   echo "  → WARNING: Seed failed (may already exist)"
 fi
 
-# Seed banco de precios (Excel import)
-echo "[2.5/3] Importing Banco de Precios from Excel..."
+# Seed banco de precios (import de Excel; se omite si ya está importado)
+echo "[2.5/3] Importing Banco de Precios from Excel (condicional)..."
 if npx tsx prisma/seed-banco-precios.ts 2>&1; then
   echo "  → Banco de Precios OK"
 else
   echo "  → WARNING: Banco de Precios import failed"
 fi
 
-# Migrate Workspaces (backwards compatibility)
-echo "[2.7/3] Migrating User Workspaces..."
+# Migrate Workspaces (se omite si no hay usuarios sin espacio de trabajo)
+echo "[2.7/3] Migrating User Workspaces (condicional)..."
 if npx tsx prisma/migrate-workspaces.ts 2>&1; then
   echo "  → Workspace migration OK"
 else

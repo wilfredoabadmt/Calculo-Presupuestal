@@ -302,6 +302,15 @@ function determineMaterialSubcategory(name: string): string | null {
 async function main() {
   console.log('🏗️  Importando base de precios referenciales 2007...')
 
+  // Guard de idempotencia: omitir si el banco de precios ya fue importado.
+  // Usa SEED_FORCE=true para forzar la reimportación (parsea Excel + reinserta ~946 items).
+  const FORCE = process.env.SEED_FORCE === 'true'
+  const existingBanco = await prisma.bancoPrecio.count()
+  if (!FORCE && existingBanco > 0) {
+    console.log(`✅ Banco de precios ya importado (${existingBanco} items). Omitiendo. Usa SEED_FORCE=true para forzar.`)
+    return
+  }
+
   const excelPath = path.join(process.cwd(), 'guia', 'actualizacion', 'PreciosUnitarios2007.xls')
   const wb = XLSX.readFile(excelPath)
 
