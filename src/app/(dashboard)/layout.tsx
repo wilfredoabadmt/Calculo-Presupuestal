@@ -4,6 +4,7 @@ import { ReactNode, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { isProActive } from "@/lib/plan"
 
 import { 
   LayoutDashboard, 
@@ -119,7 +120,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               </Avatar>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{user?.name || "Usuario"}</p>
-                <p className="text-xs text-muted-foreground">{(user as any)?.plan || "FREE"}</p>
+                <p className="text-xs text-muted-foreground">{isProActive(user as any) ? "PRO" : "FREE"}</p>
               </div>
             </div>
           </div>

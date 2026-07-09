@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Lock, ArrowRight } from "lucide-react"
 import Link from "next/link"
+import { isProActive } from "@/lib/plan"
 
 interface PlanGuardProps {
   children: React.ReactNode
@@ -24,8 +25,7 @@ export function PlanGuard({ children, requiredPlan = "PRO" }: PlanGuardProps) {
     )
   }
 
-  const userPlan = (session?.user as any)?.plan || "FREE"
-  const hasAccess = requiredPlan === "FREE" || userPlan === "PRO"
+  const hasAccess = requiredPlan === "FREE" || isProActive(session?.user as any)
 
   if (!hasAccess) {
     return (

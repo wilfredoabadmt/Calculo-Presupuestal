@@ -9,6 +9,7 @@ declare module "next-auth" {
       id: string
       role: string
       plan: string
+      planExpiresAt?: string | null
       workspaceEnabled?: boolean
       workspaceExpiresAt?: string | null
     } & DefaultSession["user"]
@@ -17,6 +18,7 @@ declare module "next-auth" {
   interface User extends AdapterUser {
     role: string
     plan: string
+    planExpiresAt?: Date | string | null
     workspaceEnabled?: boolean
     workspaceExpiresAt?: Date | string | null
   }
@@ -27,6 +29,7 @@ declare module "next-auth/jwt" {
     id: string
     role: string
     plan: string
+    planExpiresAt?: string | null
     workspaceEnabled?: boolean
     workspaceExpiresAt?: string | null
   }
@@ -36,6 +39,7 @@ declare module "next-auth/adapters" {
   interface AdapterUser {
     role?: string
     plan?: string
+    planExpiresAt?: Date | string | null
     workspaceEnabled?: boolean
     workspaceExpiresAt?: Date | string | null
   }

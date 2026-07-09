@@ -19,6 +19,7 @@ import {
   ArrowRight
 } from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
+import { isProActive } from "@/lib/plan"
 import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist"
 
 const quickActions = [
@@ -238,7 +239,7 @@ export default function DashboardPage() {
       )}
 
       {/* Upgrade banner for free users */}
-      {session.user.plan === "FREE" && (
+      {!isProActive(session.user) && (
         <Card className="border-primary bg-primary/5">
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">

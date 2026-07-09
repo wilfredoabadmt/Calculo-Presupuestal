@@ -44,6 +44,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           email: user.email,
           role: user.role,
           plan: user.plan,
+          planExpiresAt: user.planExpiresAt,
           workspaceEnabled: user.workspaceEnabled,
           workspaceExpiresAt: user.workspaceExpiresAt,
         }
@@ -56,6 +57,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.id = user.id
         token.role = user.role
         token.plan = user.plan
+        token.planExpiresAt = user.planExpiresAt
         token.workspaceEnabled = user.workspaceEnabled
         token.workspaceExpiresAt = user.workspaceExpiresAt
       }
@@ -66,6 +68,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.id = token.id as string
         session.user.role = token.role as string
         session.user.plan = token.plan as string
+        session.user.planExpiresAt = token.planExpiresAt as string | null
         session.user.workspaceEnabled = token.workspaceEnabled as boolean
         session.user.workspaceExpiresAt = token.workspaceExpiresAt as string | null
       }

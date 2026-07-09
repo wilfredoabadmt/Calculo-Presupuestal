@@ -21,6 +21,7 @@ import {
   ArrowRight,
   Droplets
 } from "lucide-react"
+import { isProActive } from "@/lib/plan"
 
 const calculators = [
   { 
@@ -142,7 +143,7 @@ export default function CalculadoraSelectorPage() {
   const router = useRouter() // Wait, let's keep router if it's there
   const projectId = params.id as string
   const { data: session } = useSession()
-  const isPro = (session?.user as any)?.plan === "PRO"
+  const isPro = isProActive(session?.user as any)
 
   return (
     <div className="space-y-6">

@@ -9,9 +9,11 @@ import { Label } from "@/components/ui/label"
 import { PageHeader } from "@/components/shared/PageHeader"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { User, Save, Shield, Loader2, CheckCircle, Lock, Eye, EyeOff, AlertCircle } from "lucide-react"
+import { isProActive } from "@/lib/plan"
 
 export default function CuentaPage() {
   const { data: session, update } = useSession()
+  const esPro = isProActive(session?.user as any)
   const [name, setName] = useState(session?.user?.name || "")
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -131,12 +133,12 @@ export default function CuentaPage() {
             <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-semibold">Plan {(session?.user as any)?.plan || "FREE"}</div>
+                  <div className="font-semibold">Plan {esPro ? "PRO" : "FREE"}</div>
                   <div className="text-sm text-muted-foreground">
-                    {(session?.user as any)?.plan === "PRO" ? "Acceso ilimitado" : "4 calculadoras · 1 proyecto"}
+                    {esPro ? "Acceso ilimitado" : "4 calculadoras · 1 proyecto"}
                   </div>
                 </div>
-                {(session?.user as any)?.plan === "FREE" && (
+                {!esPro && (
                   <Button size="sm">Upgrade a PRO</Button>
                 )}
               </div>
