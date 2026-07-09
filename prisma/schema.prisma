@@ -29,7 +29,8 @@ model User {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  proyectos Proyecto[]
+  proyectos   Proyecto[]
+  memberships WorkspaceMember[]
 
   @@map("users")
 }
@@ -52,6 +53,10 @@ model Material {
   descripcion  String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  workspaceId  String?
+  workspace    Workspace?               @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  customPrices WorkspaceMaterialPrice[]
 
   @@map("materiales")
 }
@@ -236,6 +241,8 @@ model Proyecto {
   descripcion String?
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspaceId String?
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -495,4 +502,49 @@ model PresupuestoDetallado {
 
   @@unique([proyectoId])
   @@map("presupuestos_detallados")
+}
+
+// ============================================
+// ESPACIOS DE TRABAJO (WORKSPACES) Y EQUIPOS
+// ============================================
+
+model Workspace {
+  id         String            @id @default(cuid())
+  name       String
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+  
+  members    WorkspaceMember[]
+  proyectos  Proyecto[]
+  materiales Material[]
+  customPrices WorkspaceMaterialPrice[]
+
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        String    @default("MEMBER") // ADMIN, EDITOR, VIEWER
+  createdAt   DateTime  @default(now())
+
+  @@unique([workspaceId, userId])
+  @@map("workspace_members")
+}
+
+model WorkspaceMaterialPrice {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  materialId  String
+  material    Material  @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  precio      Float
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([workspaceId, materialId])
+  @@map("workspace_material_prices")
 }
