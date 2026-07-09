@@ -42,6 +42,8 @@ export default function InformePage() {
     clienteLogo: (presupuesto as any)?.clienteLogo || "",
     proyectoNombre: presupuesto?.proyectoNombre || "",
     fechaEmision: presupuesto?.fechaEmision || new Date().toISOString().split("T")[0],
+    porcentajeBI: presupuesto?.porcentajeBI || 10,
+    porcentajeIVA: presupuesto?.porcentajeIVA || 21,
   })
 
   useEffect(() => {
@@ -58,6 +60,8 @@ export default function InformePage() {
         clienteLogo: (presupuesto as any).clienteLogo || "",
         proyectoNombre: presupuesto.proyectoNombre || "",
         fechaEmision: presupuesto.fechaEmision ? new Date(presupuesto.fechaEmision).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+        porcentajeBI: presupuesto.porcentajeBI,
+        porcentajeIVA: presupuesto.porcentajeIVA,
       })
     }
   }, [presupuesto])
@@ -292,6 +296,14 @@ export default function InformePage() {
                 <div className="space-y-2">
                   <Label className="text-xs">Fecha de Emision</Label>
                   <Input type="date" value={headerForm.fechaEmision} onChange={e => setHeaderForm({...headerForm, fechaEmision: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs">Gastos Generales / Beneficio Industrial (%)</Label>
+                  <Input type="number" step="0.1" value={headerForm.porcentajeBI} onChange={e => setHeaderForm({...headerForm, porcentajeBI: parseFloat(e.target.value) || 0})} />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs">I.V.A. / Impuestos (%)</Label>
+                  <Input type="number" step="0.1" value={headerForm.porcentajeIVA} onChange={e => setHeaderForm({...headerForm, porcentajeIVA: parseFloat(e.target.value) || 0})} />
                 </div>
 
                 {/* Upload Logos */}

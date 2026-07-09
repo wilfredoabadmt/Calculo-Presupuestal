@@ -107,6 +107,9 @@ export default function ConfiguracionPage() {
             <CardTitle className="flex items-center gap-2"><Box className="h-5 w-5" /> Atajos</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
+            <Link href="/configuracion/equipo">
+              <Button variant="outline" className="w-full justify-start">Mi Equipo y Espacio de Trabajo</Button>
+            </Link>
             <Link href="/configuracion/dosificaciones">
               <Button variant="outline" className="w-full justify-start">Gestionar Dosificaciones</Button>
             </Link>

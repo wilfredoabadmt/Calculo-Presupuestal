@@ -10,7 +10,7 @@ import { PageHeader } from "@/components/shared/PageHeader"
 import { EmptyState } from "@/components/shared/EmptyState"
 import { Calculator, FileText, Download, Plus, Loader2, Pencil, Check, X } from "lucide-react"
 import { formatCurrency, formatNumber } from "@/lib/utils"
-import { exportarPDF, exportarExcel } from "@/lib/exports"
+import { exportarPDF, exportarExcel, exportarFormularioB1PDF } from "@/lib/exports"
 
 interface Elemento {
   id: string
@@ -52,6 +52,44 @@ export default function PresupuestoPage() {
     it: 3.09,
   })
   const [editingAIU, setEditingAIU] = useState(false)
+
+  useEffect(() => {
+    const saved = localStorage.getItem("app-config")
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        setAiu({
+          cargasSociales: parsed.cargasSociales ?? 55,
+          iva: parsed.iva ?? 14.94,
+          gastosGenerales: parsed.gastosGenerales ?? 15,
+          utilidad: parsed.utilidad ?? 10,
+          it: parsed.impuestoIT ?? 3.09,
+        })
+      } catch (e) {}
+    }
+  }, [])
+
+  const updateAiuField = (field: string, value: number) => {
+    setAiu(prev => {
+      const next = { ...prev, [field]: value }
+      const saved = localStorage.getItem("app-config")
+      let currentConfig = {}
+      if (saved) {
+        try {
+          currentConfig = JSON.parse(saved)
+        } catch (e) {}
+      }
+      localStorage.setItem("app-config", JSON.stringify({
+        ...currentConfig,
+        cargasSociales: next.cargasSociales,
+        iva: next.iva,
+        gastosGenerales: next.gastosGenerales,
+        utilidad: next.utilidad,
+        impuestoIT: next.it,
+      }))
+      return next
+    })
+  }
 
   useEffect(() => {
     fetch(`/api/proyectos/${projectId}/elementos`)
@@ -117,6 +155,18 @@ export default function PresupuestoPage() {
         icon={<FileText className="h-7 w-7 text-primary" />}
         actions={
           <>
+            <Button variant="outline" className="border-indigo-600/30 text-indigo-400 hover:text-indigo-300 hover:bg-indigo-950/20" onClick={() => {
+              exportarFormularioB1PDF(elementos, "Presupuesto General", "Empresa Constructora", {
+                cargasSociales: aiu.cargasSociales,
+                iva: aiu.iva,
+                gastosGenerales: aiu.gastosGenerales,
+                utilidad: aiu.utilidad,
+                it: aiu.it,
+                moneda: "Bs."
+              })
+            }}>
+              <FileText className="mr-2 h-4 w-4" /> Form. B-1 (APU)
+            </Button>
             <Button variant="outline" onClick={() => {
               const items = elementos.map(e => ({ codigo: e.tipoElemento, descripcion: e.descripcion, unidad: "ud", cantidad: e.cantidad, costoTotal: e.costoTotal }))
               const resumen = { "Subtotal": subtotal, [`Gastos Generales (${aiu.gastosGenerales}%)`]: gastosGenerales, [`Utilidad (${aiu.utilidad}%)`]: utilidad, [`IT (${aiu.it}%)`]: impuestos, "Total General": totalGeneral }
@@ -260,8 +310,9 @@ export default function PresupuestoPage() {
                       <div className="flex items-center gap-1">
                         <Input
                           type="number"
+                          step="0.01"
                           value={val}
-                          onChange={e => setAiu(prev => ({ ...prev, [key]: parseFloat(e.target.value) || 0 }))}
+                          onChange={e => updateAiuField(key, parseFloat(e.target.value) || 0)}
                           className="h-7 w-20 text-right text-xs"
                         />
                         <span className="text-xs text-muted-foreground">%</span>

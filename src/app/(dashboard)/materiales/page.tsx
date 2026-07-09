@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -25,6 +25,9 @@ interface Material {
   grupo: string
   subcategoria?: string
   proveedor?: string
+  workspaceId?: string | null
+  isCustomPrice?: boolean
+  isWorkspaceMaterial?: boolean
 }
 
 const emptyForm = { codigo: "", nombre: "", unidad: "kg", precio: "", grupo: "CEMENTO", subcategoria: "", proveedor: "" }
@@ -213,19 +216,43 @@ export default function MaterialesPage() {
                 <TableBody>
                   {filtered.map(m => (
                     <TableRow key={m.id}>
-                      <TableCell className="font-mono">{m.codigo}</TableCell>
+                      <TableCell className="font-mono">
+                        <div className="flex flex-col gap-1">
+                          <span>{m.codigo}</span>
+                          <span className="text-[10px]">
+                            {m.isWorkspaceMaterial ? (
+                              <span className="text-cyan-400 font-semibold bg-cyan-950/40 px-1.5 py-0.5 rounded border border-cyan-900/30">Equipo</span>
+                            ) : (
+                              <span className="text-slate-400 bg-slate-900/60 px-1.5 py-0.5 rounded border border-slate-800/40">Global</span>
+                            )}
+                          </span>
+                        </div>
+                      </TableCell>
                       <TableCell className="font-medium">{m.nombre}</TableCell>
                       <TableCell>{m.unidad}</TableCell>
                       <TableCell><span className="px-2 py-1 rounded-full text-xs bg-muted">{m.grupo}</span></TableCell>
                       <TableCell><span className="px-2 py-1 rounded-full text-xs bg-muted">{m.subcategoria || '-'}</span></TableCell>
-                      <TableCell className="text-right">{formatCurrency(m.precio)}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex flex-col items-end gap-1">
+                          <span className="font-semibold">{formatCurrency(m.precio)}</span>
+                          {m.isCustomPrice && (
+                            <span className="text-[10px] text-green-400 font-medium bg-green-950/30 px-1.5 py-0.2 rounded border border-green-900/20">Precios Equipo</span>
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell className="text-right">
                         <Button variant="ghost" size="icon" onClick={() => openEdit(m)}>
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => setDeleteId(m.id)}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
+                        {m.isWorkspaceMaterial ? (
+                          <Button variant="ghost" size="icon" onClick={() => setDeleteId(m.id)}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        ) : (
+                          <Button variant="ghost" size="icon" disabled className="opacity-30 cursor-not-allowed">
+                            <Trash2 className="h-4 w-4 text-muted-foreground" />
+                          </Button>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -241,6 +268,11 @@ export default function MaterialesPage() {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>{editingId ? "Editar Material" : "Nuevo Material"}</DialogTitle>
+            {editingId && !form.codigo.startsWith("W_") && (
+              <CardDescription className="text-amber-400 bg-amber-950/20 p-2.5 rounded border border-amber-900/30 text-xs mt-2">
+                ⚠️ Nota: Este es un material de referencia global. Al modificar su precio, se creará un precio personalizado únicamente para tu Espacio de Trabajo, protegiendo los datos de otros usuarios.
+              </CardDescription>
+            )}
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">

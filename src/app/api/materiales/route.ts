@@ -58,21 +58,33 @@ export async function GET(request: Request) {
   })
 
   // Cargar y fusionar los precios personalizados del workspace
+  let priceMap = new Map<string, number>()
   if (workspaceId) {
     const customPrices = await prisma.workspaceMaterialPrice.findMany({
       where: { workspaceId }
     })
-
-    const priceMap = new Map(customPrices.map(cp => [cp.materialId, cp.precio]))
-
-    materiales.forEach(m => {
-      if (priceMap.has(m.id)) {
-        m.precio = priceMap.get(m.id)!
-      }
-    })
+    priceMap = new Map(customPrices.map(cp => [cp.materialId, cp.precio]))
   }
 
-  return NextResponse.json(materiales)
+  const mapped = materiales.map(m => {
+    const isCustomPrice = priceMap.has(m.id)
+    return {
+      id: m.id,
+      codigo: m.codigo,
+      nombre: m.nombre,
+      unidad: m.unidad,
+      precio: isCustomPrice ? priceMap.get(m.id)! : m.precio,
+      grupo: m.grupo,
+      subcategoria: m.subcategoria,
+      proveedor: m.proveedor,
+      descripcion: m.descripcion,
+      workspaceId: m.workspaceId,
+      isCustomPrice,
+      isWorkspaceMaterial: m.workspaceId !== null
+    }
+  })
+
+  return NextResponse.json(mapped)
 }
 
 export async function POST(request: Request) {

@@ -616,3 +616,283 @@ export function exportarCronogramaImagen(items: any[]) {
 
   doc.save(`Cronograma_Gantt_${new Date().toISOString().slice(0, 10)}.pdf`)
 }
+
+// 11. Exportar Formulario B-1 (Análisis de Precios Unitarios Oficial de Licitación)
+export function exportarFormularioB1PDF(
+  elementos: any[],
+  proyectoNombre: string,
+  empresaNombre: string,
+  config: {
+    cargasSociales: number
+    iva: number
+    gastosGenerales: number
+    utilidad: number
+    it: number
+    moneda: string
+  }
+) {
+  const doc = new jsPDF("p", "mm", "letter")
+  const pageWidth = doc.internal.pageSize.getWidth()
+  const pageHeight = doc.internal.pageSize.getHeight()
+  const margin = 15
+  const contentWidth = pageWidth - 2 * margin
+
+  elementos.forEach((elemento, index) => {
+    if (index > 0) doc.addPage()
+
+    let y = 15
+
+    // Borde de la página
+    doc.setDrawColor(148, 163, 184)
+    doc.setLineWidth(0.5)
+    doc.rect(margin, margin, contentWidth, pageHeight - 2 * margin)
+
+    // Cabecera del formulario
+    doc.setFillColor(15, 23, 42)
+    doc.rect(margin, margin, contentWidth, 12, "F")
+
+    doc.setTextColor(255, 255, 255)
+    doc.setFont("helvetica", "bold")
+    doc.setFontSize(11)
+    doc.text("FORMULARIO B-1: ANÁLISIS DE PRECIOS UNITARIOS OFICIAL", margin + 5, margin + 8)
+
+    y = margin + 15
+    doc.setTextColor(0, 0, 0)
+    doc.setFontSize(8)
+
+    // Datos informativos en dos columnas
+    doc.setFont("helvetica", "bold")
+    doc.text("PROYECTO:", margin + 5, y)
+    doc.setFont("helvetica", "normal")
+    doc.text(proyectoNombre || "Sin nombre", margin + 30, y)
+
+    doc.setFont("helvetica", "bold")
+    doc.text("EMPRESA:", pageWidth - margin - 75, y)
+    doc.setFont("helvetica", "normal")
+    doc.text(empresaNombre || "Empresa Constructora", pageWidth - margin - 50, y)
+
+    y += 5
+    doc.setFont("helvetica", "bold")
+    doc.text("ACTIVIDAD:", margin + 5, y)
+    doc.setFont("helvetica", "normal")
+    doc.text(elemento.descripcion || "Actividad de Obra", margin + 30, y)
+
+    doc.setFont("helvetica", "bold")
+    doc.text("UNIDAD:", pageWidth - margin - 75, y)
+    doc.setFont("helvetica", "normal")
+    doc.text(elemento.unidad || "ud", pageWidth - margin - 50, y)
+
+    y += 5
+    doc.setFont("helvetica", "bold")
+    doc.text("CANTIDAD:", margin + 5, y)
+    doc.setFont("helvetica", "normal")
+    doc.text(elemento.cantidad.toFixed(2), margin + 30, y)
+
+    doc.setFont("helvetica", "bold")
+    doc.text("MONEDA:", pageWidth - margin - 75, y)
+    doc.setFont("helvetica", "normal")
+    doc.text(config.moneda || "Bs.", pageWidth - margin - 50, y)
+
+    y += 8
+
+    // Parsear materiales del elemento
+    let materialesList: any[] = []
+    if (elemento.materiales) {
+      try {
+        const parsed = JSON.parse(elemento.materiales)
+        if (Array.isArray(parsed)) {
+          materialesList = parsed
+        } else if (typeof parsed === "object") {
+          materialesList = Object.entries(parsed).map(([key, val]: any) => {
+            const name = key.charAt(0).toUpperCase() + key.slice(1)
+            const unidad = key === "cemento" ? "bolsas" : key === "agua" ? "lt" : "m³"
+            const qty = key === "cemento" ? val.bolsas : key === "agua" ? val.lt : val.m3
+            return { nombre: name, cantidad: qty, unidad, precio: val.precio }
+          })
+        }
+      } catch {}
+    }
+
+    const cantElemento = elemento.cantidad || 1
+
+    // Rendimiento y costos de materiales
+    let costoMateriales = 0
+    const matRows = materialesList.map((m, i) => {
+      // Rendimiento por unidad del ítem
+      const rend = m.cantidad / cantElemento
+      const pu = m.precio / m.cantidad
+      const totalMat = rend * pu
+      costoMateriales += totalMat
+      return [
+        `MAT-${(i+1).toString().padStart(3, '0')}`,
+        m.nombre,
+        m.unidad,
+        rend.toFixed(4),
+        pu.toFixed(2),
+        totalMat.toFixed(2)
+      ]
+    })
+
+    // Mano de obra simulada/estimada
+    const laborRates: Record<string, { desc: string; rate: number; rend: number }> = {
+      CONCRETO: { desc: "Especialista Encofrador / Albañil", rate: 25.0, rend: 2.2 },
+      PARED: { desc: "Albañil de Primera", rate: 22.0, rend: 1.4 },
+      COLUMNA: { desc: "Albañil Especialista", rate: 26.0, rend: 2.5 },
+      VIGA: { desc: "Albañil Especialista", rate: 26.0, rend: 2.5 },
+      LOSA: { desc: "Albañil Especialista", rate: 26.0, rend: 2.0 },
+      CIMIENTO: { desc: "Albañil Encargado", rate: 22.0, rend: 1.6 },
+      MURO: { desc: "Albañil Estructurista", rate: 22.0, rend: 1.4 },
+      TECHO: { desc: "Techador Especialista", rate: 24.0, rend: 1.8 },
+      PISO: { desc: "Colocador Cerámica", rate: 22.0, rend: 1.1 },
+      CIELO: { desc: "Yesero Pintor", rate: 22.0, rend: 1.2 },
+    }
+
+    const typeKey = (elemento.tipoElemento || "OTROS").toUpperCase()
+    const lRate = laborRates[typeKey] || { desc: "Albañil General", rate: 20.0, rend: 1.2 }
+
+    const rendAlbañil = lRate.rend
+    const rendAyudante = lRate.rend * 1.2
+    const costoAlbañilHr = lRate.rate
+    const costoAyudanteHr = lRate.rate * 0.75
+
+    const subtotalAlbañil = rendAlbañil * costoAlbañilHr
+    const subtotalAyudante = rendAyudante * costoAyudanteHr
+    const subtotalManoObraDirecto = subtotalAlbañil + subtotalAyudante
+
+    const socialCharges = subtotalManoObraDirecto * (config.cargasSociales / 100)
+    const subtotalWithSocial = subtotalManoObraDirecto + socialCharges
+    const ivaLabor = subtotalWithSocial * (config.iva / 100)
+    const totalManoObra = subtotalWithSocial + ivaLabor
+
+    const moRows = [
+      ["MO-001", lRate.desc, "hr", rendAlbañil.toFixed(2), costoAlbañilHr.toFixed(2), subtotalAlbañil.toFixed(2)],
+      ["MO-002", "Peón / Ayudante de Obra", "hr", rendAyudante.toFixed(2), costoAyudanteHr.toFixed(2), subtotalAyudante.toFixed(2)],
+      ["", "Subtotal Mano de Obra", "", "", "", subtotalManoObraDirecto.toFixed(2)],
+      ["", `Cargas Sociales (${config.cargasSociales}%)`, "", "", "", socialCharges.toFixed(2)],
+      ["", `IVA Mano de Obra (${config.iva}%)`, "", "", "", ivaLabor.toFixed(2)]
+    ]
+
+    // Equipos y Maquinaria
+    const eqRates: Record<string, { desc: string; rate: number; rend: number }> = {
+      CONCRETO: { desc: "Mezcladora de Concreto & Vibrador", rate: 35.0, rend: 0.8 },
+      COLUMNA: { desc: "Herramientas Menores & Mezcladora", rate: 30.0, rend: 0.6 },
+      VIGA: { desc: "Herramientas Menores & Mezcladora", rate: 30.0, rend: 0.6 },
+      LOSA: { desc: "Herramientas Menores & Guinchera", rate: 32.0, rend: 0.7 },
+      CIMIENTO: { desc: "Mezcladora & compactador", rate: 25.0, rend: 0.5 },
+    }
+
+    const eqRate = eqRates[typeKey] || null
+    let costoEquiposDirecto = 0
+    const eqRows: any[] = []
+
+    if (eqRate) {
+      costoEquiposDirecto = eqRate.rend * eqRate.rate
+      eqRows.push(["EQ-001", eqRate.desc, "hr", eqRate.rend.toFixed(2), eqRate.rate.toFixed(2), costoEquiposDirecto.toFixed(2)])
+    }
+
+    // Herramientas menores (5% de la Mano de Obra Directa)
+    const herramientasMenores = subtotalManoObraDirecto * 0.05
+    const totalEquipos = costoEquiposDirecto + herramientasMenores
+
+    eqRows.push(["EQ-HM", "Herramientas Menores (5% Mano Obra)", "glb", "1.00", herramientasMenores.toFixed(2), herramientasMenores.toFixed(2)])
+
+    // Costo Directo Total
+    const costoDirecto = costoMateriales + totalManoObra + totalEquipos
+
+    // Costos Indirectos y Margen
+    const gastosGenerales = costoDirecto * (config.gastosGenerales / 100)
+    const utilidad = (costoDirecto + gastosGenerales) * (config.utilidad / 100)
+    const costoIndirecto = gastosGenerales + utilidad
+
+    // Base Imponible y Transacciones (IT 3.09%)
+    const baseIT = costoDirecto + costoIndirecto
+    const impuestoIT = baseIT * (config.it / 100)
+
+    // Adoptado Final
+    const precioAdoptado = baseIT + impuestoIT
+
+    // Renderizar tablas usando autoTable
+    // 1. Tabla de Materiales
+    doc.setFont("helvetica", "bold")
+    doc.text("1. MATERIALES", margin + 2, y + 5)
+    y += 7
+
+    autoTable(doc, {
+      startY: y,
+      head: [["Código", "Insumo / Material", "Unidad", "Rendimiento", "P. Unitario", "Costo Total"]],
+      body: matRows.length > 0 ? matRows : [["-", "Sin materiales registrados", "-", "0", "0", "0.00"]],
+      styles: { fontSize: 7, cellPadding: 1 },
+      headStyles: { fillColor: [47, 55, 65] },
+      margin: { left: margin + 2, right: margin + 2 },
+    })
+
+    y = (doc as any).lastAutoTable.finalY + 3
+    doc.setFont("helvetica", "bold")
+    doc.text(`TOTAL MATERIALES: Bs. ${costoMateriales.toFixed(2)}`, pageWidth - margin - 50, y)
+
+    // 2. Tabla de Mano de Obra
+    y += 5
+    doc.text("2. MANO DE OBRA", margin + 2, y)
+    y += 2
+
+    autoTable(doc, {
+      startY: y,
+      head: [["Código", "Descripción Obreros", "Unidad", "Rendimiento", "Costo Horario", "Costo Total"]],
+      body: moRows,
+      styles: { fontSize: 7, cellPadding: 1 },
+      headStyles: { fillColor: [47, 55, 65] },
+      margin: { left: margin + 2, right: margin + 2 },
+    })
+
+    y = (doc as any).lastAutoTable.finalY + 3
+    doc.setFont("helvetica", "bold")
+    doc.text(`TOTAL MANO DE OBRA: Bs. ${totalManoObra.toFixed(2)}`, pageWidth - margin - 50, y)
+
+    // 3. Tabla de Equipos y Herramientas
+    y += 5
+    doc.text("3. EQUIPO Y HERRAMIENTAS", margin + 2, y)
+    y += 2
+
+    autoTable(doc, {
+      startY: y,
+      head: [["Código", "Descripción Equipos", "Unidad", "Rendimiento", "Tarifa / Costo", "Costo Total"]],
+      body: eqRows,
+      styles: { fontSize: 7, cellPadding: 1 },
+      headStyles: { fillColor: [47, 55, 65] },
+      margin: { left: margin + 2, right: margin + 2 },
+    })
+
+    y = (doc as any).lastAutoTable.finalY + 3
+    doc.setFont("helvetica", "bold")
+    doc.text(`TOTAL EQUIPOS: Bs. ${totalEquipos.toFixed(2)}`, pageWidth - margin - 50, y)
+
+    // Resumen Final APU
+    y += 8
+    doc.setFillColor(248, 250, 252)
+    doc.rect(margin + 5, y, contentWidth - 10, 32, "F")
+    doc.setDrawColor(203, 213, 225)
+    doc.rect(margin + 5, y, contentWidth - 10, 32)
+
+    doc.setFontSize(8)
+    doc.setTextColor(30, 41, 59)
+    doc.text(`COSTO DIRECTO TOTAL (1 + 2 + 3):`, margin + 8, y + 6)
+    doc.text(`Bs. ${costoDirecto.toFixed(2)}`, pageWidth - margin - 20, y + 6, { align: "right" })
+
+    doc.text(`GASTOS GENERALES (${config.gastosGenerales}% de Costo Directo):`, margin + 8, y + 12)
+    doc.text(`Bs. ${gastosGenerales.toFixed(2)}`, pageWidth - margin - 20, y + 12, { align: "right" })
+
+    doc.text(`UTILIDAD (${config.utilidad}% de Costo Directo + GG):`, margin + 8, y + 18)
+    doc.text(`Bs. ${utilidad.toFixed(2)}`, pageWidth - margin - 20, y + 18, { align: "right" })
+
+    doc.text(`IMPUESTO A LAS TRANSACCIONES IT (${config.it}%):`, margin + 8, y + 24)
+    doc.text(`Bs. ${impuestoIT.toFixed(2)}`, pageWidth - margin - 20, y + 24, { align: "right" })
+
+    doc.setFontSize(10)
+    doc.setFont("helvetica", "bold")
+    doc.text(`PRECIO UNITARIO ADOPTADO:`, margin + 8, y + 30)
+    doc.text(`Bs. ${precioAdoptado.toFixed(2)}`, pageWidth - margin - 20, y + 30, { align: "right" })
+  })
+
+  doc.save(`Formulario_B1_APU_${new Date().toISOString().slice(0, 10)}.pdf`)
+}
+
