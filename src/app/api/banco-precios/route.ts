@@ -9,6 +9,7 @@ export async function GET(request: Request) {
   const page = parseInt(searchParams.get("page") || "1")
   const limit = parseInt(searchParams.get("limit") || "50")
   const categorias = searchParams.get("categorias") === "true"
+  const all = searchParams.get("all") === "true"
 
   // Solo devolver categorías únicas
   if (categorias) {
@@ -24,7 +25,7 @@ export async function GET(request: Request) {
 
   const where: any = {}
   if (search) {
-    where.actividad = { contains: search }
+    where.actividad = { contains: search, mode: "insensitive" }
   }
   if (categoria) {
     where.categoria = categoria
@@ -37,8 +38,10 @@ export async function GET(request: Request) {
     prisma.bancoPrecio.findMany({
       where,
       orderBy: { actividad: "asc" },
-      skip: (page - 1) * limit,
-      take: limit,
+      ...(all ? {} : {
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
     }),
     prisma.bancoPrecio.count({ where }),
   ])
@@ -65,13 +68,79 @@ export async function GET(request: Request) {
     items: mapped,
     total,
     page,
-    totalPages: Math.ceil(total / limit),
+    totalPages: all ? 1 : Math.ceil(total / limit),
   })
 }
 
 export async function POST(request: Request) {
   try {
     const body = await request.json()
+
+    // Manejar importación masiva (Array)
+    if (Array.isArray(body)) {
+      const results = []
+      for (const item of body) {
+        const {
+          codigo,
+          actividad,
+          unidad,
+          categoria,
+          subcategoria,
+          precioUnitario,
+          materiales,
+          manoObra,
+          beneficiosSociales,
+          iva,
+          equipoMaquinaria,
+          gastosGenerales,
+          utilidad,
+          it,
+        } = item
+
+        if (!actividad || !unidad) continue // Validación básica de campos requeridos
+
+        let existing = null
+        if (codigo) {
+          existing = await prisma.bancoPrecio.findFirst({
+            where: { codigo }
+          })
+        }
+
+        const dataObj = {
+          codigo: codigo || null,
+          actividad,
+          unidad,
+          cantidad: 1,
+          categoria: categoria || "GENERALES",
+          subcategoria: subcategoria || null,
+          precioUnitario: parseFloat(precioUnitario) || 0,
+          materiales: materiales ? (typeof materiales === "string" ? materiales : JSON.stringify(materiales)) : "[]",
+          manoObra: manoObra ? (typeof manoObra === "string" ? manoObra : JSON.stringify(manoObra)) : "[]",
+          beneficiosSociales: parseFloat(beneficiosSociales) ?? 71.18,
+          iva: parseFloat(iva) ?? 14.94,
+          equipoMaquinaria: parseFloat(equipoMaquinaria) ?? 5,
+          gastosGenerales: parseFloat(gastosGenerales) ?? 11,
+          utilidad: parseFloat(utilidad) ?? 7,
+          it: parseFloat(it) ?? 3.09,
+        }
+
+        if (existing) {
+          const updated = await prisma.bancoPrecio.update({
+            where: { id: existing.id },
+            data: dataObj,
+          })
+          results.push(updated)
+        } else {
+          const created = await prisma.bancoPrecio.create({
+            data: dataObj,
+          })
+          results.push(created)
+        }
+      }
+      return NextResponse.json({ success: true, count: results.length })
+    }
+
+    // Creación individual
     const {
       codigo,
       actividad,
@@ -111,6 +180,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json(newItem)
   } catch (error: any) {
-    return NextResponse.json({ error: error.message || "Error al crear el ítem" }, { status: 500 })
+    return NextResponse.json({ error: error.message || "Error al procesar la solicitud" }, { status: 500 })
   }
 }

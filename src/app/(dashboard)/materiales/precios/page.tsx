@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
+import * as XLSX from "xlsx"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -69,6 +70,134 @@ export default function BancoPreciosPage() {
   const [saving, setSaving] = useState(false)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [exporting, setExporting] = useState(false)
+  const [importing, setImporting] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleExport = async () => {
+    try {
+      setExporting(true)
+      const res = await fetch("/api/banco-precios?all=true")
+      if (!res.ok) throw new Error("Error al obtener los precios")
+      const data = await res.json()
+      const exportData = (data.items || []).map((i: any) => ({
+        "Código": i.codigo || i.id.slice(0, 8).toUpperCase(),
+        "Actividad": i.actividad,
+        "Unidad": i.unidad,
+        "Categoría": i.categoria,
+        "Subcategoría": i.subcategoria || "",
+        "P.U. Referencial (Bs.)": i.precioUnitario,
+        "Beneficios Sociales (%)": i.beneficiosSociales,
+        "IVA (%)": i.iva,
+        "Herramientas/Maquinaria (%)": i.equipoMaquinaria,
+        "Gastos Generales (%)": i.gastosGenerales,
+        "Utilidad (%)": i.utilidad,
+        "IT (%)": i.it,
+      }))
+      
+      const ws = XLSX.utils.json_to_sheet(exportData)
+      const wb = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(wb, ws, "Banco de Precios")
+      XLSX.writeFile(wb, `Banco_de_Precios_Referenciales_${new Date().toISOString().slice(0, 10)}.xlsx`)
+    } catch (err: any) {
+      console.error("Error al exportar:", err)
+      alert("Error al exportar el banco de precios: " + err.message)
+    } finally {
+      setExporting(false)
+    }
+  }
+
+  const handleImportExcel = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setImporting(true)
+    const reader = new FileReader()
+    reader.onload = async (evt) => {
+      try {
+        const data = evt.target?.result
+        const workbook = XLSX.read(data, { type: "binary" })
+        const sheetName = workbook.SheetNames[0]
+        const sheet = workbook.Sheets[sheetName]
+        const rows = XLSX.utils.sheet_to_json<any>(sheet)
+
+        const parsedItems = rows.map((row: any) => {
+          const getVal = (keys: string[], fallback: any = null) => {
+            for (const k of Object.keys(row)) {
+              if (keys.some(key => k.toLowerCase().trim() === key.toLowerCase())) {
+                return row[k]
+              }
+            }
+            return fallback
+          }
+
+          const codigo = getVal(["Código", "Codigo", "code", "código"])
+          const actividad = getVal(["Actividad", "Nombre", "Descripción", "Descripcion", "activity", "item", "actividad"])
+          const unidad = getVal(["Unidad", "Und", "unit", "u", "unidad"], "ud")
+          const categoria = getVal(["Categoría", "Categoria", "category", "categoría"], "GENERALES")
+          const subcategoria = getVal(["Subcategoría", "Subcategoria", "subcategory", "subcategoría"])
+          const precioUnitario = parseFloat(getVal(["P.U. Referencial (Bs.)", "Precio Unitario", "Precio", "price", "precio"])) || 0
+
+          return {
+            codigo: codigo ? String(codigo) : undefined,
+            actividad: actividad ? String(actividad) : undefined,
+            unidad: String(unidad),
+            categoria: String(categoria).toUpperCase(),
+            subcategoria: subcategoria ? String(subcategoria) : undefined,
+            precioUnitario,
+            beneficiosSociales: parseFloat(getVal(["Beneficios Sociales (%)", "Cargas Sociales", "social", "beneficios sociales"])) ?? 71.18,
+            iva: parseFloat(getVal(["IVA (%)", "iva", "Iva"])) ?? 14.94,
+            equipoMaquinaria: parseFloat(getVal(["Herramientas/Maquinaria (%)", "Equipo", "tools", "maquinaria"])) ?? 5,
+            gastosGenerales: parseFloat(getVal(["Gastos Generales (%)", "gastos", "gastos generales"])) ?? 11,
+            utilidad: parseFloat(getVal(["Utilidad (%)", "utilidad"])) ?? 7,
+            it: parseFloat(getVal(["IT (%)", "it", "It"])) ?? 3.09,
+          }
+        }).filter(item => item.actividad && item.unidad)
+
+        if (parsedItems.length === 0) {
+          alert("No se encontraron ítems válidos en el archivo Excel. Asegúrate de tener columnas para 'Actividad' y 'Unidad'.")
+          setImporting(false)
+          return
+        }
+
+        const response = await fetch("/api/banco-precios", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(parsedItems)
+        })
+
+        if (!response.ok) {
+          throw new Error("Error en el servidor al importar los datos")
+        }
+
+        const resData = await response.json()
+        alert(`Se importaron/actualizaron ${resData.count} ítems del banco de precios con éxito.`)
+        
+        // Trigger reload
+        setSearch("")
+        setCatFilter("TODAS")
+        setPage(1)
+        setLoading(true)
+        const catQuery = ""
+        fetch(`/api/banco-precios?search=&categoria=${catQuery}&page=1&limit=50`)
+          .then(r => r.json())
+          .then(data => {
+            setItems(Array.isArray(data.items) ? data.items : [])
+            setTotalPages(data.totalPages || 1)
+            setTotal(data.total || 0)
+            setLoading(false)
+          })
+          .catch(() => setLoading(false))
+      } catch (err: any) {
+        console.error("Error al importar Excel:", err)
+        alert("Ocurrió un error al procesar el archivo Excel: " + err.message)
+      } finally {
+        setImporting(false)
+        if (fileInputRef.current) fileInputRef.current.value = ""
+      }
+    }
+    reader.readAsBinaryString(file)
+  }
 
   // Fetch categorized items
   useEffect(() => {
@@ -260,14 +389,27 @@ export default function BancoPreciosPage() {
 
   return (
     <div className="space-y-6">
+      <input 
+        type="file" 
+        ref={fileInputRef} 
+        onChange={handleImportExcel} 
+        accept=".xlsx, .xls" 
+        className="hidden" 
+      />
       <PageHeader
         title="Banco de Precios Referenciales"
         description="Base de precios unitarios de referencia"
         icon={<DollarSign className="h-7 w-7 text-primary" />}
         actions={
           <div className="flex items-center gap-2">
-            <Button variant="outline"><Download className="mr-2 h-4 w-4" /> Exportar</Button>
-            <Button variant="outline"><Upload className="mr-2 h-4 w-4" /> Importar Excel</Button>
+            <Button variant="outline" onClick={handleExport} disabled={exporting}>
+              {exporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+              Exportar
+            </Button>
+            <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={importing}>
+              {importing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+              Importar Excel
+            </Button>
             <Button onClick={openCreate}><Plus className="mr-2 h-4 w-4" /> Nuevo Ítem</Button>
           </div>
         }
