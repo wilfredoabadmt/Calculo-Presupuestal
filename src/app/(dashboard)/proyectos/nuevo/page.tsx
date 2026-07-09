@@ -243,20 +243,23 @@ export default function NuevoProyectoPage() {
             Próximo paso: Calculadoras
           </h3>
           <p className="text-muted-foreground mb-4">
-            Una vez creado el proyecto, podrás agregar elementos constructivos usando nuestras 10 calculadoras especializadas:
+            Una vez creado el proyecto, podrás agregar elementos constructivos usando nuestras 14 calculadoras especializadas:
           </p>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5 text-sm">
             {[
-              "Concreto", "Paredes", "Columnas", "Vigas", "Losas",
-              "Cimientos", "Muros", "Techos", "Pisos", "Cielos Rasos"
-            ].map((calc, i) => (
-              <span key={calc} className={`px-3 py-1 rounded-full text-center ${i < 3 ? 'bg-green-100 text-green-800' : 'bg-primary/10 text-primary'}`}>
-                {calc} {i < 3 && <span className="ml-1">✓</span>}
-              </span>
-            ))}
+              "Concreto", "Paredes", "Pisos", "Pintura", "Columnas",
+              "Vigas", "Losas", "Cimientos", "Muros", "Techos"
+            ].map((calc) => {
+              const gratis = ["Concreto", "Paredes", "Pisos", "Pintura"].includes(calc)
+              return (
+                <span key={calc} className={`px-3 py-1 rounded-full text-center ${gratis ? 'bg-green-100 text-green-800' : 'bg-primary/10 text-primary'}`}>
+                  {calc} {gratis && <span className="ml-1">✓</span>}
+                </span>
+              )
+            })}
           </div>
           <p className="text-xs text-muted-foreground mt-3">
-            Los 3 primeros (Concreto, Paredes, Pisos) son gratuitos en el plan FREE.
+            4 calculadoras (Concreto, Paredes, Pisos, Pintura) son gratuitas en el plan FREE.
           </p>
         </CardContent>
       </Card>

@@ -17,7 +17,6 @@ import {
   Loader2 
 } from "lucide-react"
 import { formatNumber } from "@/lib/utils"
-import { PlanGuard } from "@/components/shared/PlanGuard"
 
 const PRECIO_PINTURA_LT = 4.80 // por litro de pintura látex estándar
 const PRECIO_SELLADOR_LT = 3.50 // por litro de sellador acrílico
@@ -148,8 +147,7 @@ export default function PinturaCalculatorPage() {
   }
 
   return (
-    <PlanGuard>
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-4">
             <Link href={`/proyectos/${projectId}/calculadora`} className="p-2 hover:bg-accent rounded-lg">
@@ -391,6 +389,5 @@ export default function PinturaCalculatorPage() {
           )}
         </div>
       </div>
-    </PlanGuard>
   )
 }

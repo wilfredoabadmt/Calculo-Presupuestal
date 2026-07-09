@@ -245,7 +245,7 @@ export default function DashboardPage() {
               <div>
                 <h3 className="text-lg font-semibold">Actualiza a Plan PRO</h3>
                 <p className="text-muted-foreground mt-1">
-                  Accede a las 10 calculadoras, proyectos ilimitados, cronograma Gantt, 
+                  Accede a las 14 calculadoras, proyectos ilimitados, cronograma Gantt,
                   exportación PDF/Excel y banco de precios referenciales completo.
                 </p>
               </div>

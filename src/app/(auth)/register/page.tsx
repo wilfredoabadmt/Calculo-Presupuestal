@@ -192,7 +192,7 @@ export default function RegisterPage() {
             <div className="mt-6 grid grid-cols-3 gap-3 text-center text-xs text-muted-foreground">
               {[
                 "Sin tarjeta de crédito",
-                "3 calculadoras gratis",
+                "4 calculadoras gratis",
                 "Cancela cuando quieras",
               ].map((t) => (
                 <div key={t} className="flex flex-col items-center gap-1">

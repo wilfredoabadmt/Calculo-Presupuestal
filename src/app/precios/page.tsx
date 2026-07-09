@@ -51,7 +51,7 @@ export default async function PricingPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               {[
-                "3 calculadoras (Concreto, Paredes, Pisos)",
+                "4 calculadoras (Concreto, Paredes, Pisos, Pintura)",
                 "1 proyecto activo",
                 "Export PDF limitado (5/mes)",
                 "Catálogo básico de materiales",
@@ -84,7 +84,7 @@ export default async function PricingPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               {[
-                "Las 10 calculadoras completas",
+                "Las 14 calculadoras completas",
                 "Proyectos ilimitados",
                 "Export PDF y Excel ilimitado",
                 "946 ítems referenciales integrados",
@@ -148,7 +148,7 @@ export default async function PricingPage() {
             {[
               {
                 q: "¿Qué incluye el plan Free?",
-                a: "Acceso a 3 calculadoras (Concreto, Paredes, Pisos), 1 proyecto activo y exportación PDF limitada. Sin tiempo de expiración.",
+                a: "Acceso a 4 calculadoras (Concreto, Paredes, Pisos, Pintura), 1 proyecto activo y exportación PDF limitada. Sin tiempo de expiración.",
               },
               {
                 q: "¿Puedo cambiar de plan en cualquier momento?",

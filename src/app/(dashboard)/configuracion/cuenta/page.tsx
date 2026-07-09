@@ -133,7 +133,7 @@ export default function CuentaPage() {
                 <div>
                   <div className="font-semibold">Plan {(session?.user as any)?.plan || "FREE"}</div>
                   <div className="text-sm text-muted-foreground">
-                    {(session?.user as any)?.plan === "PRO" ? "Acceso ilimitado" : "3 calculadoras · 1 proyecto"}
+                    {(session?.user as any)?.plan === "PRO" ? "Acceso ilimitado" : "4 calculadoras · 1 proyecto"}
                   </div>
                 </div>
                 {(session?.user as any)?.plan === "FREE" && (

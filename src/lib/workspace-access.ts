@@ -23,6 +23,41 @@ export interface WorkspaceAccessUser {
   workspaceEnabled?: boolean | null
   workspaceExpiresAt?: Date | string | null
   role?: string | null
+  plan?: string | null
+  planExpiresAt?: Date | string | null
+}
+
+/**
+ * Límite de proyectos del plan FREE.
+ */
+export const FREE_PROJECT_LIMIT = 1
+
+/**
+ * Forma mínima de usuario para evaluar el plan efectivo.
+ */
+export interface PlanUser {
+  plan?: string | null
+  planExpiresAt?: Date | string | null
+  role?: string | null
+}
+
+/**
+ * Determina si el usuario tiene plan PRO activo.
+ *
+ * Reglas:
+ * - El administrador del sistema (role ADMIN) siempre es PRO.
+ * - Requiere plan "PRO". Si hay fecha de expiración, no debe estar vencida.
+ * - Un PRO vencido se considera FREE.
+ */
+export function isProActive(user: PlanUser | null | undefined): boolean {
+  if (!user) return false
+  if (user.role === "ADMIN") return true
+  if (user.plan !== "PRO") return false
+  if (user.planExpiresAt) {
+    const expiry = new Date(user.planExpiresAt)
+    if (expiry.getTime() < Date.now()) return false
+  }
+  return true
 }
 
 /**
@@ -30,13 +65,17 @@ export interface WorkspaceAccessUser {
  *
  * Reglas:
  * - El administrador del sistema (role ADMIN) siempre tiene acceso.
- * - El acceso requiere el permiso habilitado (workspaceEnabled).
- * - Si hay fecha de expiración, no debe estar vencida. Sin fecha = permanente.
+ * - El plan FREE nunca tiene acceso: se requiere plan PRO activo.
+ * - Además se requiere el permiso habilitado (workspaceEnabled) sin vencer.
+ *   Sin fecha de expiración = permanente.
  */
 export function hasActiveWorkspace(user: WorkspaceAccessUser | null | undefined): boolean {
   if (!user) return false
 
   if (user.role === "ADMIN") return true
+
+  // El módulo de Equipo incluye todo lo del plan Pro: requiere Pro activo.
+  if (!isProActive(user)) return false
 
   if (!user.workspaceEnabled) return false
 

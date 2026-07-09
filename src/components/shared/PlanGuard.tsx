@@ -38,7 +38,7 @@ export function PlanGuard({ children, requiredPlan = "PRO" }: PlanGuardProps) {
             <h2 className="text-xl font-bold mb-2">Calculadora Pro</h2>
             <p className="text-muted-foreground mb-6">
               Esta calculadora requiere el <strong>Plan Pro</strong>. 
-              Actualiza para desbloquear las 10 calculadoras completas.
+              Actualiza para desbloquear las 14 calculadoras completas.
             </p>
             <div className="flex flex-col gap-3">
               <Link href="/precios">
