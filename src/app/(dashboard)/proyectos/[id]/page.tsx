@@ -273,13 +273,13 @@ export default function ProyectoDetailPage() {
       </div>
 
       <Tabs defaultValue="dashboard" className="space-y-4">
-        <TabsList className="flex w-full overflow-x-auto justify-start sm:grid sm:grid-cols-6 h-auto sm:h-10 no-scrollbar gap-1 sm:gap-0 p-1">
-          <TabsTrigger value="dashboard" className="shrink-0 sm:shrink">Resumen</TabsTrigger>
-          <TabsTrigger value="elementos" className="shrink-0 sm:shrink">Elementos</TabsTrigger>
-          <TabsTrigger value="presupuesto" className="shrink-0 sm:shrink">Presupuesto</TabsTrigger>
-          <TabsTrigger value="detallado" className="shrink-0 sm:shrink">Detallado</TabsTrigger>
-          <TabsTrigger value="cronograma" className="shrink-0 sm:shrink">Cronograma</TabsTrigger>
-          <TabsTrigger value="reportes" className="shrink-0 sm:shrink">Reportes</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 h-auto gap-1 p-1">
+          <TabsTrigger value="dashboard" className="w-full py-2 text-xs sm:text-sm">Resumen</TabsTrigger>
+          <TabsTrigger value="elementos" className="w-full py-2 text-xs sm:text-sm">Elementos</TabsTrigger>
+          <TabsTrigger value="presupuesto" className="w-full py-2 text-xs sm:text-sm">Presupuesto</TabsTrigger>
+          <TabsTrigger value="detallado" className="w-full py-2 text-xs sm:text-sm">Detallado</TabsTrigger>
+          <TabsTrigger value="cronograma" className="w-full py-2 text-xs sm:text-sm">Cronograma</TabsTrigger>
+          <TabsTrigger value="reportes" className="w-full py-2 text-xs sm:text-sm">Reportes</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard">
