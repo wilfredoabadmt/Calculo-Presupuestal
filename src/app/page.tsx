@@ -595,7 +595,7 @@ export default async function HomePage() {
           <Award className="h-10 w-10 text-cyan-400 mx-auto mb-6" />
           <h2 className="text-3xl sm:text-4xl font-extrabold mb-4">¿Representas a una Constructora o Institución Pública?</h2>
           <p className="text-slate-400 mb-8 max-w-xl mx-auto leading-relaxed">
-            Ofrecemos capacitación presencial, integración con ERP institucional y parametrización de catálogos municipales personalizados.
+            Ofrecemos licencias corporativas multiusuario, base de precios centralizada para tu equipo y parametrización personalizada de catálogos para licitaciones públicas y privadas.
           </p>
           <Link href="/register">
             <Button size="lg" className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-slate-950 font-bold px-8 py-5 rounded-lg">
