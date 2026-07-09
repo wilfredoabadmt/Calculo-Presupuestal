@@ -8,10 +8,12 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { PageHeader } from "@/components/shared/PageHeader"
-import { Users2, Mail, Plus, Trash2, Edit3, Check, Loader2, UserPlus, AlertCircle, Lock, Building2, ShieldCheck, FolderKanban, Crown, ArrowRight, Sparkles, Headset } from "lucide-react"
+import { Users2, Mail, Plus, Trash2, Edit3, Check, Loader2, UserPlus, AlertCircle, Lock, Building2, ShieldCheck, FolderKanban, Crown, ArrowRight, Sparkles, Headset, Info, Calendar, Quote, CheckCircle2 } from "lucide-react"
 import Link from "next/link"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
+import { useSession } from "next-auth/react"
+import { isProActive } from "@/lib/plan"
 
 interface Member {
   id: string
@@ -31,6 +33,7 @@ interface Workspace {
 }
 
 export default function EquipoConfigPage() {
+  const { data: session, status } = useSession()
   const [workspace, setWorkspace] = useState<Workspace | null>(null)
   const [userRole, setUserRole] = useState<string>("MEMBER")
   const [loading, setLoading] = useState(true)
@@ -56,9 +59,15 @@ export default function EquipoConfigPage() {
   // Member management states
   const [actionMemberId, setActionMemberId] = useState<string | null>(null)
 
+  const isPro = isProActive(session?.user as any)
+
   useEffect(() => {
-    loadWorkspace()
-  }, [])
+    if (status === "authenticated" && isPro) {
+      loadWorkspace()
+    } else if (status === "unauthenticated" || (status === "authenticated" && !isPro)) {
+      setLoading(false)
+    }
+  }, [status, isPro])
 
   async function loadWorkspace() {
     setLoading(true)
@@ -215,12 +224,17 @@ export default function EquipoConfigPage() {
     }
   }
 
-  if (loading) {
+  if (status === "loading" || loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     )
+  }
+
+  // Redirigir a los usuarios con plan FREE o no autenticados a la pantalla persuasiva
+  if (!session || !isPro) {
+    return <TeamUpsell />
   }
 
   // Sin workspace pero con permiso activo: permitir crear uno (auto-servicio)
@@ -518,48 +532,40 @@ const TEAM_BENEFITS = [
   },
 ]
 
-// Miembros ficticios solo para la vista previa (captura) de la función.
-const PREVIEW_MEMBERS = [
-  { initials: "MR", name: "María Rojas", email: "maria@constructora.com", role: "ADMIN", color: "bg-primary text-primary-foreground" },
-  { initials: "JG", name: "Jorge Gutiérrez", email: "jorge@constructora.com", role: "MIEMBRO", color: "bg-emerald-500/90 text-white" },
-  { initials: "LP", name: "Lucía Paredes", email: "lucia@constructora.com", role: "MIEMBRO", color: "bg-sky-500/90 text-white" },
-]
-
 export function TeamUpsell() {
   return (
-    <div className="space-y-8 max-w-6xl mx-auto pb-10">
+    <div className="space-y-12 max-w-6xl mx-auto pb-16 px-4">
+      {/* Header */}
       <PageHeader
-        title="Mi Equipo y Espacio de Trabajo"
-        description="Colabora con toda tu empresa en un solo lugar"
+        title="Colaboración y Espacios de Trabajo"
+        description="Lleva la productividad de tu constructora al siguiente nivel colaborando en tiempo real"
         icon={<Users2 className="h-7 w-7 text-primary" />}
         backHref="/configuracion"
       />
 
-      {/* Hero + captura de la función */}
-      <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
-        {/* Copy persuasivo */}
-        <div className="space-y-6 order-2 lg:order-1">
+      {/* Hero + Mockup */}
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-12 lg:items-center w-full max-w-full overflow-hidden">
+        {/* Copy Persuasivo (Left) */}
+        <div className="space-y-6 lg:w-1/2 order-2 lg:order-1 text-left w-full">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary">
             <Sparkles className="h-3.5 w-3.5" />
-            Función Premium
+            Productividad Sin Límites
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             <h2 className="text-3xl font-extrabold leading-tight text-foreground sm:text-4xl">
-              Deja de trabajar solo.{" "}
-              <span className="text-primary">Presupuesta en equipo.</span>
+              Multiplica la eficiencia de tu constructora{" "}
+              <span className="bg-gradient-to-r from-primary to-violet-500 bg-clip-text text-transparent">colaborando en tiempo real.</span>
             </h2>
             <p className="text-base text-muted-foreground leading-relaxed">
-              Crea el espacio de trabajo de tu empresa, invita a tus colaboradores y
-              compartan proyectos, precios y calculadoras en tiempo real. Un solo lugar,
-              toda tu obra bajo control.
+              Deja atrás las hojas de cálculo individuales y las discrepancias de precios. El módulo de Equipo te permite centralizar el control de costos de tus obras en un único espacio seguro en la nube.
             </p>
           </div>
 
-          {/* Beneficios */}
-          <div className="grid gap-4 sm:grid-cols-2">
+          {/* Beneficios Clave */}
+          <div className="grid gap-4 sm:grid-cols-2 pt-2">
             {TEAM_BENEFITS.map((b) => (
-              <div key={b.title} className="flex gap-3">
+              <div key={b.title} className="flex gap-3 bg-card/40 border border-border/60 p-3 rounded-lg hover:border-primary/40 hover:bg-card/85 transition-all duration-300">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <b.icon className="h-5 w-5" />
                 </div>
@@ -572,85 +578,138 @@ export function TeamUpsell() {
           </div>
         </div>
 
-        {/* Captura / vista previa bloqueada de la función */}
-        <div className="order-1 lg:order-2">
-          <div className="relative">
-            {/* Mockup de la pantalla de Equipo */}
-            <div className="pointer-events-none select-none rounded-xl border border-border bg-card p-4 shadow-2xl shadow-black/30 blur-[1.5px]">
-              {/* Barra superior tipo ventana */}
-              <div className="mb-4 flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-red-400/70" />
-                <span className="h-2.5 w-2.5 rounded-full bg-yellow-400/70" />
-                <span className="h-2.5 w-2.5 rounded-full bg-green-400/70" />
-                <span className="ml-3 flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
-                  <Building2 className="h-3.5 w-3.5" /> Constructora Andina S.R.L.
+        {/* Captura de Pantalla Premium (Right) */}
+        <div className="lg:w-1/2 order-1 lg:order-2 w-full max-w-full min-w-0 overflow-hidden px-1">
+          <div className="relative w-full max-w-[500px] mx-auto overflow-hidden sm:overflow-visible">
+            {/* Glow decorativo de fondo */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-violet-500/20 blur-2xl rounded-2xl -z-10" />
+            
+            {/* Imagen del Mockup */}
+            <div className="relative group overflow-hidden rounded-xl border border-white/10 bg-card shadow-2xl shadow-black/40 w-full max-w-full">
+              <img
+                src="/team_workspace_mockup.png"
+                alt="Vista previa de Workspace de Equipo"
+                className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
+                style={{ maxWidth: "500px", width: "100%" }}
+              />
+              
+              {/* Overlay de Candado / Premium */}
+              <div className="absolute inset-0 bg-slate-950/45 backdrop-blur-[1px] flex flex-col items-center justify-center transition-all duration-300 group-hover:bg-slate-950/20" style={{ maxWidth: "100%" }}>
+                <div className="flex h-14 w-14 items-center justify-center rounded-full border border-primary/40 bg-background/90 shadow-xl group-hover:scale-110 transition-transform duration-300">
+                  <Lock className="h-6 w-6 text-primary" />
+                </div>
+                <span className="mt-3 rounded-full bg-background/90 px-3.5 py-1 text-xs font-bold text-foreground shadow-lg tracking-wide border border-border">
+                  MÓDULO DE COLABORACIÓN PREMIUM
                 </span>
-              </div>
-
-              {/* Tabla de miembros simulada */}
-              <div className="overflow-hidden rounded-lg border border-border">
-                <div className="flex items-center justify-between bg-muted/40 px-3 py-2 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
-                  <span>Miembros del equipo</span>
-                  <span className="inline-flex items-center gap-1 rounded bg-primary/15 px-2 py-0.5 text-primary">
-                    <Plus className="h-3 w-3" /> Invitar
-                  </span>
-                </div>
-                <div className="divide-y divide-border">
-                  {PREVIEW_MEMBERS.map((m) => (
-                    <div key={m.initials} className="flex items-center gap-3 px-3 py-2.5">
-                      <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${m.color}`}>
-                        {m.initials}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-xs font-semibold text-foreground">{m.name}</p>
-                        <p className="truncate text-[11px] text-muted-foreground">{m.email}</p>
-                      </div>
-                      <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${m.role === "ADMIN" ? "bg-primary/15 text-primary" : "bg-secondary text-secondary-foreground"}`}>
-                        {m.role}
-                      </span>
-                    </div>
-                  ))}
-                </div>
               </div>
             </div>
 
-            {/* Overlay con candado */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center rounded-xl bg-background/40 backdrop-blur-[1px]">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full border border-primary/30 bg-background/90 shadow-lg">
-                <Lock className="h-6 w-6 text-primary" />
+            {/* Badge flotante interactivo */}
+            <div className="absolute -bottom-4 -right-4 bg-slate-900/90 backdrop-blur-md p-3 rounded-lg border border-border/80 flex items-center gap-3 shadow-xl max-w-[280px] hidden sm:flex">
+              <div className="bg-emerald-500/20 p-2 rounded-full text-emerald-400">
+                <CheckCircle2 className="h-5 w-5 animate-pulse" />
               </div>
-              <span className="mt-3 rounded-full bg-background/90 px-3 py-1 text-xs font-semibold text-foreground shadow">
-                Vista previa · Función bloqueada
-              </span>
+              <div className="text-left">
+                <p className="text-xs font-bold text-foreground">Sincronización en la Nube</p>
+                <p className="text-[10px] text-muted-foreground">Cambios instantáneos y control de versiones automático.</p>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Llamada a la acción + aviso de habilitación por el administrador */}
-      <Card className="border-primary/20 bg-gradient-to-br from-primary/10 via-card to-card">
-        <CardContent className="flex flex-col items-center gap-5 p-8 text-center sm:flex-row sm:justify-between sm:text-left">
-          <div className="space-y-1.5">
-            <h3 className="text-lg font-bold text-foreground">
-              ¿Listo para colaborar con tu equipo?
-            </h3>
-            <p className="max-w-xl text-sm text-muted-foreground leading-relaxed">
-              Esta función la activa el <span className="font-semibold text-foreground">administrador</span> del
-              sistema en tu cuenta. Escríbenos o revisa los planes y la habilitamos para
-              que crees tu espacio de trabajo hoy mismo.
-            </p>
+      {/* Tabla Comparativa de Planes */}
+      <Card className="border-border/80 bg-card/30 backdrop-blur-sm overflow-hidden">
+        <CardHeader className="text-center pb-2">
+          <CardTitle className="text-xl font-bold">¿Qué incluye la función de Equipo?</CardTitle>
+          <CardDescription>Compara el plan básico individual con las capacidades del plan corporativo.</CardDescription>
+        </CardHeader>
+        <CardContent className="p-0 sm:p-6">
+          <div className="overflow-x-auto w-full max-w-full">
+            <table className="w-full table-fixed text-xs sm:text-sm text-left border-collapse">
+              <thead>
+                <tr className="border-b border-border bg-muted/40">
+                  <th className="p-2 sm:p-4 font-bold text-foreground w-[40%] whitespace-normal break-words">Característica</th>
+                  <th className="p-2 sm:p-4 font-bold text-center text-muted-foreground w-[30%] whitespace-normal break-words">Plan Personal (FREE)</th>
+                  <th className="p-2 sm:p-4 font-bold text-center text-primary w-[30%] bg-primary/5 whitespace-normal break-words">Plan Equipo (Premium)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                <tr>
+                  <td className="p-2 sm:p-4 font-medium text-foreground whitespace-normal break-words">Colaboradores</td>
+                  <td className="p-2 sm:p-4 text-center text-muted-foreground whitespace-normal break-words">1 usuario</td>
+                  <td className="p-2 sm:p-4 text-center text-foreground font-semibold bg-primary/5 whitespace-normal break-words">Usuarios Ilimitados</td>
+                </tr>
+                <tr>
+                  <td className="p-2 sm:p-4 font-medium text-foreground whitespace-normal break-words">Sincronización en Tiempo Real</td>
+                  <td className="p-2 sm:p-4 text-center text-muted-foreground whitespace-normal break-words">No disponible (Local)</td>
+                  <td className="p-2 sm:p-4 text-center text-foreground font-semibold bg-primary/5 whitespace-normal break-words">Sí, en la Nube</td>
+                </tr>
+                <tr>
+                  <td className="p-2 sm:p-4 font-medium text-foreground whitespace-normal break-words">Proyectos y Presupuestos</td>
+                  <td className="p-2 sm:p-4 text-center text-muted-foreground whitespace-normal break-words">Límite de 1 proyecto</td>
+                  <td className="p-2 sm:p-4 text-center text-foreground font-semibold bg-primary/5 whitespace-normal break-words">Proyectos Ilimitados</td>
+                </tr>
+                <tr>
+                  <td className="p-2 sm:p-4 font-medium text-foreground whitespace-normal break-words">Roles y Permisos Granulares</td>
+                  <td className="p-2 sm:p-4 text-center text-muted-foreground whitespace-normal break-words">—</td>
+                  <td className="p-2 sm:p-4 text-center text-foreground font-semibold bg-primary/5 whitespace-normal break-words">Admin, Colaborador, Auditor</td>
+                </tr>
+                <tr>
+                  <td className="p-2 sm:p-4 font-medium text-foreground whitespace-normal break-words">Base de Materiales Compartida</td>
+                  <td className="p-2 sm:p-4 text-center text-muted-foreground whitespace-normal break-words">Individual por computadora</td>
+                  <td className="p-2 sm:p-4 text-center text-foreground font-semibold bg-primary/5 whitespace-normal break-words">Compartida para toda la Empresa</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-          <div className="flex w-full shrink-0 flex-col items-stretch gap-2 sm:w-auto">
-            <Link href="/precios" className="block w-full sm:w-auto">
-              <Button size="lg" className="w-full gap-2 font-bold sm:w-auto">
+        </CardContent>
+      </Card>
+
+      {/* Testimonial de Cliente */}
+      <div className="bg-muted/30 border border-border/80 rounded-xl p-8 max-w-4xl mx-auto text-center relative overflow-hidden">
+        <Quote className="h-10 w-10 text-primary/20 absolute -top-2 -left-2 rotate-180" />
+        <p className="text-base sm:text-lg italic text-muted-foreground leading-relaxed relative z-10">
+          "Desde que habilitamos el módulo de equipo en nuestra constructora, pudimos centralizar todos los presupuestos de obra. Ya no tenemos planillas duplicadas y todo el equipo edita en tiempo real. ¡Altamente recomendado para agilizar los cierres de licitaciones!"
+        </p>
+        <div className="mt-4 flex items-center justify-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-tr from-primary to-violet-500 text-white font-bold text-sm shadow">
+            RS
+          </div>
+          <div className="text-left">
+            <h4 className="text-sm font-bold text-foreground">Ing. Roberto Silva</h4>
+            <p className="text-xs text-muted-foreground">Gerente de Operaciones · Constructora Alfa</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Informative Alert for Admins / User activation */}
+      <Card className="border-amber-500/20 bg-gradient-to-br from-amber-500/5 via-card to-card">
+        <CardContent className="flex flex-col gap-5 p-6">
+          <div className="flex items-start gap-4 text-left">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500 mt-1">
+              <Info className="h-5 w-5" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-base font-bold text-foreground">
+                ¿Cómo activar esta funcionalidad?
+              </h3>
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                Actualmente, el <span className="font-bold text-foreground">administrador de tu sistema</span> es el único que puede habilitar esta opción para tu cuenta de usuario desde el panel de control. Muy pronto, la habilitación se procesará de forma automática al realizar el pago del módulo.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-col items-center gap-3 pt-2 border-t border-border/40 text-center w-full">
+            <span className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+              <Headset className="h-3.5 w-3.5 shrink-0" />
+              ¿Tienes dudas? Contacta a soporte para más información.
+            </span>
+            <Link href="/precios" className="w-full max-w-[280px] block">
+              <Button size="lg" className="w-full gap-2 font-bold">
                 Ver planes y precios
                 <ArrowRight className="h-4 w-4 shrink-0" />
               </Button>
             </Link>
-            <span className="flex flex-wrap items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
-              <Headset className="h-3.5 w-3.5 shrink-0" />
-              Solo el administrador puede habilitarla
-            </span>
           </div>
         </CardContent>
       </Card>

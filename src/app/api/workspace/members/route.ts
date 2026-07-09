@@ -1,12 +1,26 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
+import { hasActiveWorkspace } from "@/lib/workspace-access"
 
 // Agregar miembro al Workspace
 export async function POST(request: Request) {
   const session = await auth()
   if (!session?.user?.id) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 })
+  }
+
+  // Validar si el usuario tiene permiso de workspace activo
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { id: true, role: true, workspaceEnabled: true, workspaceExpiresAt: true, plan: true, planExpiresAt: true },
+  })
+
+  if (!hasActiveWorkspace(user)) {
+    return NextResponse.json(
+      { error: "No tienes activada la función de Equipo. Contáctate con el administrador para habilitarla." },
+      { status: 403 }
+    )
   }
 
   // 1. Obtener workspace y validar rol del solicitante
@@ -79,6 +93,19 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 })
   }
 
+  // Validar si el usuario tiene permiso de workspace activo
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { id: true, role: true, workspaceEnabled: true, workspaceExpiresAt: true, plan: true, planExpiresAt: true },
+  })
+
+  if (!hasActiveWorkspace(user)) {
+    return NextResponse.json(
+      { error: "No tienes activada la función de Equipo. Contáctate con el administrador para habilitarla." },
+      { status: 403 }
+    )
+  }
+
   const requesterMember = await prisma.workspaceMember.findFirst({
     where: { userId: session.user.id }
   })
@@ -137,6 +164,19 @@ export async function DELETE(request: Request) {
   const session = await auth()
   if (!session?.user?.id) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 })
+  }
+
+  // Validar si el usuario tiene permiso de workspace activo
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { id: true, role: true, workspaceEnabled: true, workspaceExpiresAt: true, plan: true, planExpiresAt: true },
+  })
+
+  if (!hasActiveWorkspace(user)) {
+    return NextResponse.json(
+      { error: "No tienes activada la función de Equipo. Contáctate con el administrador para habilitarla." },
+      { status: 403 }
+    )
   }
 
   const requesterMember = await prisma.workspaceMember.findFirst({
