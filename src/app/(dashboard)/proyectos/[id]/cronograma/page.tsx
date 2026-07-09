@@ -328,8 +328,8 @@ export default function CronogramaPage() {
                 <p className="text-xs text-muted-foreground">
                   💡 Cada elemento representa una actividad de tu obra. Úsalos como referencia para agregar actividades al diagrama de Gantt con el código y nombre correcto.
                 </p>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                <div className="overflow-x-auto w-full max-w-full">
+                  <table className="w-full text-sm min-w-[650px]">
                     <thead>
                       <tr className="border-b">
                         <th className="text-left py-2 pr-4 font-medium text-muted-foreground">Tipo</th>
@@ -409,7 +409,7 @@ export default function CronogramaPage() {
               }
             />
           ) : (
-            <div className="space-y-1 overflow-x-auto">
+            <div className="space-y-1 overflow-x-auto w-full max-w-full">
               <div className="min-w-[720px] space-y-1">
               {/* Column headers */}
               <div className="flex items-center gap-2 mb-3 border-b pb-2">
@@ -476,7 +476,7 @@ export default function CronogramaPage() {
                     {/* Progress % */}
                     <div className="w-12 text-right text-sm text-muted-foreground">{item.progreso ?? 0}%</div>
                     {/* Actions */}
-                    <div className="flex gap-1 w-16 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex gap-1 w-16 justify-end opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                       <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => openEdit(item)}>
                         <span className="text-xs">✏️</span>
                       </Button>
