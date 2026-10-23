@@ -1,6 +1,6 @@
+import { BeamEngine } from "@/domain/calculo/viga"
 import {
   calcularBolsasCemento,
-  aplicarDesperdicio,
   redondear,
   crearMaterial,
   type ResultadoCalculo,
@@ -51,46 +51,76 @@ export interface InputViga {
 }
 
 export function calcularViga(input: InputViga): ResultadoCalculo {
-  // Concreto
-  const volumen = redondear(input.largo * input.a * input.b)
-  const volTotal = redondear(volumen * input.cantidad)
-  const volConDesp = aplicarDesperdicio(volTotal, input.desperdicioConcreto)
+  // Map old input format to new domain engine format
+  const concrete = {
+    length: input.largo,
+    height: input.a,
+    width: input.b,
+    dosage: input.dosificacion,
+    concreteWaste: input.desperdicioConcreto,
+    steelWaste: input.desperdicioAcero,
+    quantity: input.cantidad,
+  }
 
-  const cementoKg = redondear(volConDesp * input.dosificacion.cementoKg)
-  const cementoBolsas = calcularBolsasCemento(cementoKg)
-  const arenaM3 = redondear(volConDesp * input.dosificacion.arenaM3)
-  const gravaM3 = redondear(volConDesp * input.dosificacion.gravaM3)
+  const reinforcement = {
+    positiveLength: input.aceroPositivo.longitudTotal,
+    positiveDiameter: input.aceroPositivo.diametro,
+    positiveKgPerMeter: input.aceroPositivo.kgM,
+    positiveNumBars: input.aceroPositivo.cantidadVarillas,
+    positiveHasLap: input.aceroPositivo.traslapes,
+    positiveLapLength: input.aceroPositivo.largoTraslape,
+    negativeLength: input.aceroNegativo.longitudTotal,
+    negativeDiameter: input.aceroNegativo.diametro,
+    negativeKgPerMeter: input.aceroNegativo.kgM,
+    negativeNumBars: input.aceroNegativo.cantidadVarillas,
+    negativeHasLap: input.aceroNegativo.traslapes,
+    negativeLapLength: input.aceroNegativo.largoTraslape,
+    stirrupPerimeter: 2 * (input.a + input.b) - 8 * 0.04 + 2 * 0.12,
+    stirrupDiameter: input.estribos.diametro,
+    stirrupKgPerMeter: input.estribos.kgM,
+    zones: {
+      confined: {
+        length: input.largo * 0.30,
+        spacing: input.estribos.separacionConfinada / 100,
+      },
+      central: {
+        length: input.largo * 0.70,
+        spacing: input.estribos.separacionCentral / 100,
+      },
+    },
+  }
 
-  // Acero positivo (+)
-  const longPos = input.aceroPositivo.traslapes
-    ? input.aceroPositivo.longitudTotal + input.aceroPositivo.cantidadVarillas * input.aceroPositivo.largoTraslape
-    : input.aceroPositivo.longitudTotal
-  const pesoPos = redondear(longPos * input.aceroPositivo.kgM * input.cantidad)
-  const pesoPosConDesp = redondear(aplicarDesperdicio(pesoPos, input.desperdicioAcero))
+  const result = BeamEngine.calculate(concrete, reinforcement)
 
-  // Acero negativo (-)
-  const longNeg = input.aceroNegativo.traslapes
-    ? input.aceroNegativo.longitudTotal + input.aceroNegativo.cantidadVarillas * input.aceroNegativo.largoTraslape
-    : input.aceroNegativo.longitudTotal
-  const pesoNeg = redondear(longNeg * input.aceroNegativo.kgM * input.cantidad)
-  const pesoNegConDesp = redondear(aplicarDesperdicio(pesoNeg, input.desperdicioAcero))
-
-  // Estribos
-  const perimetroEstribo = 2 * (input.a + input.b) - 8 * 0.04 + 2 * 0.12
-  const numEstribosConfinada = Math.ceil((input.largo * 0.30) / (input.estribos.separacionConfinada / 100))
-  const numEstribosCentral = Math.ceil((input.largo * 0.7) / (input.estribos.separacionCentral / 100))
-  const totalEstribos = numEstribosConfinada + numEstribosCentral + 4
-  const longTotalEstribos = redondear(totalEstribos * input.estribos.longitud * input.cantidad)
-  const pesoEstribos = redondear(longTotalEstribos * input.estribos.kgM)
-  const pesoEstribosConDesp = redondear(aplicarDesperdicio(pesoEstribos, input.desperdicioAcero))
+  const cementoBolsas = calcularBolsasCemento(redondear(result.concrete.cementoKg))
+  const arenaM3 = redondear(result.concrete.arenaM3)
+  const gravaM3 = redondear(result.concrete.gravaM3)
 
   const materiales = [
     crearMaterial("C-01", "Cemento CP-40", "bolsa", cementoBolsas, input.precios.cemento),
     crearMaterial("A-01", "Arena media", "m³", arenaM3, input.precios.arena),
     crearMaterial("G-01", "Grava 3/4\"", "m³", gravaM3, input.precios.grava),
-    crearMaterial(`AC-P-${input.aceroPositivo.diametro}`, `Acero (+) Ø${input.aceroPositivo.diametro}`, "kg", pesoPosConDesp, input.precios.acero),
-    crearMaterial(`AC-N-${input.aceroNegativo.diametro}`, `Acero (-) Ø${input.aceroNegativo.diametro}`, "kg", pesoNegConDesp, input.precios.acero),
-    crearMaterial(`AC-E-${input.estribos.diametro}`, `Estribos Ø${input.estribos.diametro}`, "kg", pesoEstribosConDesp, input.precios.acero),
+    crearMaterial(
+      `AC-P-${input.aceroPositivo.diametro}`,
+      `Acero (+) Ø${input.aceroPositivo.diametro}`,
+      "kg",
+      redondear(result.positiveSteel.weightWithWaste),
+      input.precios.acero
+    ),
+    crearMaterial(
+      `AC-N-${input.aceroNegativo.diametro}`,
+      `Acero (-) Ø${input.aceroNegativo.diametro}`,
+      "kg",
+      redondear(result.negativeSteel.weightWithWaste),
+      input.precios.acero
+    ),
+    crearMaterial(
+      `AC-E-${input.estribos.diametro}`,
+      `Estribos Ø${input.estribos.diametro}`,
+      "kg",
+      redondear(result.stirrups.weightWithWaste),
+      input.precios.acero
+    ),
   ]
 
   const costoTotalMateriales = materiales.reduce((sum, m) => sum + m.costoTotal, 0)
@@ -99,14 +129,14 @@ export function calcularViga(input: InputViga): ResultadoCalculo {
     materiales,
     costoTotalMateriales,
     resumen: {
-      "Volumen concreto": `${volTotal} m³`,
-      "Cemento": `${cementoKg} kg (${cementoBolsas} bolsas)`,
+      "Volumen concreto": `${redondear(result.concrete.volume * concrete.quantity)} m³`,
+      "Cemento": `${redondear(result.concrete.cementoKg)} kg (${cementoBolsas} bolsas)`,
       "Arena": `${arenaM3} m³`,
       "Grava": `${gravaM3} m³`,
-      "Acero positivo (+)": `${pesoPosConDesp} kg`,
-      "Acero negativo (-)": `${pesoNegConDesp} kg`,
-      "Estribos": `${totalEstribos} pzas (${pesoEstribosConDesp} kg)`,
-      "Peso total acero": `${pesoPosConDesp + pesoNegConDesp + pesoEstribosConDesp} kg`,
+      "Acero positivo (+)": `${redondear(result.positiveSteel.weightWithWaste)} kg`,
+      "Acero negativo (-)": `${redondear(result.negativeSteel.weightWithWaste)} kg`,
+      "Estribos": `${result.stirrups.totalCount} pzas (${redondear(result.stirrups.weightWithWaste)} kg)`,
+      "Peso total acero": `${redondear(result.totalSteelWeight)} kg`,
     },
   }
 }

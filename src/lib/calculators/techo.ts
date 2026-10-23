@@ -1,7 +1,6 @@
+import { RoofEngine } from "@/domain/calculo/techo"
 import {
-  aplicarDesperdicio,
   redondear,
-  techo as ceil,
   crearMaterial,
   type ResultadoCalculo,
 } from "./utils"
@@ -21,12 +20,16 @@ export interface InputTecho {
 }
 
 export function calcularTecho(input: InputTecho): ResultadoCalculo {
-  // area_real = √(L² + H²) × A
-  const areaReal = redondear(Math.sqrt(Math.pow(input.largo, 2) + Math.pow(input.alto, 2)) * input.ancho)
-  const areaTotal = redondear(areaReal * input.cantidad)
+  const result = RoofEngine.calculate({
+    ancho: input.ancho,
+    largo: input.largo,
+    alto: input.alto,
+    unidadesM2: input.tipoTeja.unidadesM2,
+    desperdicio: input.desperdicio,
+    cantidad: input.cantidad || 1,
+  })
 
-  const tejas = ceil(aplicarDesperdicio(areaTotal * input.tipoTeja.unidadesM2, input.desperdicio))
-
+  const tejas = Math.ceil(result.tejas)
   const materiales = [
     crearMaterial("T-01", "Teja", "pza", tejas, input.precios.teja),
   ]
@@ -37,8 +40,8 @@ export function calcularTecho(input: InputTecho): ResultadoCalculo {
     materiales,
     costoTotalMateriales,
     resumen: {
-      "Area real": `${areaReal} m²`,
-      "Area total": `${areaTotal} m²`,
+      "Area real": `${redondear(result.areaReal)} m²`,
+      "Area total": `${redondear(result.areaTotal)} m²`,
       "Tejas": `${tejas} pzas`,
     },
   }

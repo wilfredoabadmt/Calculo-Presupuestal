@@ -4,7 +4,7 @@ describe("calcularCielo", () => {
   const inputBase: InputCielo = {
     ancho: 4.0,
     largo: 5.0,
-    viguetas: { separacion: 0.60, largo: 2.4 },
+    viguetas: { separacion: 0.60 },
     omegas: { separacion: 0.60 },
     anguloPerimetral: { largo: 3.0 },
     desperdicioPaneles: 5,

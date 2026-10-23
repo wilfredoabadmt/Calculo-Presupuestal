@@ -1,6 +1,6 @@
+import { ColumnEngine } from "@/domain/calculo/columna"
 import {
   calcularBolsasCemento,
-  aplicarDesperdicio,
   redondear,
   crearMaterial,
   type ResultadoCalculo,
@@ -44,39 +44,71 @@ export interface InputColumna {
 }
 
 export function calcularColumna(input: InputColumna): ResultadoCalculo {
-  // Concreto
-  const volumen = redondear(input.alto * input.a * input.b)
-  const volTotal = redondear(volumen * input.cantidad)
-  const volConDesp = aplicarDesperdicio(volTotal, input.desperdicioConcreto)
+  // Map old input format to new domain engine format
+  const concrete = {
+    height: input.alto,
+    widthA: input.a,
+    widthB: input.b,
+    dosage: input.dosificacion,
+    concreteWaste: input.desperdicioConcreto,
+    steelWaste: input.desperdicioAcero,
+    quantity: input.cantidad,
+  }
 
-  const cementoKg = redondear(volConDesp * input.dosificacion.cementoKg)
-  const cementoBolsas = calcularBolsasCemento(cementoKg)
-  const arenaM3 = redondear(volConDesp * input.dosificacion.arenaM3)
-  const gravaM3 = redondear(volConDesp * input.dosificacion.gravaM3)
+  const reinforcement = {
+    longitudinalLength: input.aceroLongitudinal.longitudTotal,
+    barDiameter: input.aceroLongitudinal.diametro,
+    kgPerMeter: input.aceroLongitudinal.kgM,
+    numBars: input.aceroLongitudinal.cantidadVarillas,
+    hasLap: input.aceroLongitudinal.traslapes,
+    lapLength: input.aceroLongitudinal.largoTraslape,
+    stirrupPerimeter: 2 * (input.a + input.b) - 8 * 0.04 + 2 * 0.12,
+    stirrupDiameter: input.estribos.diametro,
+    stirrupKgPerMeter: input.estribos.kgM,
+    zones: {
+      confined: {
+        length: input.alto * 0.15,
+        spacing: input.estribos.separacionConfinada / 100,
+      },
+      central: {
+        length: input.alto * 0.7,
+        spacing: input.estribos.separacionCentral / 100,
+      },
+      topNud: {
+        length: 0.5,
+        spacing: input.estribos.separacionConfinada / 100,
+      },
+      bottomNud: {
+        length: 0.5,
+        spacing: input.estribos.separacionConfinada / 100,
+      },
+    },
+  }
 
-  // Acero longitudinal
-  const longTotalAcero = input.aceroLongitudinal.traslapes
-    ? input.aceroLongitudinal.longitudTotal + input.aceroLongitudinal.cantidadVarillas * input.aceroLongitudinal.largoTraslape
-    : input.aceroLongitudinal.longitudTotal
-  const pesoAceroLong = redondear(longTotalAcero * input.aceroLongitudinal.kgM * input.cantidad)
-  const pesoAceroLongConDesp = redondear(aplicarDesperdicio(pesoAceroLong, input.desperdicioAcero))
+  const result = ColumnEngine.calculate(concrete, reinforcement)
 
-  // Estribos
-  const perimetroEstribo = 2 * (input.a + input.b) - 8 * 0.04 + 2 * 0.12 // perímetro efectivo
-  const numEstribosConfinada = Math.ceil((input.alto * 0.15) / (input.estribos.separacionConfinada / 100))
-  const numEstribosCentral = Math.ceil((input.alto * 0.7) / (input.estribos.separacionCentral / 100))
-  const numEstribosNudos = 4
-  const totalEstribos = (numEstribosConfinada + numEstribosCentral + numEstribosNudos) * input.estribos.zonas
-  const longTotalEstribos = redondear(totalEstribos * input.estribos.longitud * input.cantidad)
-  const pesoEstribos = redondear(longTotalEstribos * input.estribos.kgM)
-  const pesoEstribosConDesp = redondear(aplicarDesperdicio(pesoEstribos, input.desperdicioAcero))
+  const cementoBolsas = calcularBolsasCemento(redondear(result.concrete.cementoKg))
+  const arenaM3 = redondear(result.concrete.arenaM3)
+  const gravaM3 = redondear(result.concrete.gravaM3)
 
   const materiales = [
     crearMaterial("C-01", "Cemento CP-40", "bolsa", cementoBolsas, input.precios.cemento),
     crearMaterial("A-01", "Arena media", "m³", arenaM3, input.precios.arena),
     crearMaterial("G-01", "Grava 3/4\"", "m³", gravaM3, input.precios.grava),
-    crearMaterial(`AC-L-${input.aceroLongitudinal.diametro}`, `Acero long. Ø${input.aceroLongitudinal.diametro}`, "kg", pesoAceroLongConDesp, input.precios.acero),
-    crearMaterial(`AC-E-${input.estribos.diametro}`, `Estribos Ø${input.estribos.diametro}`, "kg", pesoEstribosConDesp, input.precios.acero),
+    crearMaterial(
+      `AC-L-${input.aceroLongitudinal.diametro}`,
+      `Acero long. Ø${input.aceroLongitudinal.diametro}`,
+      "kg",
+      redondear(result.longitudinalSteel.weightWithWaste),
+      input.precios.acero
+    ),
+    crearMaterial(
+      `AC-E-${input.estribos.diametro}`,
+      `Estribos Ø${input.estribos.diametro}`,
+      "kg",
+      redondear(result.stirrups.weightWithWaste),
+      input.precios.acero
+    ),
   ]
 
   const costoTotalMateriales = materiales.reduce((sum, m) => sum + m.costoTotal, 0)
@@ -85,13 +117,13 @@ export function calcularColumna(input: InputColumna): ResultadoCalculo {
     materiales,
     costoTotalMateriales,
     resumen: {
-      "Volumen concreto": `${volTotal} m³`,
-      "Cemento": `${cementoKg} kg (${cementoBolsas} bolsas)`,
+      "Volumen concreto": `${redondear(result.concrete.volume * concrete.quantity)} m³`,
+      "Cemento": `${redondear(result.concrete.cementoKg)} kg (${cementoBolsas} bolsas)`,
       "Arena": `${arenaM3} m³`,
       "Grava": `${gravaM3} m³`,
-      "Acero longitudinal": `${pesoAceroLongConDesp} kg`,
-      "Estribos": `${totalEstribos} pzas (${pesoEstribosConDesp} kg)`,
-      "Peso total acero": `${pesoAceroLongConDesp + pesoEstribosConDesp} kg`,
+      "Acero longitudinal": `${redondear(result.longitudinalSteel.weightWithWaste)} kg`,
+      "Estribos": `${result.stirrups.totalCount} pzas (${redondear(result.stirrups.weightWithWaste)} kg)`,
+      "Peso total acero": `${redondear(result.totalSteelWeight)} kg`,
     },
   }
 }

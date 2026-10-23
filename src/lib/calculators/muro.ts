@@ -1,6 +1,6 @@
+import { RetainingWallEngine } from "@/domain/calculo/muro"
 import {
   calcularBolsasCemento,
-  aplicarDesperdicio,
   redondear,
   crearMaterial,
   type ResultadoCalculo,
@@ -27,18 +27,22 @@ export interface InputMuro {
 }
 
 export function calcularMuro(input: InputMuro): ResultadoCalculo {
-  // Volumen promedio: ((C + B) / 2) × H × Largo
-  const espesorProm = (input.corona + input.base) / 2
-  const volumen = redondear(espesorProm * input.altura * input.largo)
-  const volTotal = redondear(volumen * input.cantidad)
+  const result = RetainingWallEngine.calculate({
+    corona: input.corona,
+    base: input.base,
+    altura: input.altura,
+    largo: input.largo,
+    dosificacion: input.dosificacion,
+    porcentajePiedra: input.porcentajePiedra,
+    porcentajeMortero: input.porcentajeMortero,
+    cantidad: input.cantidad || 1,
+  })
 
-  const volPiedra = redondear(volTotal * (input.porcentajePiedra / 100))
-  const volMortero = redondear(volTotal * (input.porcentajeMortero / 100))
-
-  const cementoKg = redondear(volMortero * input.dosificacion.cementoKg)
-  const cementoBolsas = calcularBolsasCemento(cementoKg)
-  const arenaM3 = redondear(volMortero * input.dosificacion.arenaM3)
-  const aguaLt = redondear(volMortero * input.dosificacion.aguaLt)
+  const cementoBolsas = calcularBolsasCemento(redondear(result.cementoKg))
+  const arenaM3 = redondear(result.arenaM3)
+  const volPiedra = redondear(result.volumenPiedra)
+  const volMortero = redondear(result.volumenMortero)
+  const aguaLt = redondear(result.aguaLt)
 
   const materiales = [
     crearMaterial("P-01", "Piedra", "m³", volPiedra, input.precios.piedra),
@@ -52,11 +56,11 @@ export function calcularMuro(input: InputMuro): ResultadoCalculo {
     materiales,
     costoTotalMateriales,
     resumen: {
-      "Espesor promedio": `${espesorProm} m`,
-      "Volumen total": `${volTotal} m³`,
+      "Espesor promedio": `${redondear(result.espesorPromedio)} m`,
+      "Volumen total": `${redondear(result.volumenTotal)} m³`,
       "Piedra": `${volPiedra} m³ (${input.porcentajePiedra}%)`,
       "Mortero": `${volMortero} m³ (${input.porcentajeMortero}%)`,
-      "Cemento": `${cementoKg} kg (${cementoBolsas} bolsas)`,
+      "Cemento": `${redondear(result.cementoKg)} kg (${cementoBolsas} bolsas)`,
       "Arena": `${arenaM3} m³`,
       "Agua": `${aguaLt} lt`,
     },
