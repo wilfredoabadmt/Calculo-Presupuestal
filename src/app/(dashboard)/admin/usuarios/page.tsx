@@ -210,7 +210,7 @@ export default function UsuariosPage() {
 
       if (actionType === "sendMasterPassword") {
         // Send master password reset
-        body = { action: "changePassword", newPassword: "master123!" }
+        body = { action: "changePassword", newPassword: "Master123!" }
       }
 
       const res = await fetch(`/api/admin/usuarios/${userId}`, {
@@ -222,8 +222,8 @@ export default function UsuariosPage() {
       if (res.ok) {
         const data = await res.json()
         if (actionType === "sendMasterPassword") {
-          setTempPassword(data.tempPassword)
-          triggerSuccessMsg(`Contraseña maestra enviada: ${data.tempPassword}`)
+          setTempPassword("Master123!")
+          triggerSuccessMsg("Contraseña maestra enviada. El usuario debe usar: Master123!")
         } else {
           triggerSuccessMsg(data.message || "Correo enviado exitosamente.")
         }
@@ -251,15 +251,20 @@ export default function UsuariosPage() {
         body: JSON.stringify({ action: "changePassword", newPassword }),
       })
 
+      const data = await res.json()
+
       if (res.ok) {
-        const data = await res.json()
-        setTempPassword(data.tempPassword || null)
+        // Only set tempPassword if it's actually present in the response
+        if (data.tempPassword) {
+          setTempPassword(data.tempPassword)
+        } else {
+          setTempPassword(null)
+        }
         triggerSuccessMsg(data.message || "Contraseña cambiada exitosamente.")
         setPasswordUserId(null)
         setNewPassword("")
         setShowNewPassword(false)
       } else {
-        const data = await res.json()
         alert(data.error || "Error al cambiar la contraseña.")
       }
     } catch {
