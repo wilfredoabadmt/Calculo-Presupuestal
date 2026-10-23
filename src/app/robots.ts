@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/api/", "/admin/", "/(dashboard)/"],
       },
     ],
-    sitemap: "https://calculo-presupuestal.clientify.click/sitemap.xml",
+    sitemap: "https://gehma.vip/sitemap.xml",
   }
 }

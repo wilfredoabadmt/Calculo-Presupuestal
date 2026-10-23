@@ -385,7 +385,7 @@ services:
     environment:
       - DATABASE_URL=postgresql://postgres:password@db:5432/calculo_presupuestal
       - NEXTAUTH_SECRET=...
-      - NEXTAUTH_URL=https://calculo-presupuestal.clientify.click
+      - NEXTAUTH_URL=https://gehma.vip
     depends_on: [db]
   db:
     image: postgres:16-alpine
@@ -414,7 +414,7 @@ Deploy Coolify:
 - Conectar repositorio GitHub en Coolify
 - Configurar variables de entorno
 - Auto-deploy en cada push a main
-- Dominio: calculo-presupuestal.clientify.click
+- Dominio: gehma.vip
 - SSL automático
 FASE 11: MARKETING, SEO Y LANDING PAGE (Días 37-39)
 Skills a aplicar:

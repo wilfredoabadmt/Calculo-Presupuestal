@@ -16,7 +16,7 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://calculo-presupuestal.clientify.click"),
+  metadataBase: new URL("https://gehma.vip"),
   title: "Cálculo Presupuestal - Sistema de Presupuestos de Construcción",
   description: "Sistema profesional para cálculo de materiales, presupuestos y análisis de precios unitarios para obras de construcción",
   keywords: ["construcción", "presupuesto", "materiales", "cálculo", "APU", "cronograma"],
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "es_BO",
-    url: "https://calculo-presupuestal.clientify.click",
+    url: "https://gehma.vip",
     siteName: "Cálculo Presupuestal",
     title: "Cálculo Presupuestal - Sistema de Presupuestos de Construcción",
     description: "Sistema profesional para cálculo de materiales, presupuestos y análisis de precios unitarios",
@@ -76,7 +76,7 @@ export default function RootLayout({
     applicationCategory: "BusinessApplication",
     operatingSystem: "Web",
     description: "Sistema profesional para cálculo de materiales, presupuestos y análisis de precios unitarios para obras de construcción en Bolivia",
-    url: "https://calculo-presupuestal.clientify.click",
+    url: "https://gehma.vip",
     offers: {
       "@type": "AggregateOffer",
       lowPrice: "0",
@@ -91,7 +91,7 @@ export default function RootLayout({
       "Banco de precios de referencia",
       "Exportación PDF y Excel",
     ],
-    screenshot: "https://calculo-presupuestal.clientify.click/og-image.png",
+    screenshot: "https://gehma.vip/og-image.png",
     softwareVersion: "1.0",
     author: {
       "@type": "Organization",
