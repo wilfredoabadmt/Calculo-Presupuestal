@@ -67,6 +67,7 @@ export default function UsuariosPage() {
   const [newPassword, setNewPassword] = useState("")
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [changingPassword, setChangingPassword] = useState(false)
+  const [tempPassword, setTempPassword] = useState<string | null>(null)
   
   // Toast Notification State
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
@@ -202,20 +203,33 @@ export default function UsuariosPage() {
     }
   }
 
-  const handleMailAction = async (userId: string, actionType: "resendVerification" | "resendPasswordReset") => {
+  const handleMailAction = async (userId: string, actionType: "resendVerification" | "resendPasswordReset" | "sendMasterPassword") => {
     setUpdatingId(userId)
     try {
+      let body: any = { action: actionType }
+
+      if (actionType === "sendMasterPassword") {
+        // Send master password reset
+        body = { action: "changePassword", newPassword: "master123!" }
+      }
+
       const res = await fetch(`/api/admin/usuarios/${userId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: actionType }),
+        body: JSON.stringify(body),
       })
 
       if (res.ok) {
         const data = await res.json()
-        triggerSuccessMsg(data.message || "Correo enviado exitosamente.")
+        if (actionType === "sendMasterPassword") {
+          setTempPassword(data.tempPassword)
+          triggerSuccessMsg(`Contraseña maestra enviada: ${data.tempPassword}`)
+        } else {
+          triggerSuccessMsg(data.message || "Correo enviado exitosamente.")
+        }
       } else {
-        alert("Error al enviar el correo.")
+        const data = await res.json()
+        alert(data.error || "Error al enviar el correo.")
       }
     } catch {
       alert("Error al conectar con el servidor.")
@@ -239,6 +253,7 @@ export default function UsuariosPage() {
 
       if (res.ok) {
         const data = await res.json()
+        setTempPassword(data.tempPassword || null)
         triggerSuccessMsg(data.message || "Contraseña cambiada exitosamente.")
         setPasswordUserId(null)
         setNewPassword("")
@@ -481,51 +496,103 @@ export default function UsuariosPage() {
                           {/* Password Column */}
                           <TableCell>
                             {isEditingPassword ? (
-                              <div className="flex items-center gap-1.5 min-w-[200px]">
-                                <div className="relative flex-1">
-                                  <Input
-                                    type={showNewPassword ? "text" : "password"}
-                                    value={newPassword}
-                                    onChange={e => setNewPassword(e.target.value)}
-                                    placeholder="Nueva contraseña"
-                                    className="h-8 text-xs pr-8"
-                                    disabled={changingPassword}
-                                  />
-                                  <button
-                                    type="button"
-                                    onClick={() => setShowNewPassword(!showNewPassword)}
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                              <div className="flex flex-col gap-2 min-w-[250px]">
+                                {/* Show temporary password if available */}
+                                {tempPassword && (
+                                  <div className="bg-amber-50 border border-amber-200 rounded-md p-2 text-xs">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <Key className="h-3 w-3 text-amber-600" />
+                                      <span className="font-medium text-amber-800">Contraseña temporal:</span>
+                                    </div>
+                                    <div className="font-mono text-amber-700 bg-amber-100 px-2 py-1 rounded">
+                                      {tempPassword}
+                                    </div>
+                                    <p className="text-xs text-amber-600 mt-1">El usuario debe cambiarla al primer inicio</p>
+                                  </div>
+                                )}
+
+                                <div className="flex items-center gap-1.5">
+                                  <div className="relative flex-1">
+                                    <Input
+                                      type={showNewPassword ? "text" : "password"}
+                                      value={newPassword}
+                                      onChange={e => setNewPassword(e.target.value)}
+                                      placeholder="Nueva contraseña o 'master' para temporal"
+                                      className="h-8 text-xs pr-8"
+                                      disabled={changingPassword}
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => setShowNewPassword(!showNewPassword)}
+                                      className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                    >
+                                      {showNewPassword ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                                    </button>
+                                  </div>
+                                  <Button
+                                    size="sm"
+                                    className="h-8 px-2"
+                                    onClick={() => handleChangePassword(u.id)}
+                                    disabled={changingPassword || !newPassword}
                                   >
-                                    {showNewPassword ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-                                  </button>
+                                    {changingPassword ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-8 px-2"
+                                    onClick={() => { setPasswordUserId(null); setNewPassword(""); setShowNewPassword(false); setTempPassword(null) }}
+                                  >
+                                    <XCircle className="h-3 w-3" />
+                                  </Button>
                                 </div>
+
+                                {/* Quick password options */}
+                                <div className="flex gap-1">
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-7 text-xs px-2"
+                                    onClick={() => setNewPassword("master123!")}
+                                    title="Contraseña maestra temporal"
+                                  >
+                                    <Key className="h-3 w-3" />
+                                    Maestra
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-7 text-xs px-2"
+                                    onClick={() => setNewPassword(`TempPass${Date.now().toString().slice(-6)}!`)}
+                                    title="Contraseña temporal segura"
+                                  >
+                                    <Key className="h-3 w-3" />
+                                    Temporal
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="flex gap-1">
                                 <Button
                                   size="sm"
-                                  className="h-8 px-2"
-                                  onClick={() => handleChangePassword(u.id)}
-                                  disabled={changingPassword || !newPassword}
+                                  variant="outline"
+                                  className="h-7 text-xs gap-1"
+                                  onClick={() => { setPasswordUserId(u.id); setNewPassword(""); setShowNewPassword(false); setTempPassword(null) }}
                                 >
-                                  {changingPassword ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
+                                  <Lock className="h-3 w-3" />
+                                  Cambiar
                                 </Button>
                                 <Button
                                   size="sm"
                                   variant="ghost"
-                                  className="h-8 px-2"
-                                  onClick={() => { setPasswordUserId(null); setNewPassword(""); setShowNewPassword(false) }}
+                                  className="h-7 text-xs gap-1 text-amber-700 hover:text-amber-700"
+                                  onClick={() => handleMailAction(u.id, "sendMasterPassword")}
+                                  disabled={updatingId === u.id}
                                 >
-                                  <XCircle className="h-3 w-3" />
+                                  <Key className="h-3 w-3" />
+                                  Reset
                                 </Button>
                               </div>
-                            ) : (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-7 text-xs gap-1"
-                                onClick={() => { setPasswordUserId(u.id); setNewPassword(""); setShowNewPassword(false) }}
-                              >
-                                <Lock className="h-3 w-3" />
-                                Cambiar
-                              </Button>
                             )}
                           </TableCell>
                           <TableCell>{format(new Date(u.createdAt), "dd MMM yyyy", { locale: es })}</TableCell>
@@ -611,6 +678,23 @@ export default function UsuariosPage() {
                               )
                             })()}
                           </TableCell>
+                          {/* Show temporary password notification */}
+                          {tempPassword && (
+                            <div className="fixed bottom-6 right-6 z-50 bg-amber-600 text-white px-4 py-3 rounded-lg shadow-xl flex items-center gap-2 border border-amber-500 animate-in fade-in slide-in-from-bottom-4 duration-300 max-w-md">
+                              <Key className="h-5 w-5 shrink-0" />
+                              <div className="flex-1">
+                                <p className="font-semibold text-sm">Contraseña temporal generada:</p>
+                                <p className="font-mono text-xs bg-amber-500 px-2 py-1 rounded mt-1">{tempPassword}</p>
+                                <p className="text-xs mt-1 opacity-90">El usuario debe cambiarla al primer inicio</p>
+                              </div>
+                              <button
+                                onClick={() => setTempPassword(null)}
+                                className="text-white hover:text-amber-100"
+                              >
+                                <XCircle className="h-4 w-4" />
+                              </button>
+                            </div>
+                          )}
                           <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-2">
                               {isCurrentUser ? (
@@ -651,21 +735,28 @@ export default function UsuariosPage() {
                                       </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end" className="w-48">
-                                      <DropdownMenuItem 
+                                      <DropdownMenuItem
                                         className="gap-2 cursor-pointer"
                                         onClick={() => handleMailAction(u.id, "resendVerification")}
                                       >
                                         <Mail className="h-4 w-4 text-muted-foreground" />
                                         Reenviar Verificación
                                       </DropdownMenuItem>
-                                      <DropdownMenuItem 
+                                      <DropdownMenuItem
                                         className="gap-2 cursor-pointer"
                                         onClick={() => handleMailAction(u.id, "resendPasswordReset")}
                                       >
                                         <Key className="h-4 w-4 text-muted-foreground" />
                                         Restablecer Contraseña
                                       </DropdownMenuItem>
-                                      <DropdownMenuItem 
+                                      <DropdownMenuItem
+                                        className="gap-2 cursor-pointer text-amber-700 hover:text-amber-700 hover:bg-amber-50"
+                                        onClick={() => handleMailAction(u.id, "sendMasterPassword")}
+                                      >
+                                        <Key className="h-4 w-4" />
+                                        Contraseña Maestra
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem
                                         className="gap-2 cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive"
                                         onClick={() => setDeleteId(u.id)}
                                       >

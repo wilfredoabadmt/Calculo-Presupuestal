@@ -27,12 +27,28 @@ export async function PATCH(
       if (!newPassword || typeof newPassword !== "string" || newPassword.length < 6) {
         return NextResponse.json({ error: "La contraseña debe tener al menos 6 caracteres" }, { status: 400 })
       }
-      const hashedPassword = await bcrypt.hash(newPassword, 12)
+
+      // Generate temporary password if it's a reset to master password
+      const isMasterReset = newPassword.toLowerCase().includes("master") || newPassword.toLowerCase().includes("temporal")
+      let finalPassword = newPassword
+
+      if (isMasterReset) {
+        // Generate a secure temporary password
+        const tempPassword = `TempPass${Date.now().toString().slice(-6)}!`
+        finalPassword = tempPassword
+      }
+
+      const hashedPassword = await bcrypt.hash(finalPassword, 12)
       await prisma.user.update({
         where: { id },
         data: { password: hashedPassword },
       })
-      return NextResponse.json({ success: true, message: "Contraseña actualizada exitosamente." })
+
+      const message = isMasterReset
+        ? `Contraseña temporal generada exitosamente. El usuario debe usar: ${finalPassword}`
+        : "Contraseña actualizada exitosamente."
+
+      return NextResponse.json({ success: true, message, tempPassword: isMasterReset ? finalPassword : null })
     }
 
     // Support email resending actions (simulated)
