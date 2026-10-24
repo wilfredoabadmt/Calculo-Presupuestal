@@ -535,6 +535,7 @@ export default function UsuariosPage() {
                                     </button>
                                   </div>
                                   <Button
+                                    type="button"
                                     size="sm"
                                     className="h-8 px-2"
                                     onClick={() => handleChangePassword(u.id)}
@@ -543,6 +544,7 @@ export default function UsuariosPage() {
                                     {changingPassword ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
                                   </Button>
                                   <Button
+                                    type="button"
                                     size="sm"
                                     variant="ghost"
                                     className="h-8 px-2"
@@ -555,6 +557,7 @@ export default function UsuariosPage() {
                                 {/* Quick password options */}
                                 <div className="flex gap-1">
                                   <Button
+                                    type="button"
                                     size="sm"
                                     variant="ghost"
                                     className="h-7 text-xs px-2"

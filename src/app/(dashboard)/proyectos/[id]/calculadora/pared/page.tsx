@@ -247,6 +247,68 @@ export default function ParedCalculatorPage() {
             <CardTitle>Parámetros de Entrada</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Esquema visual */}
+            <div className="bg-muted/50 rounded-lg p-6 text-center">
+              <div className="text-sm text-muted-foreground mb-2">Esquema Guía: Muro con Acabados (Sección Transversal)</div>
+              <svg className="mx-auto max-w-[300px] w-full" viewBox="0 0 300 200">
+                {/* Muro core (bloques) */}
+                <rect x="90" y="35" width="120" height="130" fill="currentColor" opacity="0.06" stroke="currentColor" strokeWidth="1.5"/>
+                <text x="150" y="28" textAnchor="middle" fontSize="10" fill="currentColor" opacity="0.5">Bloques/Ladrillos</text>
+                {/* Izquierda: repello + afinado */}
+                <rect x="62" y="35" width="16" height="130" fill="#f97316" opacity="0.18" stroke="#f97316" strokeWidth="1"/>
+                <rect x="46" y="35" width="16" height="130" fill="#22c55e" opacity="0.18" stroke="#22c55e" strokeWidth="1"/>
+                <line x1="62" y1="35" x2="62" y2="165" stroke="#f97316" strokeWidth="1" strokeDasharray="3,2"/>
+                <line x1="46" y1="35" x2="46" y2="165" stroke="#22c55e" strokeWidth="1" strokeDasharray="3,2"/>
+                {/* Derecha: repello + afinado */}
+                <rect x="222" y="35" width="16" height="130" fill="#f97316" opacity="0.18" stroke="#f97316" strokeWidth="1"/>
+                <rect x="238" y="35" width="16" height="130" fill="#22c55e" opacity="0.18" stroke="#22c55e" strokeWidth="1"/>
+                <line x1="222" y1="35" x2="222" y2="165" stroke="#f97316" strokeWidth="1" strokeDasharray="3,2"/>
+                <line x1="238" y1="35" x2="238" y2="165" stroke="#22c55e" strokeWidth="1" strokeDasharray="3,2"/>
+                {/* Área (top horizontal) */}
+                <line x1="46" y1="22" x2="254" y2="22" stroke="#3b82f6" strokeWidth="1.2"/>
+                <line x1="46" y1="17" x2="46" y2="27" stroke="#3b82f6" strokeWidth="1"/>
+                <line x1="254" y1="17" x2="254" y2="27" stroke="#3b82f6" strokeWidth="1"/>
+                <text x="150" y="16" textAnchor="middle" fontSize="10" fill="#3b82f6" fontWeight="600">
+                  Área {form.area ? `= ${form.area} m²` : "(A)"}
+                </text>
+                {/* Altura (left vertical) */}
+                <line x1="34" y1="35" x2="34" y2="165" stroke="#3b82f6" strokeWidth="1.2"/>
+                <text x="26" y="104" textAnchor="middle" fontSize="9" fill="#3b82f6" fontWeight="600" transform="rotate(-90,26,104)">
+                  Alto {form.area ? `≈ ${form.area} m` : "(H)"}
+                </text>
+                {/* Repello thickness callout (left) */}
+                <line x1="62" y1="178" x2="46" y2="178" stroke="#f97316" strokeWidth="1"/>
+                <line x1="62" y1="175" x2="62" y2="181" stroke="#f97316" strokeWidth="1"/>
+                <line x1="46" y1="175" x2="46" y2="181" stroke="#f97316" strokeWidth="1"/>
+                <text x="54" y="190" textAnchor="middle" fontSize="9" fill="#f97316" fontWeight="600">
+                  Repello {form.espesorRepello ? `= ${form.espesorRepello} cm` : "(cm)"}
+                </text>
+                {/* Afinado thickness callout (far left) */}
+                <line x1="46" y1="178" x2="30" y2="178" stroke="#22c55e" strokeWidth="1"/>
+                <line x1="30" y1="175" x2="30" y2="181" stroke="#22c55e" strokeWidth="1"/>
+                <text x="38" y="190" textAnchor="middle" fontSize="9" fill="#22c55e" fontWeight="600">
+                  Afinado {form.espesorAfinado ? `= ${form.espesorAfinado} mm` : "(mm)"}
+                </text>
+              </svg>
+              <div className="flex justify-center gap-3 mt-2 flex-wrap text-xs">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#3b82f6"}}/>
+                  <span className="text-muted-foreground">Área</span>
+                  {form.area && <span className="font-bold text-blue-600">{form.area} m²</span>}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#f97316"}}/>
+                  <span className="text-muted-foreground">Repello</span>
+                  {form.espesorRepello && <span className="font-bold text-orange-500">{form.espesorRepello} cm</span>}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-3 h-3 rounded-full inline-block" style={{backgroundColor:"#22c55e"}}/>
+                  <span className="text-muted-foreground">Afinado</span>
+                  {form.espesorAfinado && <span className="font-bold text-green-600">{form.espesorAfinado} mm</span>}
+                </span>
+              </div>
+            </div>
+
             <div className="grid gap-4 md:grid-cols-2">
               <InputWithHelp
                 label="Área del Muro (m²)"
