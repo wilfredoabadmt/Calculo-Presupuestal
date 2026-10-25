@@ -353,86 +353,86 @@ async function main() {
   console.log('📦 Insertando materiales base...')
   const materiales = [
     // Cementos
-    { codigo: 'CEM-001', nombre: 'Cemento Portland IP-40 (bolsa 42.5 kg)', unidad: 'bolsa', precio: 8.60, grupo: 'CEMENTO', proveedor: 'Fancesa/Soboce' },
-    { codigo: 'CEM-002', nombre: 'Cemento Portland IP-30 (bolsa 42.5 kg)', unidad: 'bolsa', precio: 8.20, grupo: 'CEMENTO', proveedor: 'Fancesa/Soboce' },
-    { codigo: 'CEM-003', nombre: 'Cemento Blanca (bolsa 42.5 kg)', unidad: 'bolsa', precio: 15.00, grupo: 'CEMENTO', proveedor: 'Importado' },
+    { codigo: 'CEM-001', nombre: 'Cemento Portland IP-40 (bolsa 42.5 kg)', unidad: 'bolsa', precio: 8.60, grupo: 'CEMENTO', subcategoria: 'Cemento Estructural', proveedor: 'Fancesa/Soboce' },
+    { codigo: 'CEM-002', nombre: 'Cemento Portland IP-30 (bolsa 42.5 kg)', unidad: 'bolsa', precio: 8.20, grupo: 'CEMENTO', subcategoria: 'Cemento de Albañilería', proveedor: 'Fancesa/Soboce' },
+    { codigo: 'CEM-003', nombre: 'Cemento Blanco (bolsa 42.5 kg)', unidad: 'bolsa', precio: 15.00, grupo: 'CEMENTO', subcategoria: 'Cemento Especial / Acabados', proveedor: 'Importado' },
 
     // Agregados
-    { codigo: 'AGR-001', nombre: 'Arena Media (m3)', unidad: 'm3', precio: 28.33, grupo: 'AGREGADOS', proveedor: 'Cantera Local' },
-    { codigo: 'AGR-002', nombre: 'Arena Fina (m3)', unidad: 'm3', precio: 30.00, grupo: 'AGREGADOS', proveedor: 'Cantera Local' },
-    { codigo: 'AGR-003', nombre: 'Grava 3/4" (m3)', unidad: 'm3', precio: 36.66, grupo: 'AGREGADOS', proveedor: 'Cantera Local' },
-    { codigo: 'AGR-004', nombre: 'Grava 1/2" (m3)', unidad: 'm3', precio: 35.00, grupo: 'AGREGADOS', proveedor: 'Cantera Local' },
-    { codigo: 'AGR-005', nombre: 'Piedra Bola/Rio (m3)', unidad: 'm3', precio: 25.00, grupo: 'AGREGADOS', proveedor: 'Cantera Local' },
-    { codigo: 'AGR-006', nombre: 'Piedra Chancada (m3)', unidad: 'm3', precio: 30.00, grupo: 'AGREGADOS', proveedor: 'Cantera Local' },
+    { codigo: 'AGR-001', nombre: 'Arena Media (m3)', unidad: 'm3', precio: 28.33, grupo: 'AGREGADOS', subcategoria: 'Áridos Finos', proveedor: 'Cantera Local' },
+    { codigo: 'AGR-002', nombre: 'Arena Fina (m3)', unidad: 'm3', precio: 30.00, grupo: 'AGREGADOS', subcategoria: 'Áridos Finos', proveedor: 'Cantera Local' },
+    { codigo: 'AGR-003', nombre: 'Grava 3/4" (m3)', unidad: 'm3', precio: 36.66, grupo: 'AGREGADOS', subcategoria: 'Áridos Gruesos', proveedor: 'Cantera Local' },
+    { codigo: 'AGR-004', nombre: 'Grava 1/2" (m3)', unidad: 'm3', precio: 35.00, grupo: 'AGREGADOS', subcategoria: 'Áridos Gruesos', proveedor: 'Cantera Local' },
+    { codigo: 'AGR-005', nombre: 'Piedra Bola/Rio (m3)', unidad: 'm3', precio: 25.00, grupo: 'AGREGADOS', subcategoria: 'Piedras y Cimentación', proveedor: 'Cantera Local' },
+    { codigo: 'AGR-006', nombre: 'Piedra Chancada (m3)', unidad: 'm3', precio: 30.00, grupo: 'AGREGADOS', subcategoria: 'Áridos Gruesos', proveedor: 'Cantera Local' },
 
     // Agua
-    { codigo: 'AGU-001', nombre: 'Agua (litro)', unidad: 'lt', precio: 0.003, grupo: 'AGUA', proveedor: 'EPSAS' },
+    { codigo: 'AGU-001', nombre: 'Agua (litro)', unidad: 'lt', precio: 0.003, grupo: 'AGUA', subcategoria: 'Servicios de Amasado', proveedor: 'EPSAS' },
 
     // Acero
-    { codigo: 'ACE-001', nombre: 'Fierro corrugado 1/8" (kg)', unidad: 'kg', precio: 2.51, grupo: 'ACERO', proveedor: 'Coboce' },
-    { codigo: 'ACE-002', nombre: 'Fierro corrugado 1/4" (kg)', unidad: 'kg', precio: 3.20, grupo: 'ACERO', proveedor: 'Coboce' },
-    { codigo: 'ACE-003', nombre: 'Fierro corrugado 3/8" (kg)', unidad: 'kg', precio: 3.85, grupo: 'ACERO', proveedor: 'Coboce' },
-    { codigo: 'ACE-004', nombre: 'Fierro corrugado 1/2" (kg)', unidad: 'kg', precio: 4.10, grupo: 'ACERO', proveedor: 'Coboce' },
-    { codigo: 'ACE-005', nombre: 'Fierro corrugado 5/8" (kg)', unidad: 'kg', precio: 4.05, grupo: 'ACERO', proveedor: 'Coboce' },
-    { codigo: 'ACE-006', nombre: 'Fierro corrugado 3/4" (kg)', unidad: 'kg', precio: 4.00, grupo: 'ACERO', proveedor: 'Coboce' },
-    { codigo: 'ACE-007', nombre: 'Fierro corrugado 1" (kg)', unidad: 'kg', precio: 3.95, grupo: 'ACERO', proveedor: 'Coboce' },
-    { codigo: 'ACE-008', nombre: 'Alambre de amarre #16 (kg)', unidad: 'kg', precio: 5.50, grupo: 'ACERO', proveedor: 'Coboce' },
-    { codigo: 'ACE-009', nombre: 'Malla electrosoldada 6x6 (pza)', unidad: 'pza', precio: 35.00, grupo: 'ACERO', proveedor: 'Coboce' },
+    { codigo: 'ACE-001', nombre: 'Fierro corrugado 1/8" (kg)', unidad: 'kg', precio: 2.51, grupo: 'ACERO', subcategoria: 'Barras Corrugadas', proveedor: 'Coboce' },
+    { codigo: 'ACE-002', nombre: 'Fierro corrugado 1/4" (kg)', unidad: 'kg', precio: 3.20, grupo: 'ACERO', subcategoria: 'Barras Corrugadas', proveedor: 'Coboce' },
+    { codigo: 'ACE-003', nombre: 'Fierro corrugado 3/8" (kg)', unidad: 'kg', precio: 3.85, grupo: 'ACERO', subcategoria: 'Barras Corrugadas', proveedor: 'Coboce' },
+    { codigo: 'ACE-004', nombre: 'Fierro corrugado 1/2" (kg)', unidad: 'kg', precio: 4.10, grupo: 'ACERO', subcategoria: 'Barras Corrugadas', proveedor: 'Coboce' },
+    { codigo: 'ACE-005', nombre: 'Fierro corrugado 5/8" (kg)', unidad: 'kg', precio: 4.05, grupo: 'ACERO', subcategoria: 'Barras Corrugadas', proveedor: 'Coboce' },
+    { codigo: 'ACE-006', nombre: 'Fierro corrugado 3/4" (kg)', unidad: 'kg', precio: 4.00, grupo: 'ACERO', subcategoria: 'Barras Corrugadas', proveedor: 'Coboce' },
+    { codigo: 'ACE-007', nombre: 'Fierro corrugado 1" (kg)', unidad: 'kg', precio: 3.95, grupo: 'ACERO', subcategoria: 'Barras Corrugadas', proveedor: 'Coboce' },
+    { codigo: 'ACE-008', nombre: 'Alambre de amarre #16 (kg)', unidad: 'kg', precio: 5.50, grupo: 'ACERO', subcategoria: 'Alambres y Amarre', proveedor: 'Coboce' },
+    { codigo: 'ACE-009', nombre: 'Malla electrosoldada 6x6 (pza)', unidad: 'pza', precio: 35.00, grupo: 'ACERO', subcategoria: 'Mallas Electrosoldadas', proveedor: 'Coboce' },
 
     // Bloques y Ladrillos
-    { codigo: 'BLO-001', nombre: 'Bloque 10x20x40 (unidad)', unidad: 'pza', precio: 2.80, grupo: 'BLOQUE', proveedor: 'Bloquera Local' },
-    { codigo: 'BLO-002', nombre: 'Bloque 12x20x40 (unidad)', unidad: 'pza', precio: 3.20, grupo: 'BLOQUE', proveedor: 'Bloquera Local' },
-    { codigo: 'BLO-003', nombre: 'Bloque 15x20x40 (unidad)', unidad: 'pza', precio: 3.80, grupo: 'BLOQUE', proveedor: 'Bloquera Local' },
-    { codigo: 'BLO-004', nombre: 'Bloque 20x20x40 (unidad)', unidad: 'pza', precio: 4.50, grupo: 'BLOQUE', proveedor: 'Bloquera Local' },
-    { codigo: 'LAD-001', nombre: 'Ladrillo 6 huecos (unidad)', unidad: 'pza', precio: 0.60, grupo: 'LADRILLO', proveedor: 'Ladrillera Local' },
-    { codigo: 'LAD-002', nombre: 'Ladrillo 8 huecos (unidad)', unidad: 'pza', precio: 0.70, grupo: 'LADRILLO', proveedor: 'Ladrillera Local' },
+    { codigo: 'BLO-001', nombre: 'Bloque 10x20x40 (unidad)', unidad: 'pza', precio: 2.80, grupo: 'BLOQUE', subcategoria: 'Bloques de Hormigón', proveedor: 'Bloquera Local' },
+    { codigo: 'BLO-002', nombre: 'Bloque 12x20x40 (unidad)', unidad: 'pza', precio: 3.20, grupo: 'BLOQUE', subcategoria: 'Bloques de Hormigón', proveedor: 'Bloquera Local' },
+    { codigo: 'BLO-003', nombre: 'Bloque 15x20x40 (unidad)', unidad: 'pza', precio: 3.80, grupo: 'BLOQUE', subcategoria: 'Bloques de Hormigón', proveedor: 'Bloquera Local' },
+    { codigo: 'BLO-004', nombre: 'Bloque 20x20x40 (unidad)', unidad: 'pza', precio: 4.50, grupo: 'BLOQUE', subcategoria: 'Bloques de Hormigón', proveedor: 'Bloquera Local' },
+    { codigo: 'LAD-001', nombre: 'Ladrillo 6 huecos (unidad)', unidad: 'pza', precio: 0.60, grupo: 'LADRILLO', subcategoria: 'Ladrillos Cerámicos', proveedor: 'Ladrillera Local' },
+    { codigo: 'LAD-002', nombre: 'Ladrillo 8 huecos (unidad)', unidad: 'pza', precio: 0.70, grupo: 'LADRILLO', subcategoria: 'Ladrillos Cerámicos', proveedor: 'Ladrillera Local' },
 
     // Tejas
-    { codigo: 'TEJ-001', nombre: 'Teja 1 (unidad)', unidad: 'pza', precio: 3.00, grupo: 'TEJA', proveedor: 'Tejera Local' },
-    { codigo: 'TEJ-002', nombre: 'Teja 2 (unidad)', unidad: 'pza', precio: 3.50, grupo: 'TEJA', proveedor: 'Tejera Local' },
-    { codigo: 'TEJ-003', nombre: 'Teja Colonial (unidad)', unidad: 'pza', precio: 2.80, grupo: 'TEJA', proveedor: 'Tejera Local' },
+    { codigo: 'TEJ-001', nombre: 'Teja Española (unidad)', unidad: 'pza', precio: 3.00, grupo: 'TEJA', subcategoria: 'Tejas de Arcilla', proveedor: 'Tejera Local' },
+    { codigo: 'TEJ-002', nombre: 'Teja Francesa (unidad)', unidad: 'pza', precio: 3.50, grupo: 'TEJA', subcategoria: 'Tejas de Arcilla', proveedor: 'Tejera Local' },
+    { codigo: 'TEJ-003', nombre: 'Teja Colonial (unidad)', unidad: 'pza', precio: 2.80, grupo: 'TEJA', subcategoria: 'Tejas de Arcilla', proveedor: 'Tejera Local' },
 
     // Láminas
-    { codigo: 'LAM-001', nombre: 'ZincAlum 0.35mm 1.00x2.44m', unidad: 'pza', precio: 45.00, grupo: 'LAMINA', proveedor: 'Ternium' },
-    { codigo: 'LAM-002', nombre: 'ZincAlum 0.35mm 1.00x3.05m', unidad: 'pza', precio: 56.00, grupo: 'LAMINA', proveedor: 'Ternium' },
-    { codigo: 'LAM-003', nombre: 'Galvanizado 0.30mm 1.00x2.44m', unidad: 'pza', precio: 38.00, grupo: 'LAMINA', proveedor: 'Ternium' },
+    { codigo: 'LAM-001', nombre: 'ZincAlum 0.35mm 1.00x2.44m', unidad: 'pza', precio: 45.00, grupo: 'LAMINA', subcategoria: 'Calaminas y Chapas', proveedor: 'Ternium' },
+    { codigo: 'LAM-002', nombre: 'ZincAlum 0.35mm 1.00x3.05m', unidad: 'pza', precio: 56.00, grupo: 'LAMINA', subcategoria: 'Calaminas y Chapas', proveedor: 'Ternium' },
+    { codigo: 'LAM-003', nombre: 'Galvanizado 0.30mm 1.00x2.44m', unidad: 'pza', precio: 38.00, grupo: 'LAMINA', subcategoria: 'Calaminas y Chapas', proveedor: 'Ternium' },
 
     // Drywall
-    { codigo: 'DRY-001', nombre: 'Parante 2.44m', unidad: 'pza', precio: 12.50, grupo: 'DRYWALL', proveedor: 'Eternit/Volcán' },
-    { codigo: 'DRY-002', nombre: 'Canal 2.44m', unidad: 'pza', precio: 8.50, grupo: 'DRYWALL', proveedor: 'Eternit/Volcán' },
-    { codigo: 'DRY-003', nombre: 'Omega 3.00m', unidad: 'pza', precio: 11.00, grupo: 'DRYWALL', proveedor: 'Eternit/Volcán' },
-    { codigo: 'DRY-004', nombre: 'Vigueta 3.00m', unidad: 'pza', precio: 14.00, grupo: 'DRYWALL', proveedor: 'Eternit/Volcán' },
-    { codigo: 'DRY-005', nombre: 'Ángulo perimetral 3.00m', unidad: 'pza', precio: 9.50, grupo: 'DRYWALL', proveedor: 'Eternit/Volcán' },
-    { codigo: 'DRY-006', nombre: 'Panel Yeso 1.22x2.44m', unidad: 'pza', precio: 45.00, grupo: 'DRYWALL', proveedor: 'Eternit/Volcán' },
-    { codigo: 'DRY-007', nombre: 'Tornillo PH 1" (caja)', unidad: 'caja', precio: 25.00, grupo: 'DRYWALL', proveedor: 'Eternit/Volcán' },
-    { codigo: 'DRY-008', nombre: 'Cinta papel (rollo)', unidad: 'rollo', precio: 12.00, grupo: 'DRYWALL', proveedor: 'Eternit/Volcán' },
-    { codigo: 'DRY-009', nombre: 'Masilla (balde 20kg)', unidad: 'balde', precio: 45.00, grupo: 'DRYWALL', proveedor: 'Eternit/Volcán' },
+    { codigo: 'DRY-001', nombre: 'Parante 2.44m', unidad: 'pza', precio: 12.50, grupo: 'DRYWALL', subcategoria: 'Perfilería Metálica', proveedor: 'Eternit/Volcán' },
+    { codigo: 'DRY-002', nombre: 'Canal 2.44m', unidad: 'pza', precio: 8.50, grupo: 'DRYWALL', subcategoria: 'Perfilería Metálica', proveedor: 'Eternit/Volcán' },
+    { codigo: 'DRY-003', nombre: 'Omega 3.00m', unidad: 'pza', precio: 11.00, grupo: 'DRYWALL', subcategoria: 'Perfilería Metálica', proveedor: 'Eternit/Volcán' },
+    { codigo: 'DRY-004', nombre: 'Vigueta 3.00m', unidad: 'pza', precio: 14.00, grupo: 'DRYWALL', subcategoria: 'Perfilería Metálica', proveedor: 'Eternit/Volcán' },
+    { codigo: 'DRY-005', nombre: 'Ángulo perimetral 3.00m', unidad: 'pza', precio: 9.50, grupo: 'DRYWALL', subcategoria: 'Perfilería Metálica', proveedor: 'Eternit/Volcán' },
+    { codigo: 'DRY-006', nombre: 'Panel Yeso 1.22x2.44m', unidad: 'pza', precio: 45.00, grupo: 'DRYWALL', subcategoria: 'Placas de Yeso', proveedor: 'Eternit/Volcán' },
+    { codigo: 'DRY-007', nombre: 'Tornillo PH 1" (caja)', unidad: 'caja', precio: 25.00, grupo: 'DRYWALL', subcategoria: 'Fijaciones y Tornillos', proveedor: 'Eternit/Volcán' },
+    { codigo: 'DRY-008', nombre: 'Cinta papel (rollo)', unidad: 'rollo', precio: 12.00, grupo: 'DRYWALL', subcategoria: 'Juntas y Acabados', proveedor: 'Eternit/Volcán' },
+    { codigo: 'DRY-009', nombre: 'Masilla (balde 20kg)', unidad: 'balde', precio: 45.00, grupo: 'DRYWALL', subcategoria: 'Juntas y Acabados', proveedor: 'Eternit/Volcán' },
 
     // Cerámicas y Porcelanatos
-    { codigo: 'CER-001', nombre: 'Cerámica 25x25 (caja 16 pzas)', unidad: 'caja', precio: 45.00, grupo: 'CERAMICA', proveedor: 'Cerámica Bolivia' },
-    { codigo: 'CER-002', nombre: 'Cerámica 40x40 (caja 10 pzas)', unidad: 'caja', precio: 65.00, grupo: 'CERAMICA', proveedor: 'Cerámica Bolivia' },
-    { codigo: 'CER-003', nombre: 'Cerámica 50x50 (caja 6 pzas)', unidad: 'caja', precio: 85.00, grupo: 'CERAMICA', proveedor: 'Cerámica Bolivia' },
-    { codigo: 'POR-001', nombre: 'Porcelanato 40x40 (caja 10 pzas)', unidad: 'caja', precio: 95.00, grupo: 'PORCELANATO', proveedor: 'Cerámica Bolivia' },
-    { codigo: 'POR-002', nombre: 'Porcelanato 60x60 (caja 4 pzas)', unidad: 'caja', precio: 120.00, grupo: 'PORCELANATO', proveedor: 'Cerámica Bolivia' },
+    { codigo: 'CER-001', nombre: 'Cerámica 25x25 (caja 16 pzas)', unidad: 'caja', precio: 45.00, grupo: 'CERAMICA', subcategoria: 'Pisos y Revestimientos', proveedor: 'Cerámica Bolivia' },
+    { codigo: 'CER-002', nombre: 'Cerámica 40x40 (caja 10 pzas)', unidad: 'caja', precio: 65.00, grupo: 'CERAMICA', subcategoria: 'Pisos y Revestimientos', proveedor: 'Cerámica Bolivia' },
+    { codigo: 'CER-003', nombre: 'Cerámica 50x50 (caja 6 pzas)', unidad: 'caja', precio: 85.00, grupo: 'CERAMICA', subcategoria: 'Pisos y Revestimientos', proveedor: 'Cerámica Bolivia' },
+    { codigo: 'POR-001', nombre: 'Porcelanato 40x40 (caja 10 pzas)', unidad: 'caja', precio: 95.00, grupo: 'PORCELANATO', subcategoria: 'Porcelanatos y Esmaltados', proveedor: 'Cerámica Bolivia' },
+    { codigo: 'POR-002', nombre: 'Porcelanato 60x60 (caja 4 pzas)', unidad: 'caja', precio: 120.00, grupo: 'PORCELANATO', subcategoria: 'Porcelanatos y Esmaltados', proveedor: 'Cerámica Bolivia' },
 
     // Adhesivos y Boquillas
-    { codigo: 'ADH-001', nombre: 'Adhesivo cerámico (bolsa 20kg)', unidad: 'bolsa', precio: 22.00, grupo: 'ADHESIVO', proveedor: 'Weber/Sika' },
-    { codigo: 'ADH-002', nombre: 'Adhesivo porcelanato (bolsa 20kg)', unidad: 'bolsa', precio: 35.00, grupo: 'ADHESIVO', proveedor: 'Weber/Sika' },
-    { codigo: 'BOQ-001', nombre: 'Boquilla blanca (bolsa 5kg)', unidad: 'bolsa', precio: 15.00, grupo: 'BOQUILLA', proveedor: 'Weber/Sika' },
-    { codigo: 'BOQ-002', nombre: 'Boquilla color (bolsa 5kg)', unidad: 'bolsa', precio: 18.00, grupo: 'BOQUILLA', proveedor: 'Weber/Sika' },
+    { codigo: 'ADH-001', nombre: 'Adhesivo cerámico (bolsa 20kg)', unidad: 'bolsa', precio: 22.00, grupo: 'ADHESIVO', subcategoria: 'Pegamentos Cementicios', proveedor: 'Weber/Sika' },
+    { codigo: 'ADH-002', nombre: 'Adhesivo porcelanato (bolsa 20kg)', unidad: 'bolsa', precio: 35.00, grupo: 'ADHESIVO', subcategoria: 'Pegamentos Especiales', proveedor: 'Weber/Sika' },
+    { codigo: 'BOQ-001', nombre: 'Boquilla blanca (bolsa 5kg)', unidad: 'bolsa', precio: 15.00, grupo: 'BOQUILLA', subcategoria: 'Fraguas y Pastinas', proveedor: 'Weber/Sika' },
+    { codigo: 'BOQ-002', nombre: 'Boquilla color (bolsa 5kg)', unidad: 'bolsa', precio: 18.00, grupo: 'BOQUILLA', subcategoria: 'Fraguas y Pastinas', proveedor: 'Weber/Sika' },
 
     // Bovedillas
-    { codigo: 'BOV-001', nombre: 'Bovedilla cerámica 30cm', unidad: 'pza', precio: 2.50, grupo: 'BOVEDILLA', proveedor: 'Local' },
-    { codigo: 'BOV-002', nombre: 'Bovedilla cerámica 40cm', unidad: 'pza', precio: 3.20, grupo: 'BOVEDILLA', proveedor: 'Local' },
+    { codigo: 'BOV-001', nombre: 'Bovedilla cerámica 30cm', unidad: 'pza', precio: 2.50, grupo: 'BOVEDILLA', subcategoria: 'Elementos de Entrepiso', proveedor: 'Local' },
+    { codigo: 'BOV-002', nombre: 'Bovedilla cerámica 40cm', unidad: 'pza', precio: 3.20, grupo: 'BOVEDILLA', subcategoria: 'Elementos de Entrepiso', proveedor: 'Local' },
 
     // Madera
-    { codigo: 'MAD-001', nombre: 'Madera pino 1x4 (ml)', unidad: 'ml', precio: 8.00, grupo: 'MADERA', proveedor: 'Maderera' },
-    { codigo: 'MAD-002', nombre: 'Madera pino 2x4 (ml)', unidad: 'ml', precio: 15.00, grupo: 'MADERA', proveedor: 'Maderera' },
-    { codigo: 'MAD-003', nombre: 'Tablero triplay 12mm (m2)', unidad: 'm2', precio: 45.00, grupo: 'MADERA', proveedor: 'Maderera' },
+    { codigo: 'MAD-001', nombre: 'Madera pino 1x4 (ml)', unidad: 'ml', precio: 8.00, grupo: 'MADERA', subcategoria: 'Madera para Encofrado', proveedor: 'Maderera' },
+    { codigo: 'MAD-002', nombre: 'Madera pino 2x4 (ml)', unidad: 'ml', precio: 15.00, grupo: 'MADERA', subcategoria: 'Madera para Encofrado', proveedor: 'Maderera' },
+    { codigo: 'MAD-003', nombre: 'Tablero triplay 12mm (m2)', unidad: 'm2', precio: 45.00, grupo: 'MADERA', subcategoria: 'Tableros Fenólicos / Triplay', proveedor: 'Maderera' },
 
     // Pintura
-    { codigo: 'PIN-001', nombre: 'Pintura látex blanca (galón)', unidad: 'gal', precio: 45.00, grupo: 'PINTURA', proveedor: 'Pinturas Andina' },
-    { codigo: 'PIN-002', nombre: 'Pintura esmalte (galón)', unidad: 'gal', precio: 65.00, grupo: 'PINTURA', proveedor: 'Pinturas Andina' },
+    { codigo: 'PIN-001', nombre: 'Pintura látex blanca (galón)', unidad: 'gal', precio: 45.00, grupo: 'PINTURA', subcategoria: 'Pinturas Base Agua', proveedor: 'Pinturas Andina' },
+    { codigo: 'PIN-002', nombre: 'Pintura esmalte (galón)', unidad: 'gal', precio: 65.00, grupo: 'PINTURA', subcategoria: 'Pinturas Sintéticas', proveedor: 'Pinturas Andina' },
   ]
 
   for (const m of materiales) {

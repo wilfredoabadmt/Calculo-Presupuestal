@@ -30,7 +30,7 @@ export function FormularioMaterial({ onSubmit }: FormularioMaterialProps) {
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2"><Label>Grupo</Label>
             <Select><SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
-              <SelectContent>{["CEMENTO","ARENA","GRAVA","ACERO","BLOQUE","CERAMICA","TEJA","MADERA","YESO","OTROS"].map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}</SelectContent>
+              <SelectContent>{["CEMENTO","AGREGADOS","ACERO","BLOQUE","CERAMICA","TEJA","MADERA","PINTURA","ADHESIVO","BOQUILLA","BOVEDILLA","AGUA","DRYWALL","LAMINA","LADRILLO","PORCELANATO","OTROS"].map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}</SelectContent>
             </Select>
           </div>
           <div className="space-y-2"><Label>Proveedor</Label><Input placeholder="Opcional" /></div>

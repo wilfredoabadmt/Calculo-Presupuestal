@@ -129,7 +129,17 @@ export default function MaterialesPage() {
   }
 
   const grupos = ["TODOS", ...Array.from(new Set(materiales.map(m => m.grupo)))]
-  const subcategorias = ["TODAS", ...Array.from(new Set(materiales.map(m => m.subcategoria).filter(Boolean) as string[]))]
+  const subcategorias = [
+    "TODAS",
+    ...Array.from(
+      new Set(
+        materiales
+          .filter(m => grupoFilter === "TODOS" || m.grupo === grupoFilter)
+          .map(m => m.subcategoria)
+          .filter(Boolean) as string[]
+      )
+    ),
+  ]
 
   const filtered = materiales.filter(m => {
     const matchSearch = m.nombre.toLowerCase().includes(search.toLowerCase()) || m.codigo.toLowerCase().includes(search.toLowerCase())
@@ -172,7 +182,10 @@ export default function MaterialesPage() {
             {grupos.map(g => (
               <button
                 key={g}
-                onClick={() => setGrupoFilter(g)}
+                onClick={() => {
+                  setGrupoFilter(g)
+                  setSubcategoriaFilter("TODAS")
+                }}
                 className={`px-3 py-1 rounded-full text-sm transition-colors ${grupoFilter === g ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-accent"}`}
               >
                 {g}
@@ -308,7 +321,7 @@ export default function MaterialesPage() {
                 <Select value={form.grupo} onValueChange={v => setForm({...form, grupo: v})}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {["TODOS","CEMENTO","AGREGADOS","ACERO","BLOQUE","CERAMICA","TEJA","MADERA","PINTURA","ADHESIVO","BOQUILLA","BOVEDILLA","AGUA","DRYWALL","LAMINA","LADRILLO","PORCELANATO","OTROS"].map(g => (
+                    {["CEMENTO","AGREGADOS","ACERO","BLOQUE","CERAMICA","TEJA","MADERA","PINTURA","ADHESIVO","BOQUILLA","BOVEDILLA","AGUA","DRYWALL","LAMINA","LADRILLO","PORCELANATO","OTROS"].map(g => (
                       <SelectItem key={g} value={g}>{g}</SelectItem>
                     ))}
                   </SelectContent>
