@@ -321,7 +321,7 @@ export default function MaterialesPage() {
                 <Select value={form.grupo} onValueChange={v => setForm({...form, grupo: v})}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {["CEMENTO","AGREGADOS","ACERO","BLOQUE","CERAMICA","TEJA","MADERA","PINTURA","ADHESIVO","BOQUILLA","BOVEDILLA","AGUA","DRYWALL","LAMINA","LADRILLO","PORCELANATO","OTROS"].map(g => (
+                    {["CEMENTO","AGREGADOS","ACERO","BLOQUE","LADRILLO","CERAMICA","PORCELANATO","TEJA","LAMINA","MADERA","PINTURA","ADHESIVO","BOQUILLA","BOVEDILLA","AGUA","DRYWALL","CERRAJERIA","HIDROSANITARIO","ELECTRICIDAD","IMPERMEABILIZANTES","VIDRIOS","CARPINTERIA","OTROS"].map(g => (
                       <SelectItem key={g} value={g}>{g}</SelectItem>
                     ))}
                   </SelectContent>

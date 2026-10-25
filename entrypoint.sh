@@ -42,5 +42,13 @@ else
   echo "  → WARNING: Workspace migration failed"
 fi
 
+# Normalizar Categorías y Subcategorías de Materiales (corrige chapas, calaminas, tejas, etc.)
+echo "[2.8/3] Normalizing Material Categories..."
+if npx tsx prisma/normalize-material-categories.ts 2>&1; then
+  echo "  → Material Categories normalization OK"
+else
+  echo "  → WARNING: Material Categories normalization failed"
+fi
+
 echo "[3/3] Starting Next.js server..."
 exec node server.js

@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import * as XLSX from 'xlsx'
 import * as path from 'path'
+import { classifyMaterial } from './normalize-material-categories'
 
 const prisma = new PrismaClient()
 
@@ -248,8 +249,11 @@ const groupPrefixes: Record<string, string> = {
   AGREGADOS: 'AGR',
   ACERO: 'ACE',
   BLOQUE: 'BLO',
+  LADRILLO: 'LAD',
   CERAMICA: 'CER',
+  PORCELANATO: 'POR',
   TEJA: 'TEJ',
+  LAMINA: 'LAM',
   MADERA: 'MAD',
   PINTURA: 'PIN',
   ADHESIVO: 'ADH',
@@ -257,45 +261,13 @@ const groupPrefixes: Record<string, string> = {
   BOVEDILLA: 'BOV',
   AGUA: 'AGU',
   DRYWALL: 'DRY',
+  CERRAJERIA: 'CRJ',
+  HIDROSANITARIO: 'SAN',
+  ELECTRICIDAD: 'ELE',
+  IMPERMEABILIZANTES: 'IMP',
+  VIDRIOS: 'VID',
+  CARPINTERIA: 'CRP',
   OTROS: 'MAT'
-}
-
-function determineMaterialGroup(name: string): string {
-  const n = name.toLowerCase()
-  if (n.includes('cemento') || n.includes('yeso') || n.includes('cal')) return 'CEMENTO'
-  if (n.includes('arena') || n.includes('grava') || n.includes('piedra') || n.includes('tierra') || n.includes('cascote') || n.includes('arcilla')) return 'AGREGADOS'
-  if (n.includes('fierro') || n.includes('acero') || n.includes('alambre') || n.includes('malla') || n.includes('clavo') || n.includes('perfil') || n.includes('vigueta') || n.includes('omega') || n.includes('canal') || n.includes('parante') || n.includes('angulo')) return 'ACERO'
-  if (n.includes('bloque') || n.includes('ladrillo') || n.includes('adobe')) return 'BLOQUE'
-  if (n.includes('ceramica') || n.includes('porcelanato') || n.includes('azulejo') || n.includes('mosaico') || n.includes('piso')) return 'CERAMICA'
-  if (n.includes('teja') || n.includes('calamina') || n.includes('chapa') || n.includes('lamina')) return 'TEJA'
-  if (n.includes('madera') || n.includes('pino') || n.includes('tablon') || n.includes('mara') || n.includes('venesta') || n.includes('puntal')) return 'MADERA'
-  if (n.includes('pintura') || n.includes('esmalte') || n.includes('latex') || n.includes('barniz') || n.includes('tinercito') || n.includes('tiner')) return 'PINTURA'
-  if (n.includes('adhesivo') || n.includes('clefa') || n.includes('cola') || n.includes('pegamento')) return 'ADHESIVO'
-  if (n.includes('boquilla')) return 'BOQUILLA'
-  if (n.includes('bovedilla')) return 'BOVEDILLA'
-  if (n.includes('agua')) return 'AGUA'
-  if (n.includes('drywall') || n.includes('placa')) return 'DRYWALL'
-  return 'OTROS'
-}
-
-function determineMaterialSubcategory(name: string): string | null {
-  const n = name.toLowerCase()
-  
-  if (n.includes('demo')) return 'Demolición'
-  if (n.includes('hormigón') || n.includes('concreto') || n.includes('f\'c') || n.includes('plantilla')) return 'Hormigón y Concreto'
-  if (n.includes('cerámica') || n.includes('ceramica') || n.includes('porcelanato') || n.includes('azulejo') || n.includes('mosaico') || n.includes('piso')) return 'Revestimientos'
-  if (n.includes('pintura') || n.includes('esmalte') || n.includes('latex') || n.includes('barniz')) return 'Pinturas'
-  if (n.includes('tubería') || n.includes('tuberia') || n.includes('grifería') || n.includes('griferia') || n.includes('llave') || n.includes('válvula') || n.includes('valvula')) return 'Hidráulica'
-  if (n.includes('cable') || n.includes('interruptor') || n.includes('enchufe') || n.includes('lámpara') || n.includes('lampara') || n.includes('foco')) return 'Eléctrica'
-  if (n.includes('teja') || n.includes('calamina') || n.includes('chapa') || n.includes('lámina') || n.includes('lamina')) return 'Cubiertas'
-  if (n.includes('madera') || n.includes('pino') || n.includes('tablón') || n.includes('tablon') || n.includes('puntal')) return 'Carpintería'
-  if (n.includes('acero') || n.includes('fierro') || n.includes('alambre') || n.includes('malla') || n.includes('clavo') || n.includes('varilla')) return 'Structural'
-  if (n.includes('bloque') || n.includes('ladrillo') || n.includes('adobe')) return 'Mampostería'
-  if (n.includes('cemento') || n.includes('yeso') || n.includes('cal') || n.includes('arena') || n.includes('grava')) return 'Materiales Básicos'
-  if (n.includes('aislante') || n.includes('termica') || n.includes('térmica')) return 'Aislamiento'
-  if (n.includes('sello') || n.includes('silicona') || n.includes('espuma')) return 'Selladores'
-  
-  return null
 }
 
 
@@ -455,7 +427,9 @@ async function main() {
   for (const mat of uniqueExcelMaterials.values()) {
     const nameNorm = mat.nombre.toLowerCase().trim()
     if (!existingNames.has(nameNorm)) {
-      const grupo = determineMaterialGroup(mat.nombre)
+      const classification = classifyMaterial(mat.nombre)
+      const grupo = classification.grupo
+      const subcategoria = classification.subcategoria
       const prefix = groupPrefixes[grupo] || 'MAT'
       
       const nextNum = (prefixCounters.get(prefix) || 0) + 1
@@ -471,8 +445,6 @@ async function main() {
         prefixCounters.set(prefix, nextNum + offset)
       }
       existingCodes.add(finalCode.toLowerCase())
-      
-      const subcategoria = determineMaterialSubcategory(mat.nombre)
       
       newMaterialsToInsert.push({
         codigo: finalCode,
