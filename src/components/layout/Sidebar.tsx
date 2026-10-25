@@ -3,8 +3,10 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { LayoutDashboard, FolderKanban, Box, Settings } from "lucide-react"
+import { LayoutDashboard, FolderKanban, Box, Settings, LogOut } from "lucide-react"
 import { Logo } from "./Logo"
+import { signOut } from "next-auth/react"
+import { Button } from "@/components/ui/button"
 
 export const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -52,6 +54,17 @@ export function Sidebar({ open, onClose }: SidebarProps) {
               )
             })}
           </nav>
+          <div className="p-3 border-t">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full justify-center gap-2 text-xs font-medium text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20 h-9"
+              onClick={() => signOut({ callbackUrl: "/" })}
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              <span>Cerrar Sesión</span>
+            </Button>
+          </div>
         </div>
       </aside>
     </>

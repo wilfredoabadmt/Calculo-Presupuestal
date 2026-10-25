@@ -25,7 +25,18 @@ export function Navbar({ onMenuClick }: NavbarProps) {
           </button>
           <h1 className="text-lg font-semibold hidden sm:block">{currentName}</h1>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            className="hidden sm:inline-flex items-center gap-2 text-xs font-medium text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/25 h-9 px-3 rounded-lg transition-colors"
+            onClick={() => signOut({ callbackUrl: "/" })}
+            title="Cerrar sesión y volver a la landing"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            <span>Cerrar Sesión</span>
+          </Button>
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-9 w-9 rounded-full">

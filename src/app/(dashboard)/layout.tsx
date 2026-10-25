@@ -113,16 +113,38 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           </nav>
 
           {/* Footer */}
-          <div className="p-4 border-t">
-            <div className="flex items-center gap-3 px-3 py-2">
-              <Avatar className="h-9 w-9">
-                <AvatarFallback>{initials}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{user?.name || "Usuario"}</p>
-                <p className="text-xs text-muted-foreground">{isProActive(user as any) ? "PRO" : "FREE"}</p>
+          <div className="p-3 border-t space-y-2">
+            <div className="flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg bg-accent/40 border border-border/40">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <Avatar className="h-8 w-8 shrink-0">
+                  <AvatarFallback className="text-xs font-semibold">{initials}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold truncate leading-tight">{user?.name || "Usuario"}</p>
+                  <p className="text-[11px] text-muted-foreground leading-tight">{isProActive(user as any) ? "Plan PRO" : "Plan FREE"}</p>
+                </div>
               </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
+                onClick={() => signOut({ callbackUrl: "/" })}
+                title="Cerrar sesión"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="sr-only">Cerrar sesión</span>
+              </Button>
             </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full justify-center gap-2 text-xs font-medium text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20 h-9"
+              onClick={() => signOut({ callbackUrl: "/" })}
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              <span>Cerrar Sesión</span>
+            </Button>
           </div>
         </div>
       </aside>
@@ -144,7 +166,18 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               </h1>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                className="hidden sm:inline-flex items-center gap-2 text-xs font-medium text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/25 h-9 px-3 rounded-lg transition-colors"
+                onClick={() => signOut({ callbackUrl: "/" })}
+                title="Cerrar sesión y volver a la landing de venta"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+                <span>Cerrar Sesión</span>
+              </Button>
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-9 w-9 rounded-full">
@@ -164,7 +197,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem 
-                    className="text-destructive"
+                    className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer font-medium"
                     onClick={() => signOut({ callbackUrl: "/" })}
                   >
                     <LogOut className="mr-2 h-4 w-4" />

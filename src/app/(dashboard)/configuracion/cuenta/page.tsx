@@ -1,14 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { useSession } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PageHeader } from "@/components/shared/PageHeader"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { User, Save, Shield, Loader2, CheckCircle, Lock, Eye, EyeOff, AlertCircle } from "lucide-react"
+import { User, Save, Shield, Loader2, CheckCircle, Lock, Eye, EyeOff, AlertCircle, LogOut } from "lucide-react"
 import { isProActive } from "@/lib/plan"
 
 export default function CuentaPage() {
@@ -247,6 +247,29 @@ export default function CuentaPage() {
                   Cambiar Contraseña
                 </>
               )}
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Card Cerrar Sesión */}
+        <Card className="border-destructive/25 shadow-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base text-destructive">
+              <LogOut className="h-5 w-5" />
+              Cerrar Sesión
+            </CardTitle>
+            <CardDescription>
+              Finaliza tu sesión actual de forma segura y regresa a la página principal de venta.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              variant="destructive"
+              onClick={() => signOut({ callbackUrl: "/" })}
+              className="gap-2 font-medium"
+            >
+              <LogOut className="h-4 w-4" />
+              Cerrar Sesión
             </Button>
           </CardContent>
         </Card>
