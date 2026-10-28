@@ -74,6 +74,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return session
     },
+    redirect: async ({ url, baseUrl }: any) => {
+      if (url.includes("clientify.click")) {
+        return baseUrl
+      }
+      if (url.startsWith("/")) {
+        return `${baseUrl}${url}`
+      }
+      try {
+        const parsedUrl = new URL(url)
+        if (parsedUrl.origin === baseUrl || parsedUrl.hostname.endsWith("gehma.vip")) {
+          return url
+        }
+      } catch {
+        return baseUrl
+      }
+      return baseUrl
+    },
   },
 })
 

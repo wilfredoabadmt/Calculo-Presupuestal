@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/api/", "/admin/", "/(dashboard)/"],
       },
     ],
-    sitemap: "https://gehma.vip/sitemap.xml",
+    sitemap: "https://calculo-presupuestal.gehma.vip/sitemap.xml",
   }
 }
